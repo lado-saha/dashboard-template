@@ -2,9 +2,20 @@
 
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure component only renders after mounting on client
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null // or a placeholder
+  }
 
   return (
     <button
@@ -15,4 +26,3 @@ export function ThemeToggle() {
     </button>
   )
 }
-

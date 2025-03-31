@@ -10,8 +10,8 @@ import { ThemeProvider } from "next-themes"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Flowers&Saints Dashboard",
-  description: "A modern, responsive financial dashboard",
+  title: "Dashboard Template",
+  description: "A modern, adaptable responsive dashboard",
 }
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={inter.className} >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SettingsProvider>
             <TooltipProvider delayDuration={0}>
