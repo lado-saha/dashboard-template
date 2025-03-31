@@ -1,43 +1,55 @@
-import "./globals.css"
-import { Inter } from "next/font/google"
-import { Sidebar } from "@/components/sidebar"
-import { TopNav } from "@/components/top-nav"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { SettingsProvider } from "@/contexts/settings-context"
-import type React from "react"
-import { ThemeProvider } from "next-themes"
+// FILE: app/layout.tsx
+import "./globals.css";
+import { Inter } from "next/font/google";
+import type React from "react";
+import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { SettingsProvider } from "@/contexts/settings-context";
+import { SessionProvider } from "@/components/providers/session-provider";
+import { ModeToggle } from "@/components/mode-toggle";
+// No longer need headers here
+// import { headers } from 'next/headers';
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Dashboard Template",
   description: "A modern, adaptable responsive dashboard",
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+// No longer needs to be async
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // const headersList = headers();
+  // const pathnameHeader = headersList.get('x-pathname') || headersList.get('pathname');
+  // const pathname = pathnameHeader || '/';
+  // const noDashboardLayoutPaths = ["/", "/login", "/signup", "/forgot-password"];
+  // const isNoDashboardPath = noDashboardLayoutPaths.some(path => pathname === path);
+  // const showDashboardLayout = !isNoDashboardPath;
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SettingsProvider>
-            <TooltipProvider delayDuration={0}>
-              <div className="max-h-screen flex">
-                <Sidebar />
-                <div className="flex-1 overflow-auto">
-                  <TopNav />
-                  <div className="container mx-auto p-6">
-                    <main className="w-full">{children}</main>
+      <body className={`${inter.className} antialiased`}>
+        <SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SettingsProvider>
+              <TooltipProvider delayDuration={0}>
+                <div className="relative min-h-screen">
+                  {/* Always visible Theme Toggle */}
+                  <div className="fixed top-4 right-4 z-50">
+                    <ModeToggle />
+                    {/* <LanguageSwitcher /> */}
                   </div>
+
+                  {/* Children will be the landing page, auth pages, OR the dashboard layout */}
+                  {/* No conditional rendering here anymore */}
+                  {children}
+
                 </div>
-              </div>
-            </TooltipProvider>
-          </SettingsProvider>
-        </ThemeProvider>
+              </TooltipProvider>
+            </SettingsProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
-  )
+  );
 }

@@ -1,5 +1,5 @@
 Project Context From: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template
-Generated On: Mon Mar 31 06:45:55 AM WAT 2025
+Generated On: Mon Mar 31 08:11:50 AM WAT 2025
 ===============================================
 Ignored Directory Patterns: .* node_modules vendor build dist target __pycache__ .next cache storage
 Ignored File Patterns: *.log package-lock.json yarn.lock composer.lock *.ico pnpm-lock.yaml
@@ -7,65 +7,75 @@ Ignored File Patterns: *.log package-lock.json yarn.lock composer.lock *.ico pnp
 
 
 // ===============================================
-// FILE: app/analytics/page.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/analytics/page.tsx
+// FILE: app/(business-actor)/bonus/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/bonus/page.tsx
 // ===============================================
 
-"use client"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DateRangePicker } from "@/components/date-range-picker"
-import { OverviewTab } from "@/components/analytics/overview-tab"
-import { AnalyticsTab } from "@/components/analytics/analytics-tab"
-import { ReportsTab } from "@/components/analytics/reports-tab"
-import { NotificationsTab } from "@/components/analytics/notifications-tab"
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
-
-export default function AnalyticsPage() {
-  const handleExportData = () => {
-    // Implement export functionality here
-    console.log("Exporting data...")
-  }
-
-  return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Analytics</h2>
-        <div className="flex items-center space-x-2">
-          <DateRangePicker />
-          <Button onClick={handleExportData} className="flex items-center gap-2 ">
-            <Download className="h-4 w-4" />
-            Export Data
-          </Button>
-        </div>
-      </div>
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <OverviewTab />
-        </TabsContent>
-        <TabsContent value="analytics" className="space-y-4">
-          <AnalyticsTab />
-        </TabsContent>
-        <TabsContent value="reports" className="space-y-4">
-          <ReportsTab />
-        </TabsContent>
-        <TabsContent value="notifications" className="space-y-4">
-          <NotificationsTab />
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
+// END OF FILE: app/(business-actor)/bonus/page.tsx
 
 
-// END OF FILE: app/analytics/page.tsx
+// ===============================================
+// FILE: app/(business-actor)/business/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/business/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/business/page.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/chat/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/chat/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/chat/page.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/organization/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/organization/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/organization/page.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/settings/layout.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/settings/layout.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/settings/layout.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/settings/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/settings/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/settings/page.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/wallet/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/wallet/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/wallet/page.tsx
+
+
+// ===============================================
+// FILE: app/(business-actor)/webhooks/page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(business-actor)/webhooks/page.tsx
+// ===============================================
+
+
+// END OF FILE: app/(business-actor)/webhooks/page.tsx
 
 
 // ===============================================
@@ -216,8 +226,8 @@ import { ThemeProvider } from "next-themes"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Flowers&Saints Dashboard",
-  description: "A modern, responsive financial dashboard",
+  title: "Dashboard Template",
+  description: "A modern, adaptable responsive dashboard",
 }
 
 export default function RootLayout({
@@ -227,7 +237,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={inter.className} >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SettingsProvider>
             <TooltipProvider delayDuration={0}>
@@ -252,44 +262,80 @@ export default function RootLayout({
 
 
 // ===============================================
-// FILE: app/page.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/page.tsx
+// FILE: app/not-found.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/not-found.tsx
 // ===============================================
 
-import { AccountsOverview } from "@/components/accounts-overview"
-import { RecentTransactions } from "@/components/recent-transactions"
-import { QuickBillPay } from "@/components/quick-bill-pay"
-import { BusinessMetrics } from "@/components/business-metrics"
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Home, Search } from 'lucide-react'; // Using Home icon for button
 
-export default function Dashboard() {
+export default function NotFound() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+    <div className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
+      <div className="max-w-lg rounded-xl bg-card p-10 shadow-xl border border-border space-y-6 animate-fade-in-up"> {/* Added card style and animation */}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <AccountsOverview />
-        </div>
-        <div className="lg:col-span-1">
-          <RecentTransactions />
-        </div>
-        <div className="lg:col-span-1">
-          <QuickBillPay />
-        </div>
+        {/* Optional: A subtle icon or graphic */}
+        {/* You could place an SVG component here */}
+        <Search className="mx-auto h-16 w-16 text-primary opacity-50" />
+
+        {/* Title */}
+        <h1 className="text-6xl font-extrabold tracking-tighter text-primary lg:text-8xl">
+          404
+        </h1>
+
+        {/* Subtitle */}
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Page Not Found
+        </h2>
+
+        {/* Informative Message */}
+        <p className="text-base text-muted-foreground">
+          Sorry, we couldn't find the page you're looking for. It might have been moved, deleted,
+          or perhaps you mistyped the URL.
+        </p>
+
+        {/* Call to Action Button */}
+        <Button asChild size="lg" className="mt-4 transition-transform hover:scale-105">
+          {/* Use asChild to make the Button behave like the Link */}
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Home className="h-5 w-5" />
+            Return to Dashboard
+          </Link>
+        </Button>
       </div>
-
-      <BusinessMetrics />
+      {/* Add a subtle footer if desired */}
+      <p className="mt-12 text-xs text-muted-foreground">
+        If you believe this is an error, please contact support.
+      </p>
     </div>
-  )
+  );
 }
 
-
-// END OF FILE: app/page.tsx
+// Optional: Add a simple keyframe animation in globals.css if you don't have tw-animate-css setup properly for this specific animation
+/* Add this to app/globals.css if needed:
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+  }
+}
+*/
+// END OF FILE: app/not-found.tsx
 
 
 // ===============================================
-// FILE: app/settings/page.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/settings/page.tsx
+// FILE: app/settings/1page.tsx
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/settings/1page.tsx
 // ===============================================
 
 "use client"
@@ -679,7 +725,7 @@ export default function SettingsPage() {
                     <Checkbox
                       id="sms-notifications"
                       defaultChecked={settings.notifications.sms}
-                      onChange={(e) => updateNotificationSettings({ ...settings.notifications, sms: e.target.checked })}
+                            onCheckedChange={(e) => updateNotificationSettings({ ...settings.notifications, sms: e.target.checked })}
                     />
                     <Label htmlFor="sms-notifications">SMS Notifications</Label>
                   </div>
@@ -714,8 +760,8 @@ export default function SettingsPage() {
                         updateNotificationSettings({ ...settings.notifications, marketing: e.target.checked })
                       }
                     />
-                    <Label htmlFor="marketing">Marketing and Promotions</Label>
-                  </div>
+                            <Label htmlFor="marketing">Marketing and Promotions</Label>
+                       </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -749,6 +795,7 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        {/* ================= PRIVACY TAB (Existing Logic) ================= */}
         <TabsContent value="privacy">
           <Card>
             <CardHeader>
@@ -756,7 +803,9 @@ export default function SettingsPage() {
               <CardDescription>Manage your privacy and data settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
+               {/* Switches, Radios, Selects update context directly */}
+               {/* ... existing privacy controls ... */}
+               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Data Sharing</CardTitle>
@@ -770,7 +819,7 @@ export default function SettingsPage() {
                         onChange={(e) =>
                           updatePrivacySettings({ ...settings.privacy, analyticsSharing: e.target.checked })
                         }
-                      />
+                            />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="personalized-ads">Allow personalized ads</Label>
@@ -790,7 +839,7 @@ export default function SettingsPage() {
                   </CardHeader>
                   <CardContent>
                     <RadioGroup
-                      value={settings.privacy.visibility}
+                            value={settings.privacy.visibility}
                       onValueChange={(value) => updatePrivacySettings({ ...settings.privacy, visibility: value })}
                     >
                       <div className="flex items-center space-x-2">
@@ -821,7 +870,7 @@ export default function SettingsPage() {
                       <SelectContent>
                         <SelectItem value="6-months">6 Months</SelectItem>
                         <SelectItem value="1-year">1 Year</SelectItem>
-                        <SelectItem value="2-years">2 Years</SelectItem>
+       ... other                <SelectItem value="2-years">2 Years</SelectItem>
                         <SelectItem value="indefinite">Indefinite</SelectItem>
                       </SelectContent>
                     </Select>
@@ -853,1481 +902,7 @@ export default function SettingsPage() {
 }
 
 
-// END OF FILE: app/settings/page.tsx
-
-
-// ===============================================
-// FILE: components/account-overview.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/account-overview.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-const accounts = [
-  { name: "Checking", balance: 5240.23 },
-  { name: "Savings", balance: 12750.89 },
-  { name: "Investment", balance: 7890.45 },
-]
-
-export function AccountOverview() {
-  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0)
-
-  return (
-    <Card className="border border-border">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Account Overview</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-semibold mb-4">${totalBalance.toFixed(2)}</div>
-        <div className="space-y-2">
-          {accounts.map((account) => (
-            <div key={account.name} className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{account.name}</span>
-              <span className="font-medium">${account.balance.toFixed(2)}</span>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/account-overview.tsx
-
-
-// ===============================================
-// FILE: components/accounts-overview.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/accounts-overview.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Wallet, Plus, Send, CreditCard, MoreHorizontal } from "lucide-react"
-import { AddMoneyModal } from "./add-money-modal"
-import { SendMoneyModal } from "./send-money-modal"
-import { RequestMoneyModal } from "./request-money-modal"
-
-const initialAccounts = [
-  { name: "Checking", balance: 7500 },
-  { name: "Savings", balance: 560000 },
-  { name: "Investment", balance: 5879000 },
-]
-
-export function AccountsOverview() {
-  const [accounts, setAccounts] = useState(initialAccounts)
-  const [isAddMoneyModalOpen, setIsAddMoneyModalOpen] = useState(false)
-  const [isSendMoneyModalOpen, setIsSendMoneyModalOpen] = useState(false)
-  const [isRequestMoneyModalOpen, setIsRequestMoneyModalOpen] = useState(false)
-
-  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0)
-
-  const handleAddMoney = (amount) => {
-    setAccounts(
-      accounts.map((account) =>
-        account.name === "Checking" ? { ...account, balance: account.balance + amount } : account,
-      ),
-    )
-  }
-
-  const handleSendMoney = (amount, fromAccount) => {
-    setAccounts(
-      accounts.map((account) =>
-        account.name === fromAccount ? { ...account, balance: account.balance - amount } : account,
-      ),
-    )
-  }
-
-  const handleRequestMoney = (amount, contact) => {
-    console.log(`Requested $${amount} from ${contact.name}`)
-  }
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Accounts Overview</CardTitle>
-        <Wallet className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">${totalBalance.toLocaleString()}</div>
-        <p className="text-xs text-muted-foreground">Total balance across all accounts</p>
-        <div className="mt-4 space-y-2">
-          {accounts.map((account) => (
-            <div key={account.name} className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">{account.name}</span>
-              <span className="text-sm font-medium">${account.balance.toLocaleString()}</span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button size="sm" onClick={() => setIsAddMoneyModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add
-          </Button>
-          <Button size="sm" onClick={() => setIsSendMoneyModalOpen(true)}>
-            <Send className="mr-2 h-4 w-4" /> Send
-          </Button>
-          <Button size="sm" onClick={() => setIsRequestMoneyModalOpen(true)}>
-            <CreditCard className="mr-2 h-4 w-4" /> Request
-          </Button>
-          <Button size="sm" variant="outline">
-            <MoreHorizontal className="mr-2 h-4 w-4" /> More
-          </Button>
-        </div>
-      </CardContent>
-      <AddMoneyModal
-        isOpen={isAddMoneyModalOpen}
-        onClose={() => setIsAddMoneyModalOpen(false)}
-        onAddMoney={handleAddMoney}
-      />
-      <SendMoneyModal
-        isOpen={isSendMoneyModalOpen}
-        onClose={() => setIsSendMoneyModalOpen(false)}
-        onSendMoney={handleSendMoney}
-        accounts={accounts}
-      />
-      <RequestMoneyModal
-        isOpen={isRequestMoneyModalOpen}
-        onClose={() => setIsRequestMoneyModalOpen(false)}
-        onRequestMoney={handleRequestMoney}
-      />
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/accounts-overview.tsx
-
-
-// ===============================================
-// FILE: components/add-money-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/add-money-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CheckCircle2 } from "lucide-react"
-
-const steps = ["Amount", "Card Details", "OTP Verification", "Confirmation"]
-
-export function AddMoneyModal({ isOpen, onClose, onAddMoney }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [amount, setAmount] = useState("")
-  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" })
-  const [otp, setOtp] = useState("")
-
-  const handleContinue = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onAddMoney(Number.parseFloat(amount))
-      onClose()
-    }
-  }
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <Label htmlFor="amount">Amount to Add</Label>
-            <Input
-              id="amount"
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
-          </div>
-        )
-      case 3:
-        return (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Money Added Successfully</p>
-            <p className="text-sm text-muted-foreground">${amount} has been added to your Checking account.</p>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {renderStepContent()}
-          <div className="flex justify-between">
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
-              </Button>
-            )}
-            <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/add-money-modal.tsx
-
-
-// ===============================================
-// FILE: components/analytics/account-growth.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/account-growth.tsx
-// ===============================================
-
-"use client"
-
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { Card, CardContent } from "@/components/ui/card"
-import { useTheme } from "next-themes"
-
-const data = [
-  { month: "Jan", newAccounts: 100, totalAccounts: 1000 },
-  { month: "Feb", newAccounts: 120, totalAccounts: 1120 },
-  { month: "Mar", newAccounts: 150, totalAccounts: 1270 },
-  { month: "Apr", newAccounts: 180, totalAccounts: 1450 },
-  { month: "May", newAccounts: 200, totalAccounts: 1650 },
-  { month: "Jun", newAccounts: 220, totalAccounts: 1870 },
-]
-
-export function AccountGrowth() {
-  const { theme } = useTheme()
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <Card className="border-none shadow-lg">
-          <CardContent className="p-2">
-            <p className="text-sm font-semibold">{label}</p>
-            <p className="text-sm text-muted-foreground">New Accounts: {payload[0].value}</p>
-            <p className="text-sm text-muted-foreground">Total Accounts: {payload[1].value}</p>
-          </CardContent>
-        </Card>
-      )
-    }
-    return null
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={data}>
-        <XAxis
-          dataKey="month"
-          stroke={theme === "dark" ? "#888888" : "#333333"}
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-        />
-        <YAxis stroke={theme === "dark" ? "#888888" : "#333333"} fontSize={12} tickLine={false} axisLine={false} />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="newAccounts" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} radius={[4, 4, 0, 0]} />
-        <Bar dataKey="totalAccounts" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} radius={[4, 4, 0, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
-  )
-}
-
-
-// END OF FILE: components/analytics/account-growth.tsx
-
-
-// ===============================================
-// FILE: components/analytics/analytics-tab.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/analytics-tab.tsx
-// ===============================================
-
-"use client"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { useTheme } from "next-themes"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
-
-const customerSegmentationData = [
-  { segment: "High Value", count: 1200 },
-  { segment: "Medium Value", count: 5300 },
-  { segment: "Low Value", count: 8500 },
-  { segment: "At Risk", count: 1700 },
-  { segment: "Lost", count: 800 },
-]
-
-const retentionRateData = [
-  { month: "Jan", rate: 95 },
-  { month: "Feb", rate: 93 },
-  { month: "Mar", rate: 94 },
-  { month: "Apr", rate: 95 },
-  { month: "May", rate: 97 },
-  { month: "Jun", rate: 98 },
-]
-
-const channelPerformanceData = [
-  { channel: "Direct", acquisitions: 1200, revenue: 50000 },
-  { channel: "Organic Search", acquisitions: 2500, revenue: 75000 },
-  { channel: "Paid Search", acquisitions: 1800, revenue: 60000 },
-  { channel: "Social Media", acquisitions: 1500, revenue: 45000 },
-  { channel: "Email", acquisitions: 900, revenue: 30000 },
-]
-
-export function AnalyticsTab() {
-  const { theme } = useTheme()
-  const [timeFrame, setTimeFrame] = useState("last_30_days")
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-semibold">Detailed Analytics</h3>
-        <Select value={timeFrame} onValueChange={setTimeFrame}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time frame" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="last_7_days">Last 7 Days</SelectItem>
-            <SelectItem value="last_30_days">Last 30 Days</SelectItem>
-            <SelectItem value="last_90_days">Last 90 Days</SelectItem>
-            <SelectItem value="last_12_months">Last 12 Months</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Customer Segmentation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={customerSegmentationData}>
-                <XAxis dataKey="segment" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Customer Retention Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={retentionRateData}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="rate" stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Channel Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={channelPerformanceData}>
-                <XAxis dataKey="channel" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Bar yAxisId="left" dataKey="acquisitions" fill={theme === "dark" ? "#adfa1d" : "#0ea5e9"} />
-                <Bar yAxisId="right" dataKey="revenue" fill={theme === "dark" ? "#1e40af" : "#3b82f6"} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Key Metrics</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Customer Lifetime Value</p>
-              <p className="text-2xl font-bold">$1,250</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Net Promoter Score</p>
-              <p className="text-2xl font-bold">72</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Customer Acquisition Cost</p>
-              <p className="text-2xl font-bold">$75</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Average Order Value</p>
-              <p className="text-2xl font-bold">$120</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/analytics-tab.tsx
-
-
-// ===============================================
-// FILE: components/analytics/metrics-carousel.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/metrics-carousel.tsx
-// ===============================================
-
-"use client"
-
-import { Card, CardContent } from "@/components/ui/card"
-import { DollarSign, Users, CreditCard, TrendingUp, Briefcase, ShieldCheck } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-
-const metrics = [
-  {
-    title: "Total Revenue",
-    value: "$1,234,567",
-    icon: DollarSign,
-    change: "+12.3%",
-    description: "Overall earnings this quarter",
-  },
-  {
-    title: "Active Users",
-    value: "45,678",
-    icon: Users,
-    change: "+5.7%",
-    description: "Users engaged in the last 30 days",
-  },
-  {
-    title: "New Accounts",
-    value: "1,234",
-    icon: CreditCard,
-    change: "+3.2%",
-    description: "Fresh sign-ups this month",
-  },
-  { title: "Growth Rate", value: "8.9%", icon: TrendingUp, change: "+1.5%", description: "Year-over-year expansion" },
-  {
-    title: "Corporate Clients",
-    value: "89",
-    icon: Briefcase,
-    change: "+10.1%",
-    description: "Business accounts acquired",
-  },
-  {
-    title: "Security Index",
-    value: "98.7%",
-    icon: ShieldCheck,
-    change: "+0.5%",
-    description: "Overall system integrity score",
-  },
-]
-
-export function MetricsCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const carouselRef = useRef<HTMLDivElement>(null)
-
-  const cardWidth = 100 / 3.5 // Show 3.5 cards
-
-  const nextSlide = () => {
-    if (!isAnimating) {
-      setIsAnimating(true)
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % metrics.length)
-    }
-  }
-
-  const prevSlide = () => {
-    if (!isAnimating) {
-      setIsAnimating(true)
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + metrics.length) % metrics.length)
-    }
-  }
-
-  useEffect(() => {
-    if (carouselRef.current) {
-      const transitionEndHandler = () => {
-        setIsAnimating(false)
-        if (currentIndex === metrics.length - 1) {
-          carouselRef.current!.style.transition = "none"
-          setCurrentIndex(0)
-          setTimeout(() => {
-            carouselRef.current!.style.transition = "transform 0.3s ease-in-out"
-          }, 50)
-        } else if (currentIndex === 0) {
-          carouselRef.current!.style.transition = "none"
-          setCurrentIndex(metrics.length - 1)
-          setTimeout(() => {
-            carouselRef.current!.style.transition = "transform 0.3s ease-in-out"
-          }, 50)
-        }
-      }
-
-      carouselRef.current.addEventListener("transitionend", transitionEndHandler)
-
-      return () => {
-        carouselRef.current?.removeEventListener("transitionend", transitionEndHandler)
-      }
-    }
-  }, [currentIndex])
-
-  const renderMetrics = () => {
-    const items = [...metrics, ...metrics, ...metrics]
-    return items.map((metric, index) => (
-      <div key={index} className="flex-shrink-0" style={{ width: `${cardWidth}%` }}>
-        <Card className="h-full mx-2">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <metric.icon className="h-8 w-8 text-primary" />
-              <span
-                className={`text-sm font-semibold ${metric.change.startsWith("+") ? "text-green-500" : "text-red-500"}`}
-              >
-                {metric.change}
-              </span>
-            </div>
-            <h3 className="text-lg font-bold mb-2">{metric.title}</h3>
-            <p className="text-2xl font-extrabold mb-4">{metric.value}</p>
-            <p className="text-sm text-muted-foreground">{metric.description}</p>
-          </CardContent>
-        </Card>
-      </div>
-    ))
-  }
-
-  return (
-    <div className="w-full relative">
-      <div className="flex justify-between items-center">
-        <Button variant="outline" size="icon" onClick={prevSlide} className="z-10">
-          &lt;
-        </Button>
-        <div className="flex-grow overflow-hidden">
-          <div
-            ref={carouselRef}
-            className="flex transition-transform duration-300 ease-in-out"
-            style={{
-              transform: `translateX(-${currentIndex * cardWidth}%)`,
-              width: `${metrics.length * 3 * cardWidth}%`,
-            }}
-          >
-            {renderMetrics()}
-          </div>
-        </div>
-        <Button variant="outline" size="icon" onClick={nextSlide} className="z-10">
-          &gt;
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/metrics-carousel.tsx
-
-
-// ===============================================
-// FILE: components/analytics/notifications-tab.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/notifications-tab.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Bell, AlertTriangle, TrendingUp, TrendingDown, DollarSign, Users } from "lucide-react"
-
-const notificationTypes = [
-  { id: "account", label: "Account Activity", icon: Bell },
-  { id: "security", label: "Security Alerts", icon: AlertTriangle },
-  { id: "performance", label: "Performance Updates", icon: TrendingUp },
-  { id: "market", label: "Market Trends", icon: TrendingDown },
-  { id: "financial", label: "Financial Reports", icon: DollarSign },
-  { id: "user", label: "User Behavior", icon: Users },
-]
-
-export function NotificationsTab() {
-  const [notifications, setNotifications] = useState({
-    account: true,
-    security: true,
-    performance: false,
-    market: false,
-    financial: true,
-    user: false,
-  })
-
-  const toggleNotification = (id) => {
-    setNotifications((prev) => ({ ...prev, [id]: !prev[id] }))
-  }
-
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Notification Preferences</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {notificationTypes.map((type) => (
-            <div key={type.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <type.icon className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm font-medium">{type.label}</span>
-              </div>
-              <Switch checked={notifications[type.id]} onCheckedChange={() => toggleNotification(type.id)} />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Recent Notifications</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <AlertTriangle className="h-5 w-5 text-yellow-500" />
-            <div>
-              <p className="text-sm font-medium">Unusual account activity detected</p>
-              <p className="text-xs text-muted-foreground">2 hours ago</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <TrendingUp className="h-5 w-5 text-green-500" />
-            <div>
-              <p className="text-sm font-medium">Your portfolio has grown by 5% this week</p>
-              <p className="text-xs text-muted-foreground">1 day ago</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Bell className="h-5 w-5 text-blue-500" />
-            <div>
-              <p className="text-sm font-medium">New feature: Advanced analytics now available</p>
-              <p className="text-xs text-muted-foreground">3 days ago</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <DollarSign className="h-5 w-5 text-purple-500" />
-            <div>
-              <p className="text-sm font-medium">Monthly financial report is ready for review</p>
-              <p className="text-xs text-muted-foreground">5 days ago</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <div className="flex justify-end">
-        <Button variant="outline" className="text-sm">
-          View All Notifications
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/notifications-tab.tsx
-
-
-// ===============================================
-// FILE: components/analytics/overview-cards.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/overview-cards.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, Users, CreditCard, TrendingUp } from "lucide-react"
-
-const cards = [
-  {
-    title: "Total Revenue",
-    icon: DollarSign,
-    amount: "$45,231.89",
-    description: "+20.1% from last month",
-    trend: "up",
-  },
-  {
-    title: "New Customers",
-    icon: Users,
-    amount: "2,350",
-    description: "+180.1% from last month",
-    trend: "up",
-  },
-  {
-    title: "Active Accounts",
-    icon: CreditCard,
-    amount: "12,234",
-    description: "+19% from last month",
-    trend: "up",
-  },
-  {
-    title: "Growth Rate",
-    icon: TrendingUp,
-    amount: "18.6%",
-    description: "+5.4% from last month",
-    trend: "up",
-  },
-]
-
-export function OverviewCards() {
-  return (
-    <>
-      {cards.map((card) => (
-        <Card key={card.title}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-            <card.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{card.amount}</div>
-            <p className="text-xs text-muted-foreground">{card.description}</p>
-            <div
-              className={`mt-2 flex items-center text-xs ${card.trend === "up" ? "text-green-500" : "text-red-500"}`}
-            >
-              {card.trend === "up" ? (
-                <TrendingUp className="mr-1 h-3 w-3" />
-              ) : (
-                <TrendingUp className="mr-1 h-3 w-3 transform rotate-180" />
-              )}
-              {card.description.split(" ")[0]}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </>
-  )
-}
-
-
-// END OF FILE: components/analytics/overview-cards.tsx
-
-
-// ===============================================
-// FILE: components/analytics/overview-tab.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/overview-tab.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { OverviewCards } from "@/components/analytics/overview-cards"
-import { RevenueChart } from "@/components/analytics/revenue-chart"
-import { RecentTransactions } from "@/components/analytics/recent-transactions"
-import { AccountGrowth } from "@/components/analytics/account-growth"
-import { TopProducts } from "@/components/analytics/top-products"
-import { UserActivity } from "@/components/analytics/user-activity"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-export function OverviewTab() {
-  const [comparisonPeriod, setComparisonPeriod] = useState("previous_month")
-
-  return (
-    <>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-semibold">Dashboard Overview</h3>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Compare to:</span>
-          <Select value={comparisonPeriod} onValueChange={setComparisonPeriod}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="previous_month">Previous Month</SelectItem>
-              <SelectItem value="previous_quarter">Previous Quarter</SelectItem>
-              <SelectItem value="previous_year">Previous Year</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <OverviewCards comparisonPeriod={comparisonPeriod} />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <RevenueChart comparisonPeriod={comparisonPeriod} />
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RecentTransactions />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Account Growth</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AccountGrowth comparisonPeriod={comparisonPeriod} />
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Top Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TopProducts />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">User Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UserActivity />
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  )
-}
-
-
-// END OF FILE: components/analytics/overview-tab.tsx
-
-
-// ===============================================
-// FILE: components/analytics/recent-transactions.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/recent-transactions.tsx
-// ===============================================
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-
-const recentTransactions = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    amount: "+$350.00",
-    status: "success",
-    date: "2023-07-20",
-    avatar:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238645_11475210.jpg-lU8bOe6TLt5Rv51hgjg8NT8PsDBmvN.jpeg",
-  },
-  {
-    id: "2",
-    name: "Bob Smith",
-    email: "bob@example.com",
-    amount: "-$120.50",
-    status: "pending",
-    date: "2023-07-19",
-    avatar:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238208_11475222.jpg-poEIzVHAGiIfMFQ7EiF8PUG1u0Zkzz.jpeg",
-  },
-  {
-    id: "3",
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    amount: "+$1,000.00",
-    status: "success",
-    date: "2023-07-18",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dd.jpg-4MCwPC2Bec6Ume26Yo1kao3CnONxDg.jpeg",
-  },
-  {
-    id: "4",
-    name: "Diana Martinez",
-    email: "diana@example.com",
-    amount: "-$50.75",
-    status: "failed",
-    date: "2023-07-17",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334178.jpg-Y74tW6XFO68g7N36SE5MSNDNVKLQ08.jpeg",
-  },
-  {
-    id: "5",
-    name: "Ethan Williams",
-    email: "ethan@example.com",
-    amount: "+$720.00",
-    status: "success",
-    date: "2023-07-16",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/5295.jpg-fLw0wGGZp8wuTzU5dnyfjZDwAHN98a.jpeg",
-  },
-]
-
-export function RecentTransactions() {
-  return (
-    <div className="space-y-4">
-      {recentTransactions.map((transaction) => (
-        <Card key={transaction.id} className="p-4">
-          <CardContent className="flex items-center p-0">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={transaction.avatar} alt={transaction.name} />
-              <AvatarFallback>{transaction.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="ml-4 flex-1 space-y-1">
-              <p className="text-sm font-medium leading-none">{transaction.name}</p>
-              <p className="text-xs text-muted-foreground">{transaction.email}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p
-                className={`text-sm font-medium ${transaction.amount.startsWith("+") ? "text-green-500" : "text-red-500"}`}
-              >
-                {transaction.amount}
-              </p>
-              <p className="text-xs text-muted-foreground">{transaction.date}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/recent-transactions.tsx
-
-
-// ===============================================
-// FILE: components/analytics/reports-tab.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/reports-tab.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Download, Printer } from "lucide-react"
-
-const reportTypes = [
-  "Financial Summary",
-  "Customer Acquisition",
-  "Product Performance",
-  "Risk Assessment",
-  "Marketing Campaign Analysis",
-  "Operational Efficiency",
-]
-
-const dummyReportData = {
-  "Financial Summary": [
-    { id: 1, metric: "Total Revenue", value: "$1,234,567" },
-    { id: 2, metric: "Net Profit", value: "$345,678" },
-    { id: 3, metric: "Operating Expenses", value: "$567,890" },
-    { id: 4, metric: "Gross Margin", value: "28%" },
-    { id: 5, metric: "Return on Investment", value: "15%" },
-  ],
-  "Customer Acquisition": [
-    { id: 1, metric: "New Customers", value: "1,234" },
-    { id: 2, metric: "Customer Acquisition Cost", value: "$50" },
-    { id: 3, metric: "Conversion Rate", value: "3.5%" },
-    { id: 4, metric: "Customer Lifetime Value", value: "$1,200" },
-    { id: 5, metric: "Churn Rate", value: "2.3%" },
-  ],
-  // Add more report types here
-}
-
-export function ReportsTab() {
-  const [selectedReport, setSelectedReport] = useState(reportTypes[0])
-
-  const handleGenerateReport = () => {
-    console.log(`Generating ${selectedReport} report...`)
-  }
-
-  const handleDownloadReport = () => {
-    console.log(`Downloading ${selectedReport} report...`)
-  }
-
-  const handlePrintReport = () => {
-    console.log(`Printing ${selectedReport} report...`)
-  }
-
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Generate Report</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center space-x-4">
-          <Select value={selectedReport} onValueChange={setSelectedReport}>
-            <SelectTrigger className="w-[240px]">
-              <SelectValue placeholder="Select report type" />
-            </SelectTrigger>
-            <SelectContent>
-              {reportTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleGenerateReport}>Generate Report</Button>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">{selectedReport} Report</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Metric</TableHead>
-                <TableHead>Value</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dummyReportData[selectedReport]?.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.metric}</TableCell>
-                  <TableCell>{row.value}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" onClick={handleDownloadReport}>
-              <Download className="mr-2 h-4 w-4" />
-              Download
-            </Button>
-            <Button variant="outline" onClick={handlePrintReport}>
-              <Printer className="mr-2 h-4 w-4" />
-              Print
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/reports-tab.tsx
-
-
-// ===============================================
-// FILE: components/analytics/revenue-chart.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/revenue-chart.tsx
-// ===============================================
-
-"use client"
-
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { Card, CardContent } from "@/components/ui/card"
-import { useTheme } from "next-themes"
-
-const data = [
-  { month: "Jan", revenue: 2000 },
-  { month: "Feb", revenue: 2200 },
-  { month: "Mar", revenue: 2700 },
-  { month: "Apr", revenue: 2400 },
-  { month: "May", revenue: 2800 },
-  { month: "Jun", revenue: 3200 },
-  { month: "Jul", revenue: 3100 },
-  { month: "Aug", revenue: 3400 },
-  { month: "Sep", revenue: 3700 },
-  { month: "Oct", revenue: 3500 },
-  { month: "Nov", revenue: 3800 },
-  { month: "Dec", revenue: 4200 },
-]
-
-export function RevenueChart() {
-  const { theme } = useTheme()
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <Card className="border-none shadow-lg">
-          <CardContent className="p-2">
-            <p className="text-sm font-semibold">{label}</p>
-            <p className="text-sm text-muted-foreground">Revenue: ${payload[0].value.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-      )
-    }
-    return null
-  }
-
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <XAxis
-          dataKey="month"
-          stroke={theme === "dark" ? "#888888" : "#333333"}
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-        />
-        <YAxis
-          stroke={theme === "dark" ? "#888888" : "#333333"}
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `$${value}`}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Line
-          type="monotone"
-          dataKey="revenue"
-          stroke={theme === "dark" ? "#adfa1d" : "#0ea5e9"}
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  )
-}
-
-
-// END OF FILE: components/analytics/revenue-chart.tsx
-
-
-// ===============================================
-// FILE: components/analytics/top-products.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/top-products.tsx
-// ===============================================
-
-import { CheckCircle2 } from "lucide-react"
-
-const topProducts = [
-  { name: "Savings Account", revenue: "$1,200,000", growth: "+12%" },
-  { name: "Credit Card", revenue: "$980,000", growth: "+8%" },
-  { name: "Personal Loan", revenue: "$850,000", growth: "+15%" },
-  { name: "Mortgage", revenue: "$2,300,000", growth: "+5%" },
-  { name: "Investment Fund", revenue: "$1,800,000", growth: "+20%" },
-]
-
-export function TopProducts() {
-  return (
-    <div className="space-y-8">
-      {topProducts.map((product) => (
-        <div key={product.name} className="flex items-center">
-          <CheckCircle2 className="mr-2 h-4 w-4 text-muted-foreground" />
-          <div className="ml-4 space-y-1">
-            <p className="text-sm font-medium leading-none">{product.name}</p>
-            <p className="text-sm text-muted-foreground">{product.revenue}</p>
-          </div>
-          <div className="ml-auto font-medium text-green-500">{product.growth}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/top-products.tsx
-
-
-// ===============================================
-// FILE: components/analytics/user-activity.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/analytics/user-activity.tsx
-// ===============================================
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-
-const userActivities = [
-  {
-    id: "1",
-    user: "Fiona Garcia",
-    action: "Logged in",
-    time: "2 minutes ago",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9720029.jpg-Yf9h2a3kT7rYyCb648iLIeHThq5wEy.jpeg",
-  },
-  {
-    id: "2",
-    user: "George Lee",
-    action: "Updated profile",
-    time: "10 minutes ago",
-    avatar:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27470341_7294795.jpg-XE0zf7R8tk4rfA1vm4fAHeZ1QoVEOo.jpeg",
-  },
-  {
-    id: "3",
-    user: "Hannah Kim",
-    action: "Made a transfer",
-    time: "15 minutes ago",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/799.jpg-0tEi4Xvg5YsFoGoQfQc698q4Dygl1S.jpeg",
-  },
-  {
-    id: "4",
-    user: "Ian Foster",
-    action: "Opened new account",
-    time: "30 minutes ago",
-    avatar: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334228.jpg-eOsHCkvVrVAwcPHKYSs5sQwVKsqWpC.jpeg",
-  },
-]
-
-export function UserActivity() {
-  return (
-    <div className="space-y-4">
-      {userActivities.map((activity) => (
-        <Card key={activity.id} className="p-4">
-          <CardContent className="flex items-center p-0">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={activity.avatar} alt={activity.user} />
-              <AvatarFallback>{activity.user.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="ml-4 flex-1 space-y-1">
-              <p className="text-sm font-medium leading-none">{activity.user}</p>
-              <p className="text-xs text-muted-foreground">{activity.action}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p className="text-xs text-muted-foreground">{activity.time}</p>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-
-// END OF FILE: components/analytics/user-activity.tsx
-
-
-// ===============================================
-// FILE: components/budget-tracker.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/budget-tracker.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-
-const budgetCategories = [
-  { name: "Housing", spent: 2000, budget: 2500 },
-  { name: "Transportation", spent: 450, budget: 500 },
-  { name: "Food", spent: 800, budget: 1000 },
-  { name: "Utilities", spent: 300, budget: 350 },
-  { name: "Entertainment", spent: 250, budget: 300 },
-]
-
-export function BudgetTracker() {
-  const totalBudget = budgetCategories.reduce((sum, category) => sum + category.budget, 0)
-  const totalSpent = budgetCategories.reduce((sum, category) => sum + category.spent, 0)
-  const overallPercentage = (totalSpent / totalBudget) * 100
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Budget Overview</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Total Spent</span>
-            <span className="text-sm font-medium">
-              ${totalSpent.toLocaleString()} / ${totalBudget.toLocaleString()}
-            </span>
-          </div>
-          <Progress value={overallPercentage} className="h-2" />
-          <p className="text-sm text-muted-foreground text-right">{overallPercentage.toFixed(1)}% of budget used</p>
-
-          <div className="space-y-2">
-            {budgetCategories.map((category) => {
-              const percentage = (category.spent / category.budget) * 100
-              return (
-                <div key={category.name} className="grid grid-cols-3 gap-2 items-center">
-                  <span className="text-sm font-medium">{category.name}</span>
-                  <Progress value={percentage} className="h-1.5" />
-                  <span className="text-sm text-muted-foreground text-right">{percentage.toFixed(0)}%</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/budget-tracker.tsx
-
-
-// ===============================================
-// FILE: components/business-metrics.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/business-metrics.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { TrendingUp, Users, DollarSign, ArrowRight } from "lucide-react"
-
-const metrics = [
-  {
-    id: 1,
-    title: "Revenue Growth",
-    subtitle: "Monthly revenue target",
-    icon: TrendingUp,
-    status: "On Track",
-    progress: 75,
-    target: 100000,
-    current: 75000,
-    unit: "$",
-  },
-  {
-    id: 2,
-    title: "Customer Acquisition",
-    subtitle: "New customers this quarter",
-    icon: Users,
-    status: "Behind",
-    progress: 60,
-    target: 1000,
-    current: 600,
-    unit: "",
-  },
-  {
-    id: 3,
-    title: "Average Order Value",
-    subtitle: "Target AOV for Q3",
-    icon: DollarSign,
-    status: "Ahead",
-    progress: 110,
-    target: 150,
-    current: 165,
-    unit: "$",
-  },
-]
-
-const statusColors = {
-  "On Track": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  Behind: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  Ahead: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-}
-
-export function BusinessMetrics() {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Business Metrics</h2>
-        <Button variant="outline" size="sm">
-          View Details <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {metrics.map((metric) => (
-          <Card key={metric.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
-              <metric.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">{metric.subtitle}</p>
-              <div className="mt-2 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className={`px-2 py-1 rounded-full ${statusColors[metric.status]}`}>{metric.status}</span>
-                  <span className="text-muted-foreground">
-                    {metric.current} / {metric.target} {metric.unit}
-                  </span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-1.5">
-                  <div
-                    className="bg-primary h-1.5 rounded-full"
-                    style={{ width: `${Math.min(metric.progress, 100)}%` }}
-                  />
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">
-                    {metric.unit}
-                    {metric.target.toLocaleString()}
-                  </span>
-                  <span className="text-muted-foreground">{metric.progress}% complete</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/business-metrics.tsx
-
-
-// ===============================================
-// FILE: components/content.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/content.tsx
-// ===============================================
-
-import { List01 } from "./list01"
-import { List02 } from "./list02"
-import { List03 } from "./list03"
-
-export function Content() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div className="md:col-span-2 lg:col-span-1">
-        <List01 />
-      </div>
-      <div className="md:col-span-2 lg:col-span-1">
-        <List02 />
-      </div>
-      <div className="md:col-span-2 lg:col-span-1">
-        <List03 />
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/content.tsx
+// END OF FILE: app/settings/1page.tsx
 
 
 // ===============================================
@@ -2396,115 +971,6 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
 
 
 // ===============================================
-// FILE: components/financial-chart.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/financial-chart.tsx
-// ===============================================
-
-"use client"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-
-const data = [
-  { month: "Jan", income: 2000, expenses: 1800 },
-  { month: "Feb", income: 2200, expenses: 1900 },
-  { month: "Mar", income: 2400, expenses: 2000 },
-  { month: "Apr", income: 2600, expenses: 2200 },
-  { month: "May", income: 2800, expenses: 2400 },
-  { month: "Jun", income: 3000, expenses: 2600 },
-]
-
-export function FinancialChart() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Financial Overview</CardTitle>
-      </CardHeader>
-      <CardContent className="pb-4">
-        <div className="h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
-              <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip />
-              <Line type="monotone" dataKey="income" stroke="#8884d8" strokeWidth={2} />
-              <Line type="monotone" dataKey="expenses" stroke="#82ca9d" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/financial-chart.tsx
-
-
-// ===============================================
-// FILE: components/function-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/function-modal.tsx
-// ===============================================
-
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import type React from "react" // Import React
-
-interface FunctionModalProps {
-  title: string
-  description: string
-  actionText: string
-  icon: React.ReactNode
-}
-
-export function FunctionModal({ title, description, actionText, icon }: FunctionModalProps) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start">
-          {icon}
-          {title}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="amount" className="text-right">
-              Amount
-            </Label>
-            <Input id="amount" type="number" placeholder="Enter amount" className="col-span-3" />
-          </div>
-        </div>
-        <Button type="submit">{actionText}</Button>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/function-modal.tsx
-
-
-// ===============================================
 // FILE: components.json
 // PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components.json
 // ===============================================
@@ -2512,336 +978,6 @@ export function FunctionModal({ title, description, actionText, icon }: Function
 [Non-text file (e.g., binary, data, compressed) - Contents omitted]
 
 // END OF FILE: components.json
-
-
-// ===============================================
-// FILE: components/layout.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/layout.tsx
-// ===============================================
-
-import type React from "react"
-import { Sidebar } from "./sidebar"
-import { TopNav } from "./top-nav"
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopNav />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background">{children}</main>
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/layout.tsx
-
-
-// ===============================================
-// FILE: components/list01.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/list01.tsx
-// ===============================================
-
-import { Wallet, Plus, Send, CreditCard, MoreHorizontal } from "lucide-react"
-import { Modal } from "./modal"
-
-const accounts = [
-  { name: "Checking", balance: 5240.23 },
-  { name: "Savings", balance: 12750.89 },
-  { name: "Investment", balance: 7890.45 },
-]
-
-export function List01() {
-  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0)
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-          <Wallet className="h-5 w-5 mr-2" />
-          Accounts
-        </h2>
-        <span className="text-2xl font-bold text-gray-900 dark:text-white">${totalBalance.toFixed(2)}</span>
-      </div>
-      <div className="space-y-4 mb-6">
-        {accounts.map((account) => (
-          <div key={account.name} className="flex justify-between items-center">
-            <span className="text-sm text-gray-500 dark:text-gray-400">{account.name}</span>
-            <span className="font-medium text-gray-900 dark:text-white">${account.balance.toFixed(2)}</span>
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Modal
-          trigger={
-            <button className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              <Plus className="h-4 w-4 mr-2" />
-              Add
-            </button>
-          }
-          title="Add Funds"
-          description="Add funds to your account"
-        />
-        <Modal
-          trigger={
-            <button className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-              <Send className="h-4 w-4 mr-2" />
-              Send
-            </button>
-          }
-          title="Send Money"
-          description="Send money to another account"
-        />
-        <Modal
-          trigger={
-            <button className="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-              <CreditCard className="h-4 w-4 mr-2" />
-              Top-up
-            </button>
-          }
-          title="Top Up"
-          description="Top up your account"
-        />
-        <button className="flex items-center justify-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-          <MoreHorizontal className="h-4 w-4 mr-2" />
-          More
-        </button>
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/list01.tsx
-
-
-// ===============================================
-// FILE: components/list02.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/list02.tsx
-// ===============================================
-
-import { CreditCard, ShoppingCart, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react"
-
-const transactions = [
-  { id: 1, title: "Online Purchase", amount: -89.99, date: "2023-06-15", icon: ShoppingCart, type: "expense" },
-  { id: 2, title: "Salary Deposit", amount: 3500, date: "2023-06-01", icon: Wallet, type: "income" },
-  { id: 3, title: "Grocery Shopping", amount: -156.23, date: "2023-06-10", icon: ShoppingCart, type: "expense" },
-  { id: 4, title: "ATM Withdrawal", amount: -200, date: "2023-06-05", icon: CreditCard, type: "expense" },
-  { id: 5, title: "Freelance Payment", amount: 750, date: "2023-06-12", icon: Wallet, type: "income" },
-]
-
-export function List02() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-          <CreditCard className="h-5 w-5 mr-2" />
-          Recent Transactions
-        </h2>
-      </div>
-      <div className="space-y-4 mb-6">
-        {transactions.map((transaction) => (
-          <div key={transaction.id} className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className={`p-2 rounded-full mr-3 ${transaction.type === "income" ? "bg-green-100" : "bg-red-100"}`}>
-                <transaction.icon
-                  className={`h-4 w-4 ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{transaction.title}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{transaction.date}</p>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <span
-                className={`text-sm font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-              >
-                {transaction.type === "income" ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
-              </span>
-              {transaction.type === "income" ? (
-                <ArrowUpRight className="h-4 w-4 text-green-600 ml-1" />
-              ) : (
-                <ArrowDownRight className="h-4 w-4 text-red-600 ml-1" />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      <button className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-        View All Transactions
-      </button>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/list02.tsx
-
-
-// ===============================================
-// FILE: components/list03.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/list03.tsx
-// ===============================================
-
-import { Calendar, PiggyBank, TrendingUp, CreditCard, ArrowRight } from "lucide-react"
-
-const events = [
-  {
-    id: 1,
-    title: "Emergency Fund",
-    subtitle: "3 months of expenses saved",
-    icon: PiggyBank,
-    status: "In Progress",
-    progress: 65,
-    target: 15000,
-    date: "Dec 2024",
-  },
-  {
-    id: 2,
-    title: "Stock Portfolio",
-    subtitle: "Tech sector investment plan",
-    icon: TrendingUp,
-    status: "Pending",
-    progress: 30,
-    target: 50000,
-    date: "Jun 2024",
-  },
-  {
-    id: 3,
-    title: "Debt Repayment",
-    subtitle: "Student loan payoff plan",
-    icon: CreditCard,
-    status: "In Progress",
-    progress: 45,
-    target: 25000,
-    date: "Mar 2025",
-  },
-]
-
-const statusColors = {
-  Pending: "bg-yellow-100 text-yellow-800",
-  "In Progress": "bg-blue-100 text-blue-800",
-  Completed: "bg-green-100 text-green-800",
-}
-
-export function List03() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-          <Calendar className="h-5 w-5 mr-2" />
-          Upcoming Events
-        </h2>
-      </div>
-      <div className="space-x-4 overflow-x-auto flex pb-4">
-        {events.map((event) => (
-          <div key={event.id} className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 w-72 flex-shrink-0">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 bg-gray-200 dark:bg-gray-600 rounded-full">
-                <event.icon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-              </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[event.status]}`}>
-                {event.status}
-              </span>
-            </div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">{event.title}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{event.subtitle}</p>
-            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 mb-3">
-              <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${event.progress}%` }}></div>
-            </div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                ${event.target.toLocaleString()}
-                <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">target</span>
-              </span>
-              <span className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <Calendar className="h-3 w-3 mr-1" />
-                {event.date}
-              </span>
-            </div>
-            <button className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors flex items-center justify-center">
-              View Details
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/list03.tsx
-
-
-// ===============================================
-// FILE: components/modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState, type ReactNode } from "react"
-import { X } from "lucide-react"
-
-interface ModalProps {
-  trigger: ReactNode
-  title: string
-  description: string
-}
-
-export function Modal({ trigger, title, description }: ModalProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <>
-      <div onClick={() => setIsOpen(true)}>{trigger}</div>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg max-w-md w-full">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-500">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{description}</p>
-              <div className="mb-4">
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Amount
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Enter amount"
-                />
-              </div>
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-                <button className="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
-
-
-// END OF FILE: components/modal.tsx
 
 
 // ===============================================
@@ -2991,894 +1127,6 @@ export function Notifications() {
 
 
 // ===============================================
-// FILE: components/payment-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/payment-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { CheckCircle2 } from "lucide-react"
-
-const steps = ["Payment Option", "Card Details", "OTP Verification", "Confirmation"]
-
-export function PaymentModal({ bill, isOpen, onClose, onPaymentSuccess }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [paymentOption, setPaymentOption] = useState("full")
-  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" })
-  const [otp, setOtp] = useState("")
-
-  const handleContinue = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onPaymentSuccess()
-      onClose()
-    }
-  }
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <RadioGroup value={paymentOption} onValueChange={setPaymentOption}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="full" id="full" />
-                <Label htmlFor="full">Pay in full (${bill.amount})</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="installments" id="installments" />
-                <Label htmlFor="installments">Pay in 4 (${(bill.amount / 4).toFixed(2)} x 4)</Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
-          </div>
-        )
-      case 3:
-        return (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Payment Successful</p>
-            <p className="text-sm text-muted-foreground">
-              Your payment of ${bill.amount} for {bill.name} has been processed successfully.
-            </p>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {renderStepContent()}
-          <div className="flex justify-between">
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
-              </Button>
-            )}
-            <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/payment-modal.tsx
-
-
-// ===============================================
-// FILE: components/profile01.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/profile01.tsx
-// ===============================================
-
-import { ChevronDown } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-export function Profile01() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <ChevronDown className="ml-2 w-4 h-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem>Logout</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-
-// END OF FILE: components/profile01.tsx
-
-
-// ===============================================
-// FILE: components/profile-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/profile-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CreditCard, Edit2, Save, Trash2 } from "lucide-react"
-
-interface ProfileModalProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-interface CardInfo {
-  type: string
-  number: string
-  expiry: string
-}
-
-interface UserProfile {
-  name: string
-  email: string
-  company: string
-  phone: string
-  accountNumber: string
-  bankName: string
-  cards: CardInfo[]
-}
-
-export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: "Dollar Gill",
-    email: "dollar@example.com",
-    company: "Acme Inc.",
-    phone: "+1 (555) 123-4567",
-    accountNumber: "1234567890",
-    bankName: "Global Bank",
-    cards: [
-      { type: "Visa", number: "************1387", expiry: "12/24" },
-      { type: "Amex", number: "***********2468", expiry: "06/25" },
-      { type: "Mastercard", number: "************9876", expiry: "03/26" },
-    ],
-  })
-
-  const handleInputChange = (field: keyof UserProfile, value: string) => {
-    setUserProfile((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSave = () => {
-    setIsEditing(false)
-    // Here you would typically send the updated profile to your backend
-    console.log("Saving profile:", userProfile)
-  }
-
-  const handleRemoveCard = (index: number) => {
-    setUserProfile((prev) => ({
-      ...prev,
-      cards: prev.cards.filter((_, i) => i !== index),
-    }))
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Profile</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src="https://github.com/shadcn.png" alt={userProfile.name} />
-              <AvatarFallback>
-                {userProfile.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-2xl font-bold">{userProfile.name}</h2>
-              <p className="text-sm text-muted-foreground">{userProfile.email}</p>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="ml-auto"
-              onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-            >
-              {isEditing ? <Save className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
-            </Button>
-          </div>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={userProfile.name}
-                  readOnly={!isEditing}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  value={userProfile.email}
-                  readOnly={!isEditing}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="company">Company</Label>
-                <Input
-                  id="company"
-                  value={userProfile.company}
-                  readOnly={!isEditing}
-                  onChange={(e) => handleInputChange("company", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={userProfile.phone}
-                  readOnly={!isEditing}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="accountNumber">Account Number</Label>
-                <Input id="accountNumber" value={userProfile.accountNumber} readOnly />
-              </div>
-              <div>
-                <Label htmlFor="bankName">Bank Name</Label>
-                <Input id="bankName" value={userProfile.bankName} readOnly />
-              </div>
-            </div>
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Cards</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {userProfile.cards.map((card, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <CreditCard className="h-6 w-6" />
-                    <div>
-                      <p className="font-medium">{card.type}</p>
-                      <p className="text-sm text-muted-foreground">{card.number}</p>
-                    </div>
-                    <p className="ml-auto text-sm">Expires: {card.expiry}</p>
-                    {isEditing && (
-                      <Button variant="destructive" size="icon" onClick={() => handleRemoveCard(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/profile-modal.tsx
-
-
-// ===============================================
-// FILE: components/quick-actions.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/quick-actions.tsx
-// ===============================================
-
-"use client"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { PlusCircle, SendHorizontal, CreditCard } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-function ActionDialog({ title, description, actionText }: { title: string; description: string; actionText: string }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start">
-          {title === "Add Funds" && <PlusCircle className="mr-2 h-4 w-4" />}
-          {title === "Send Money" && <SendHorizontal className="mr-2 h-4 w-4" />}
-          {title === "Top Up" && <CreditCard className="mr-2 h-4 w-4" />}
-          {title}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="amount" className="text-right">
-              Amount
-            </Label>
-            <Input id="amount" type="number" placeholder="Enter amount" className="col-span-3" />
-          </div>
-        </div>
-        <Button type="submit">{actionText}</Button>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export function QuickActions() {
-  return (
-    <Card className="border border-border">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <ActionDialog title="Add Funds" description="Add funds to your account" actionText="Add Funds" />
-        <ActionDialog title="Send Money" description="Send money to another account" actionText="Send Money" />
-        <ActionDialog title="Top Up" description="Top up your account" actionText="Top Up" />
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/quick-actions.tsx
-
-
-// ===============================================
-// FILE: components/quick-bill-pay.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/quick-bill-pay.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { PaymentModal } from "./payment-modal"
-
-const initialBills = [
-  { id: 1, name: "Electricity Bill", amount: 85, dueDate: "2023-07-15" },
-  { id: 2, name: "Internet Service", amount: 60, dueDate: "2023-07-18" },
-  { id: 3, name: "Credit Card Payment", amount: 500, dueDate: "2023-07-25" },
-  { id: 4, name: "Water Bill", amount: 45, dueDate: "2023-07-30" },
-]
-
-export function QuickBillPay() {
-  const [bills, setBills] = useState(initialBills)
-  const [selectedBill, setSelectedBill] = useState(null)
-
-  const handlePaymentSuccess = (paidBillId) => {
-    setBills(bills.filter((bill) => bill.id !== paidBillId))
-    setSelectedBill(null)
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quick Bill Pay</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {bills.length > 0 ? (
-          <div className="space-y-4">
-            {bills.map((bill) => (
-              <div key={bill.id} className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{bill.name}</p>
-                  <p className="text-sm text-muted-foreground">Due: {bill.dueDate}</p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold">${bill.amount}</span>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedBill(bill)}>
-                    Pay
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground">No pending bills</p>
-        )}
-      </CardContent>
-      {selectedBill && (
-        <PaymentModal
-          bill={selectedBill}
-          isOpen={!!selectedBill}
-          onClose={() => setSelectedBill(null)}
-          onPaymentSuccess={() => handlePaymentSuccess(selectedBill.id)}
-        />
-      )}
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/quick-bill-pay.tsx
-
-
-// ===============================================
-// FILE: components/recent-transactions.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/recent-transactions.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ArrowUpRight, ArrowDownRight } from "lucide-react"
-
-const transactions = [
-  { id: 1, name: "Amazon.com", amount: -129.99, date: "2023-07-15", type: "expense" },
-  { id: 2, name: "Whole Foods Market", amount: -89.72, date: "2023-07-10", type: "expense" },
-  { id: 3, name: "Netflix Subscription", amount: -15.99, date: "2023-07-05", type: "expense" },
-  { id: 4, name: "Freelance Payment", amount: 750, date: "2023-07-12", type: "income" },
-  { id: 5, name: "Gas Station", amount: -45.5, date: "2023-07-18", type: "expense" },
-]
-
-export function RecentTransactions() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Recent Transactions</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {transactions.slice(0, 3).map((transaction) => (
-            <div key={transaction.id} className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium">{transaction.name}</p>
-                <p className="text-xs text-muted-foreground">{transaction.date}</p>
-              </div>
-              <div className="flex items-center">
-                <span
-                  className={`text-sm font-medium ${
-                    transaction.type === "income"
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {transaction.type === "income" ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
-                </span>
-                {transaction.type === "income" ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-600 dark:text-green-400 ml-1" />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-600 dark:text-red-400 ml-1" />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <Button className="w-full mt-4" variant="outline">
-          View All Transactions
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/recent-transactions.tsx
-
-
-// ===============================================
-// FILE: components/request-money-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/request-money-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle2 } from "lucide-react"
-
-const steps = ["Select Contact", "Enter Amount", "OTP Verification", "Confirmation"]
-
-const contacts = [
-  { id: "1", name: "John Doe", phoneNumber: "+1 234 567 8901" },
-  { id: "2", name: "Jane Smith", phoneNumber: "+1 987 654 3210" },
-  { id: "3", name: "Alice Johnson", phoneNumber: "+1 555 123 4567" },
-]
-
-export function RequestMoneyModal({ isOpen, onClose, onRequestMoney }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [selectedContact, setSelectedContact] = useState(null)
-  const [amount, setAmount] = useState("")
-  const [otp, setOtp] = useState("")
-
-  const handleContinue = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onRequestMoney(Number.parseFloat(amount), selectedContact)
-      onClose()
-    }
-  }
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <Label htmlFor="contact">Select Contact</Label>
-            <Select onValueChange={(value) => setSelectedContact(contacts.find((c) => c.id === value))}>
-              <SelectTrigger id="contact">
-                <SelectValue placeholder="Select a contact" />
-              </SelectTrigger>
-              <SelectContent>
-                {contacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    {contact.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedContact && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Contact Details:</p>
-                <p className="text-sm">Name: {selectedContact.name}</p>
-                <p className="text-sm">ID: {selectedContact.id}</p>
-                <p className="text-sm">Phone: {selectedContact.phoneNumber}</p>
-              </div>
-            )}
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <Label htmlFor="amount">Amount to Request</Label>
-            <Input
-              id="amount"
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
-          </div>
-        )
-      case 3:
-        return (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Money Request Sent</p>
-            <p className="text-sm text-muted-foreground">
-              ${amount} has been requested from {selectedContact.name}.
-            </p>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {renderStepContent()}
-          <div className="flex justify-between">
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
-              </Button>
-            )}
-            <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/request-money-modal.tsx
-
-
-// ===============================================
-// FILE: components/savings-goals.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/savings-goals.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
-
-const savingsGoals = [
-  { name: "Emergency Fund", current: 10000, target: 25000 },
-  { name: "Vacation", current: 3000, target: 5000 },
-  { name: "New Car", current: 15000, target: 35000 },
-]
-
-export function SavingsGoals() {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-md font-medium">Savings Goals</CardTitle>
-        <Button variant="outline" size="icon">
-          <PlusCircle className="h-4 w-4" />
-          <span className="sr-only">Add new savings goal</span>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {savingsGoals.map((goal) => {
-            const percentage = (goal.current / goal.target) * 100
-            return (
-              <div key={goal.name} className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>{goal.name}</span>
-                  <span>
-                    ${goal.current.toLocaleString()} / ${goal.target.toLocaleString()}
-                  </span>
-                </div>
-                <Progress value={percentage} className="h-2" />
-                <p className="text-xs text-right text-muted-foreground">{percentage.toFixed(1)}% complete</p>
-              </div>
-            )
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-// END OF FILE: components/savings-goals.tsx
-
-
-// ===============================================
-// FILE: components/send-money-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/send-money-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle2 } from "lucide-react"
-
-const steps = ["Amount and Account", "Card Details", "OTP Verification", "Confirmation"]
-
-export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [amount, setAmount] = useState("")
-  const [selectedAccount, setSelectedAccount] = useState("")
-  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" })
-  const [otp, setOtp] = useState("")
-
-  const handleContinue = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onSendMoney(Number.parseFloat(amount), selectedAccount)
-      onClose()
-    }
-  }
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount to Send</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="Enter amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="account">From Account</Label>
-              <Select onValueChange={setSelectedAccount} value={selectedAccount}>
-                <SelectTrigger id="account">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.name} value={account.name}>
-                      {account.name} (${account.balance.toFixed(2)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
-          </div>
-        )
-      case 3:
-        return (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Money Sent Successfully</p>
-            <p className="text-sm text-muted-foreground">
-              ${amount} has been sent from your {selectedAccount} account.
-            </p>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {renderStepContent()}
-          <div className="flex justify-between">
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
-              </Button>
-            )}
-            <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/send-money-modal.tsx
-
-
-// ===============================================
 // FILE: components/sidebar.tsx
 // PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/sidebar.tsx
 // ===============================================
@@ -3887,137 +1135,228 @@ export function SendMoneyModal({ isOpen, onClose, onSendMoney, accounts }) {
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"; // Import Image component
 import { usePathname } from "next/navigation"
 import {
-  Home,
-  BarChart2,
-  Building2,
-  Folder,
-  Wallet,
-  Receipt,
-  CreditCard,
-  Users2,
-  Shield,
-  MessagesSquare,
-  Video,
-  Settings,
-  HelpCircle,
-  Menu,
-  ChevronLeft,
-  SidebarClose,
+  Home, BarChart2, Building2, Users2, Briefcase, Folder, Wallet, Receipt,
+  CreditCard, ShoppingCart, Calendar, Send, Star, Bell, Shield, Settings,
+  MessagesSquare, Gift, HelpCircle, LogOut, Menu, SidebarClose, Users, Server
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+// Assuming useSettings might eventually provide role or org name/logo
+// import { useSettings } from "@/contexts/settings-context";
 
-const navigation = [
-  {
-    title: "Finance", links: [
-      { name: "Dashboard", href: "/", icon: Home },
-      { name: "Analytics", href: "/analytics", icon: BarChart2 },
-      { name: "Organization", href: "/organization", icon: Building2 },
-      { name: "Projects", href: "/projects", icon: Folder },
-      { name: "Transactions", href: "/transactions", icon: Wallet },
-      { name: "Invoices", href: "/invoices", icon: Receipt },
-      { name: "Payments", href: "/payments", icon: CreditCard },
-    ]
-  }, {
-    title: "Team", links: [
-      { name: "Members", href: "/members", icon: Users2 },
-      { name: "Permissions", href: "/permissions", icon: Shield },
-      { name: "Chat", href: "/chat", icon: MessagesSquare },
-      { name: "Meetings", href: "/meetings", icon: Video },
-    ]
-  }
-]
+// --- Navigation Arrays (routes updated) ---
+const baNavigation = [
+  { name: "Dashboard", href: "/business-actor/dashboard", icon: Home },
+  { name: "Organization", href: "/business-actor/organization", icon: Building2 },
+  { name: "Business", href: "/business-actor/business", icon: Briefcase },
+  { name: "Transactions", href: "/business-actor/transactions", icon: Wallet },
+  { name: "Invoices", href: "/business-actor/invoices", icon: Receipt },
+  { name: "Wallet", href: "/business-actor/wallet", icon: Wallet }, // Portefeuille
+  { name: "Bonus Config", href: "/business-actor/bonus", icon: Star },
+  { name: "Webhooks", href: "/business-actor/webhooks", icon: Bell },
+  { name: "Chat", href: "/business-actor/chat", icon: MessagesSquare },
+  // Add other BA sections from spec...
+  // { name: "Wishlist", href: "/business-actor/wishlist", icon: ShoppingCart },
+  // { name: "Planning", href: "/business-actor/planning", icon: Calendar },
+  // { name: "Posts", href: "/business-actor/posts", icon: Send },
+  // { name: "Reservations", href: "/business-actor/reservations", icon: Calendar }, // Example
+  // { name: "Payments", href: "/business-actor/payments", icon: CreditCard },
+  // { name: "Subscription", href: "/business-actor/subscription", icon: Receipt }, // Example
+  // { name: "Referrals", href: "/business-actor/referrals", icon: Gift },
+  // { name: "Reviews", href: "/business-actor/reviews", icon: Star }, // Example
+];
+
+const customerNavigation = [
+  { name: "Dashboard", href: "/customer/dashboard", icon: Home },
+  { name: "Services", href: "/customer/services", icon: Briefcase }, // Announcements/Reservations
+  { name: "Invoices", href: "/customer/invoices", icon: Receipt },
+  { name: "My Bonus", href: "/customer/bonus", icon: Star },
+  { name: "Favorites", href: "/customer/favorites", icon: Star }, // Example
+  { name: "Invite Friends", href: "/customer/invite", icon: Gift },
+  { name: "Chat", href: "/customer/chat", icon: MessagesSquare },
+  // Add other Customer sections...
+];
+
+const superAdminNavigation = [
+  { name: "Dashboard", href: "/super-admin/dashboard", icon: Home },
+  { name: "Platforms", href: "/super-admin/platforms", icon: Server },
+  { name: "Business Actors", href: "/super-admin/business-actors", icon: Users2 },
+  { name: "Customers", href: "/super-admin/customers", icon: Users },
+  { name: "Webhooks Config", href: "/super-admin/webhooks", icon: Bell },
+  { name: "Bonus Overview", href: "/super-admin/bonus", icon: Star },
+  { name: "Chat", href: "/super-admin/chat", icon: MessagesSquare },
+  // Add other Super Admin sections...
+];
 
 const bottomNavigation = [
+  // Update hrefs to be placeholders, logic will add prefix later
   { name: "Settings", href: "/settings", icon: Settings },
   { name: "Help", href: "/help", icon: HelpCircle },
-]
+  { name: "Logout", href: "/logout", icon: LogOut }, // Logout usually doesn't need prefix
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  // const { settings } = useSettings(); // To get BA name, logo etc.
 
-  const NavItem = ({ item, isBottom = false }) => (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>
-        <Link
-          href={item.href}
-          className={cn(
-            "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            pathname === item.href
-              ? "bg-secondary text-secondary-foreground"
-              : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
-            isCollapsed && "justify-center px-2",
-          )}
-        >
-          <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-          {!isCollapsed && <span>{item.name}</span>}
-        </Link>
-      </TooltipTrigger>
-      {isCollapsed && (
-        <TooltipContent side="right" className="flex items-center gap-4">
-          {item.name}
-        </TooltipContent>
-      )}
-    </Tooltip>
-  )
+  // --- Determine Role and Content ---
+  // This logic needs to be replaced with your actual auth/context system
+  let userRole = 'business-actor'; // Default for example
+  let sidebarTitle = "BA Workspace"; // Default Title
+  let logoSrc = "/logo.svg"; // Default Logo
+  let currentNavigation = baNavigation;
+  let settingsHrefPrefix = "/business-actor";
+
+  if (pathname.startsWith('/customer')) {
+    userRole = 'customer';
+    sidebarTitle = "My Account";
+    // logoSrc = settings.customerLogo || "/default-customer-logo.svg"; // Example dynamic logo
+    currentNavigation = customerNavigation;
+    settingsHrefPrefix = "/customer";
+  } else if (pathname.startsWith('/super-admin')) {
+    userRole = 'super-admin';
+    sidebarTitle = "Platform Admin";
+    // logoSrc = "/admin-logo.svg"; // Example admin logo
+    currentNavigation = superAdminNavigation;
+    settingsHrefPrefix = "/super-admin";
+  } else if (pathname.startsWith('/business-actor')) {
+    // You might get specific BA name/logo from settings context
+    // sidebarTitle = settings.organizationName || "BA Workspace";
+    // logoSrc = settings.organizationLogo || "/logo.svg";
+    currentNavigation = baNavigation; // Already default, but explicit
+    settingsHrefPrefix = "/business-actor";
+  }
+  // --- End Role Determination ---
+
+
+  const NavItem = ({ item, isBottom = false }) => {
+    let href = item.href;
+
+    // Add role prefix to bottom nav items like Settings and Help
+    // Logout typically goes to a generic /logout route
+    if (isBottom && item.name !== "Logout") {
+      // Handle the case where the base settings/help page is shared (/settings)
+      // Or if they are role-specific (/business-actor/settings)
+      // This example assumes role-specific URLs generated from the prefix:
+      href = `${settingsHrefPrefix}${item.href}`;
+    }
+
+    // If you decide settings IS shared at /settings, adjust here:
+    // if (isBottom && (item.name === "Settings" || item.name === "Help")) {
+    //   href = item.href; // Keep it as /settings or /help
+    // } else if (isBottom && item.name !== "Logout") {
+    //   href = `${settingsHrefPrefix}${item.href}`; // Prefix other bottom links if any
+    // }
+
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <Link
+            href={href}
+            className={cn(
+              "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              (pathname === href || (href !== '/' && pathname.startsWith(href)))
+                ? "bg-secondary text-secondary-foreground"
+                : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground",
+              isCollapsed && "justify-center px-2",
+            )}
+            onClick={() => isMobileOpen && setIsMobileOpen(false)} // Close mobile sidebar on nav
+          >
+            <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+            {!isCollapsed && <span>{item.name}</span>}
+          </Link>
+        </TooltipTrigger>
+        {isCollapsed && (
+          <TooltipContent side="right" className="flex items-center gap-4">
+            {item.name}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    );
+  };
 
   return (
     <TooltipProvider>
       <>
-        <button
-          className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background rounded-md shadow-md"
+        {/* Mobile Menu Toggle */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="lg:hidden fixed top-4 left-4 z-50 rounded-md shadow-md" // Use Button for consistency
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           aria-label="Toggle sidebar"
         >
-          <Menu className="h-6 w-6" />
-        </button>
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Sidebar Container */}
         <div
           className={cn(
-            "fixed inset-y-0 z-20 flex flex-col bg-background transition-all duration-300 ease-in-out lg:static",
+            "fixed inset-y-0 left-0 z-40 flex h-full flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen", // Use theme vars, sticky position
             isCollapsed ? "w-[72px]" : "w-72",
-            isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+            isMobileOpen ? "translate-x-0 shadow-xl" : "-translate-x-full lg:translate-x-0", // Add shadow when mobile open
           )}
         >
-          <div className="border-b border-border">
-            <div className={cn("flex h-16 items-center gap-2 px-4", isCollapsed && "justify-center px-2")}>
+          {/* Sidebar Header */}
+          <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-4">
+            <Link
+              href={settingsHrefPrefix + "/dashboard"} // Link logo/title to role's dashboard
+              className={cn("flex items-center gap-2 font-semibold", isCollapsed && "justify-center w-full")}
+              onClick={() => isMobileOpen && setIsMobileOpen(false)} // Close mobile sidebar on click
+            >
+              <Image
+                src={logoSrc} // Dynamic logo source
+                alt={`${sidebarTitle} Logo`}
+                width={32} // Adjust size as needed
+                height={32}
+                className="h-8 w-8 shrink-0" // Tailwind size control
+                priority // Prioritize logo loading
+              />
               {!isCollapsed && (
-                <Link href="/" className="flex items-center font-semibold">
-                  <span className="text-lg">Flowers&Saints</span>
-                </Link>
+                <span className="text-lg truncate">{sidebarTitle}</span> // Dynamic title
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn("ml-auto h-8 w-8", isCollapsed && "ml-0")}
-                onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                <SidebarClose className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
-                <span className="sr-only">{isCollapsed ? "Expand" : "Collapse"} Sidebar</span>
-              </Button>
-            </div>
+            </Link>
+
+            {/* Desktop Collapse Button */}
+            <Button
+              variant="ghost"
+              size="icon" // Use icon size
+              className={cn("ml-auto hidden h-8 w-8 lg:flex", isCollapsed && "ml-0")}
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              <SidebarClose className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+            </Button>
+
+            {/* Mobile Close Button (appears inside header when open) */}
+            <Button
+              variant="ghost"
+              size="icon" // Use icon size
+              className="ml-auto h-8 w-8 lg:hidden"
+              onClick={() => setIsMobileOpen(false)}
+              aria-label="Close Sidebar"
+            >
+              <SidebarClose className="h-4 w-4" />
+            </Button>
           </div>
-          <div className="flex-1 overflow-auto">
+
+          {/* Navigation Area */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <nav className="flex-1 space-y-1 px-2 py-4">
-              {navigation.map((section) => (
-                <div key={section.title} className="pb-4">
-                  {!isCollapsed && (
-                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                      {section.title}
-                    </div>
-                  )}
-                  {section.links.map((item) => (
-                    <NavItem key={item.name} item={item} />
-                  ))}
-                </div>
+              {currentNavigation.map((item) => (
+                <NavItem key={item.name} item={item} />
               ))}
             </nav>
           </div>
-          <div className="border-t border-border p-2">
+
+          {/* Bottom Navigation */}
+          <div className="mt-auto border-t border-sidebar-border p-2">
             <nav className="space-y-1">
               {bottomNavigation.map((item) => (
                 <NavItem key={item.name} item={item} isBottom />
@@ -4025,9 +1364,18 @@ export function Sidebar() {
             </nav>
           </div>
         </div>
+
+        {/* Overlay for mobile */}
+        {isMobileOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            aria-hidden="true"
+            onClick={() => setIsMobileOpen(false)}
+          />
+        )}
       </>
     </TooltipProvider>
-  )
+  );
 }
 // END OF FILE: components/sidebar.tsx
 
@@ -4041,9 +1389,20 @@ export function Sidebar() {
 
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure component only renders after mounting on client
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null // or a placeholder
+  }
 
   return (
     <button
@@ -4054,8 +1413,6 @@ export function ThemeToggle() {
     </button>
   )
 }
-
-
 // END OF FILE: components/theme-toggle.tsx
 
 
@@ -4065,7 +1422,7 @@ export function ThemeToggle() {
 // ===============================================
 
 "use client"
-import { ThemeToggle } from "./theme-toggle"
+import { ThemeToggle } from "./theme-toggle" // Ensure this uses ui/button if sidebar does
 import { Notifications } from "./notifications"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -4079,39 +1436,84 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button" // Use ui/button
 import React from "react"
+import { Home } from "lucide-react"; // Import Home icon
+import { ModeToggle } from "./mode-toggle"
+
+// Helper function to format segment names for display
+function formatBreadcrumbSegment(segment: string): string {
+  if (!segment) return "";
+  // Replace hyphens with spaces and capitalize words
+  return segment
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 export function TopNav() {
-  const pathname = usePathname()
-  const pathSegments = pathname.split("/").filter(Boolean)
-  const { settings } = useSettings()
+  const pathname = usePathname();
+  const { settings } = useSettings();
+
+  // Breadcrumb Logic
+  const pathSegments = pathname.split('/').filter(Boolean);
+
+  // Identify role segment (first segment)
+  const roleSegment = pathSegments.length > 0 ? pathSegments[0] : null;
+  // Filter out the role segment for breadcrumb display
+  const displaySegments = pathSegments.slice(1);
+
+  // Determine home link based on role
+  let homeHref = "/"; // Default fallback
+  if (roleSegment === 'business-actor') {
+    homeHref = '/business-actor/dashboard';
+  } else if (roleSegment === 'customer') {
+    homeHref = '/customer/dashboard';
+  } else if (roleSegment === 'super-admin') {
+    homeHref = '/super-admin/dashboard';
+  }
+
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="hidden md:block">
-          <nav className="flex items-center space-x-2">
-            <Link href="/" className="text-sm font-medium">
-              Home
-            </Link>
-            {pathSegments.map((segment, index) => (
+    <header className="sticky top-0 z-30 border-b border-border bg-background backdrop-blur-sm"> {/* Reduced z-index, added blur */}
+      <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6"> {/* Use container */}
+        {/* Breadcrumbs */}
+        <div className="hidden items-center gap-1 text-sm md:flex">
+          <Link href={homeHref} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+            <Home className="h-4 w-4" />
+            <span className="font-medium">Home</span>
+          </Link>
+          {displaySegments.filter((str, _) => str !== 'dashboard').map((segment, index) => {
+            const href = `/${pathSegments.slice(0, index + 2).join("/")}`; // Build href including role segment
+            const isLast = index === displaySegments.length - 1;
+            return (
               <React.Fragment key={segment}>
                 <span className="text-muted-foreground">/</span>
-                <Link href={`/${pathSegments.slice(0, index + 1).join("/")}`} className="text-sm font-medium">
-                  {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                </Link>
+                {isLast ? (
+                  <span className="font-medium text-foreground">
+                    {formatBreadcrumbSegment(segment)}
+                  </span>
+                ) : (
+                  <Link
+                    href={href}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {formatBreadcrumbSegment(segment)}
+                  </Link>
+                )}
               </React.Fragment>
-            ))}
-          </nav>
+            )
+          })}
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Right Side Actions */}
+        <div className="flex flex-1 items-center justify-end gap-4"> {/* Ensure right alignment */}
           <Notifications />
-          <ThemeToggle />
+          <ModeToggle /> {/* Use mode toggle from ui (check its implementation) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full"> {/* Consistent size */}
+                <Avatar className="h-8 w-8"> {/* Slightly smaller to fit button */}
                   <AvatarImage src={settings.avatar} alt={settings.fullName} />
                   <AvatarFallback>
                     {settings.fullName
@@ -4120,6 +1522,7 @@ export function TopNav() {
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
+                <span className="sr-only">Open user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -4130,13 +1533,18 @@ export function TopNav() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {/* <DropdownMenuItem asChild>
+                 Adjust link based on role if settings is role-specific
+                 <Link href={`${settingsHrefPrefix}/settings`}>Profile</Link>
+               </DropdownMenuItem> */}
               <DropdownMenuItem asChild>
-                <Link href="/settings">Profile</Link>
+                <Link href="/settings">Settings</Link> {/* Assuming one settings page */}
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                {/* Add Logout Logic */}
+                Log out
               </DropdownMenuItem>
-              <DropdownMenuItem>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -4145,134 +1553,7 @@ export function TopNav() {
   )
 }
 
-
 // END OF FILE: components/top-nav.tsx
-
-
-// ===============================================
-// FILE: components/top-up-modal.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/top-up-modal.tsx
-// ===============================================
-
-"use client"
-
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CheckCircle2 } from "lucide-react"
-
-const steps = ["Amount", "Card Details", "OTP Verification", "Confirmation"]
-
-export function TopUpModal({ isOpen, onClose, onTopUp }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [amount, setAmount] = useState("")
-  const [cardDetails, setCardDetails] = useState({ number: "", expiry: "", cvv: "" })
-  const [otp, setOtp] = useState("")
-
-  const handleContinue = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    } else {
-      onTopUp(Number.parseFloat(amount))
-      onClose()
-    }
-  }
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <Label htmlFor="amount">Top-up Amount</Label>
-            <Input
-              id="amount"
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Enter the OTP sent to your registered mobile number</p>
-            <Input placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
-          </div>
-        )
-      case 3:
-        return (
-          <div className="text-center space-y-4">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <p className="text-lg font-medium">Top-up Successful</p>
-            <p className="text-sm text-muted-foreground">${amount} has been added to your account.</p>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{steps[currentStep]}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {renderStepContent()}
-          <div className="flex justify-between">
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
-                Back
-              </Button>
-            )}
-            <Button onClick={handleContinue} className="ml-auto">
-              {currentStep === steps.length - 1 ? "Close" : "Continue"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-
-// END OF FILE: components/top-up-modal.tsx
 
 
 // ===============================================
@@ -5899,100 +3180,6 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
 
 
 // ===============================================
-// FILE: components/upcoming-events.tsx
-// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/upcoming-events.tsx
-// ===============================================
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar, PiggyBank, TrendingUp, CreditCard, ArrowRight } from "lucide-react"
-
-const events = [
-  {
-    id: 1,
-    title: "Emergency Fund",
-    subtitle: "3 months of expenses saved",
-    icon: PiggyBank,
-    status: "In Progress",
-    progress: 65,
-    target: 15000,
-    date: "Dec 2024",
-  },
-  {
-    id: 2,
-    title: "Stock Portfolio",
-    subtitle: "Tech sector investment plan",
-    icon: TrendingUp,
-    status: "Pending",
-    progress: 30,
-    target: 50000,
-    date: "Jun 2024",
-  },
-  {
-    id: 3,
-    title: "Debt Repayment",
-    subtitle: "Student loan payoff plan",
-    icon: CreditCard,
-    status: "In Progress",
-    progress: 45,
-    target: 25000,
-    date: "Mar 2025",
-  },
-]
-
-const statusColors = {
-  Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  "In Progress": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  Completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-}
-
-export function UpcomingEvents() {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Upcoming Events</h2>
-        <Button variant="outline" size="sm">
-          View All <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <Card key={event.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{event.title}</CardTitle>
-              <event.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">{event.subtitle}</p>
-              <div className="mt-2 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className={`px-2 py-1 rounded-full ${statusColors[event.status]}`}>{event.status}</span>
-                  <span className="text-muted-foreground">
-                    <Calendar className="inline mr-1 h-3 w-3" />
-                    {event.date}
-                  </span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-1.5">
-                  <div className="bg-primary h-1.5 rounded-full" style={{ width: `${event.progress}%` }} />
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="font-medium">${event.target.toLocaleString()}</span>
-                  <span className="text-muted-foreground">{event.progress}% complete</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-
-// END OF FILE: components/upcoming-events.tsx
-
-
-// ===============================================
 // FILE: contexts/settings-context.tsx
 // PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/contexts/settings-context.tsx
 // ===============================================
@@ -6328,6 +3515,16 @@ export default config;
 
 
 // ===============================================
+// FILE: public/logo.svg
+// PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/public/logo.svg
+// ===============================================
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+
+// END OF FILE: public/logo.svg
+
+
+// ===============================================
 // FILE: public/next.svg
 // PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/public/next.svg
 // ===============================================
@@ -6426,6 +3623,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 // PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/tailwind.config.js
 // ===============================================
 
+// Import default theme
+const { fontFamily } = require("tailwindcss/defaultTheme") // Import default theme
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -6437,13 +3637,24 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1.5rem", // Adjusted default padding
       screens: {
-        "2xl": "1400px",
+        "2xl": "1440px", // Slightly wider max width
       },
     },
     extend: {
+      fontFamily: {
+        // Set 'sans' to use the Montserrat variable, with fallbacks
+        sans: ["var(--font-montserrat)", ...fontFamily.sans],
+      },
       colors: {
+         // Add sidebar specific colors if not already defined via CSS vars
+         sidebar: {
+           DEFAULT: "hsl(var(--sidebar))",
+           foreground: "hsl(var(--sidebar-foreground))",
+           border: "hsl(var(--sidebar-border))",
+           // ... add others like primary, accent if needed for sidebar theme
+         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -6485,24 +3696,38 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" }, // Use string "0"
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" }, // Use string "0"
         },
+         // Add fade-in-up animation if not using tw-animate-css
+         "fade-in-up": {
+           "0%": {
+             opacity: "0",
+             transform: "translateY(10px)",
+           },
+           "100%": {
+             opacity: "1",
+             transform: "translateY(0)",
+           },
+         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in-up": "fade-in-up 0.5s ease-out forwards", // Add fade-in-up
       },
     },
   },
-  plugins: [require("tw-animate-css")],
+  // Ensure you have the required plugins
+  plugins: [
+      // require("tailwindcss-animate"), // Standard animate plugin
+      // require("tw-animate-css") // Remove if using tailwindcss-animate
+    ],
 }
-
-
 // END OF FILE: tailwind.config.js
 
 

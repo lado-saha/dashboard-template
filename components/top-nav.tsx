@@ -1,27 +1,20 @@
+// FILE: components/top-nav.tsx
 "use client"
-import { ThemeToggle } from "./theme-toggle" // Ensure this uses ui/button if sidebar does
-import { Notifications } from "./notifications"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useSettings } from "@/contexts/settings-context"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button" // Use ui/button
-import React from "react"
-import { Home } from "lucide-react"; // Import Home icon
-import { ModeToggle } from "./mode-toggle"
 
-// Helper function to format segment names for display
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home } from "lucide-react";
+
+import { Notifications } from "./notifications";
+// import { ModeToggle } from "./mode-toggle"; // No longer needed here
+import { UserNav } from "./user-nav";
+import { cn } from "@/lib/utils";
+import { ModeToggle } from "./mode-toggle";
+
+// Helper function (keep as is)
 function formatBreadcrumbSegment(segment: string): string {
   if (!segment) return "";
-  // Replace hyphens with spaces and capitalize words
   return segment
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -30,42 +23,55 @@ function formatBreadcrumbSegment(segment: string): string {
 
 export function TopNav() {
   const pathname = usePathname();
-  const { settings } = useSettings();
 
-  // Breadcrumb Logic
+  // --- Breadcrumb and Role Logic (Keep as is) ---
   const pathSegments = pathname.split('/').filter(Boolean);
-
-  // Identify role segment (first segment)
   const roleSegment = pathSegments.length > 0 ? pathSegments[0] : null;
-  // Filter out the role segment for breadcrumb display
-  const displaySegments = pathSegments.slice(1);
+  const displaySegments = pathSegments.slice(1).filter(segment => segment !== 'dashboard');
 
-  // Determine home link based on role
-  let homeHref = "/"; // Default fallback
+  let homeHref = "/";
+  let settingsHrefPrefix = "/";
+
   if (roleSegment === 'business-actor') {
     homeHref = '/business-actor/dashboard';
+    settingsHrefPrefix = '/business-actor';
   } else if (roleSegment === 'customer') {
     homeHref = '/customer/dashboard';
+    settingsHrefPrefix = '/customer';
   } else if (roleSegment === 'super-admin') {
     homeHref = '/super-admin/dashboard';
+    settingsHrefPrefix = '/super-admin';
   }
+  // --- End Breadcrumb and Role Logic ---
 
+
+  // --- Logout Handler (Keep as is) ---
+  const handleLogout = () => {
+    console.log("Logout action triggered!");
+    alert("Logout functionality not yet implemented.");
+  };
+  // --- End Logout Handler ---
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background backdrop-blur-sm"> {/* Reduced z-index, added blur */}
-      <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-6"> {/* Use container */}
-        {/* Breadcrumbs */}
+    <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+
+        {/* Left Side: Breadcrumbs (Keep as is) */}
         <div className="hidden items-center gap-1 text-sm md:flex">
+          {/* ... breadcrumbs code ... */}
           <Link href={homeHref} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
             <Home className="h-4 w-4" />
-            <span className="font-medium">Home</span>
+            {displaySegments.length === 0 && (
+              <span className="font-medium">Home</span>
+            )}
           </Link>
-          {displaySegments.filter((str, _) => str !== 'dashboard').map((segment, index) => {
-            const href = `/${pathSegments.slice(0, index + 2).join("/")}`; // Build href including role segment
+          {displaySegments.length > 0 && <span className="text-muted-foreground">/</span>}
+          {displaySegments.map((segment, index) => {
+            const currentPathSegments = [roleSegment, ...displaySegments.slice(0, index + 1)].filter(Boolean);
+            const href = `/${currentPathSegments.join("/")}`;
             const isLast = index === displaySegments.length - 1;
             return (
               <React.Fragment key={segment}>
-                <span className="text-muted-foreground">/</span>
                 {isLast ? (
                   <span className="font-medium text-foreground">
                     {formatBreadcrumbSegment(segment)}
@@ -78,54 +84,32 @@ export function TopNav() {
                     {formatBreadcrumbSegment(segment)}
                   </Link>
                 )}
+                {!isLast && <span className="text-muted-foreground">/</span>}
               </React.Fragment>
             )
           })}
         </div>
 
-        {/* Right Side Actions */}
-        <div className="flex flex-1 items-center justify-end gap-4"> {/* Ensure right alignment */}
+        {/* Mobile Placeholder (Keep as is) */}
+        <div className="md:hidden">
+          <span className="text-sm font-medium">
+            {displaySegments.length > 0
+              ? formatBreadcrumbSegment(displaySegments[displaySegments.length - 1])
+              : (roleSegment ? formatBreadcrumbSegment(roleSegment) : "Dashboard")
+            }
+          </span>
+        </div>
+
+        {/* Right Side: Actions */}
+        <div className="flex items-center gap-x-4">
           <Notifications />
-          <ModeToggle /> {/* Use mode toggle from ui (check its implementation) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full"> {/* Consistent size */}
-                <Avatar className="h-8 w-8"> {/* Slightly smaller to fit button */}
-                  <AvatarImage src={settings.avatar} alt={settings.fullName} />
-                  <AvatarFallback>
-                    {settings.fullName
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="sr-only">Open user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{settings.fullName}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{settings.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {/* <DropdownMenuItem asChild>
-                 Adjust link based on role if settings is role-specific
-                 <Link href={`${settingsHrefPrefix}/settings`}>Profile</Link>
-               </DropdownMenuItem> */}
-              <DropdownMenuItem asChild>
-                <Link href="/settings">Settings</Link> {/* Assuming one settings page */}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                {/* Add Logout Logic */}
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ModeToggle />
+          <UserNav
+            settingsHrefPrefix={settingsHrefPrefix}
+            onLogout={handleLogout}
+          />
         </div>
       </div>
     </header>
-  )
+  );
 }
