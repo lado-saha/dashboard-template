@@ -1,50 +1,49 @@
-// FILE: app/layout.tsx
-import "./globals.css";
+import "./globals.css"; // Ensure globals are imported first
 import { Inter } from "next/font/google";
 import type React from "react";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner" // Import Sonner Toaster for notifications
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/mode-toggle";
-// No longer need headers here
-// import { headers } from 'next/headers';
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Metadata remains the same
 export const metadata = {
   title: "Dashboard Template",
   description: "A modern, adaptable responsive dashboard",
 };
 
-// No longer needs to be async
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // const headersList = headers();
-  // const pathnameHeader = headersList.get('x-pathname') || headersList.get('pathname');
-  // const pathname = pathnameHeader || '/';
-  // const noDashboardLayoutPaths = ["/", "/login", "/signup", "/forgot-password"];
-  // const isNoDashboardPath = noDashboardLayoutPaths.some(path => pathname === path);
-  // const showDashboardLayout = !isNoDashboardPath;
-
   return (
+    // Add 'dark' class handling for ThemeProvider
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      {/* Apply base font and ensure full height */}
+      <body className={`${inter.className} antialiased min-h-screen flex flex-col`}>
+        {/* SessionProvider wraps everything needing session access */}
         <SessionProvider>
+          {/* ThemeProvider enables light/dark/system themes */}
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {/* SettingsProvider manages user display preferences */}
             <SettingsProvider>
+              {/* TooltipProvider enables tooltips across the app */}
               <TooltipProvider delayDuration={0}>
-                <div className="relative min-h-screen">
-                  {/* Always visible Theme Toggle */}
-                  <div className="fixed top-4 right-4 z-50">
-                    <ModeToggle />
-                    {/* <LanguageSwitcher /> */}
+                 {/* Main container */}
+                <div className="relative flex-1">
+                   {/* ModeToggle positioned globally */}
+                   <div className="fixed top-4 right-4 z-50 print:hidden"> {/* Hide toggle when printing */}
+                    {/* <ModeToggle /> */}
                   </div>
 
-                  {/* Children will be the landing page, auth pages, OR the dashboard layout */}
-                  {/* No conditional rendering here anymore */}
+                  {/* Render the active page content */}
                   {children}
-
                 </div>
+
+                {/* Sonner Toaster for displaying brief notifications */}
+                 <Toaster position="top-right" richColors closeButton />
               </TooltipProvider>
             </SettingsProvider>
           </ThemeProvider>
