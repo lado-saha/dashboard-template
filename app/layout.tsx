@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="relative flex-1">
                    {/* ModeToggle positioned globally */}
                    <div className="fixed top-4 right-4 z-50 print:hidden"> {/* Hide toggle when printing */}
-                    {/* <ModeToggle /> */}
+                    <ModeToggle />
                   </div>
 
                   {/* Render the active page content */}
