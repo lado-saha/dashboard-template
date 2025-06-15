@@ -1,0 +1,393 @@
+// types/resourceManagement.ts
+import { Timestamps, Auditable } from "@/types/organization"; // Assuming Timestamps, Auditable are in organization.ts
+
+// --- General ---
+export type ProductAccessibility = "PUBLIC" | "PRIVATE";
+export type ProductPackagingType = "KG" | "CARTON" | "PIECE" | "METER";
+export type ProductStateType = "AVAILABLE" | "UNAVAILABLE" | "RESERVED" | "SOLD"; // From Resource/Service DTOs
+export type ProductPostStatusType = "AVAILABLE" | "UNAVAILABLE"; // From ProductPostDto
+export type ProductTypeType = "TANGIBLE" | "INTANGIBLE"; // Differentiates physical vs digital/service aspects
+
+
+// --- Resources & Services (Core Product Definitions) ---
+interface BaseProductRequest {
+  brand_id?: string; // uuid
+  immatriculation?: string;
+  serial_number?: string;
+  sku_code?: string;
+  bar_code?: string;
+  qr_code?: string;
+  name?: string;
+  short_description?: string;
+  long_description?: string;
+  storage_condition?: string;
+  model_id?: string; // uuid
+  iot_number?: string;
+  available_quantity?: number; // int32
+  product_type?: ProductTypeType;
+  base_price?: number;
+  accessibility?: ProductAccessibility;
+  organisation_id?: string; // uuid (Note: spec uses 'organisation_id')
+  default_agency_id?: string; // uuid
+  sell_packaging?: ProductPackagingType;
+  purchase_packaging?: ProductPackagingType;
+  category_id?: string; // uuid
+  number_usage?: number; // int32
+  transferable?: boolean;
+  state?: ProductStateType; // This state seems specific to this service's view of product
+  max_reservation?: number; // int32
+  is_tangible?: boolean;
+  expires_at?: string; // date-time
+}
+
+export interface CreateResourceRequest extends BaseProductRequest {
+  product_compositions?: CreateProductCompositionRequest[];
+}
+export interface UpdateResourceRequest extends Partial<CreateResourceRequest> { }
+
+export interface CreateServiceRequest extends BaseProductRequest { }
+export interface UpdateServiceRequest extends Partial<CreateServiceRequest> { }
+
+
+interface BaseProductDto extends Auditable {
+  brand_id?: string; // uuid
+  immatriculation?: string;
+  serial_number?: string;
+  sku_code?: string;
+  bar_code?: string;
+  qr_code?: string;
+  name?: string;
+  short_description?: string;
+  long_description?: string;
+  storage_condition?: string;
+  model_id?: string; // uuid
+  category_id?: string; // uuid
+  iot_number?: string;
+  available_quantity?: number; // int32
+  product_type?: ProductTypeType;
+  base_price?: number;
+  accessibility?: ProductAccessibility;
+  organisation_id?: string; // uuid
+  default_agency_id?: string; // uuid
+  sell_product_id?: string; // uuid (sell_packaging in request, sell_product_id in DTO?) - CLARIFY
+  purchase_unit_id?: string; // uuid (purchase_packaging in request, purchase_unit_id in DTO?) - CLARIFY
+  parent_id?: string; // uuid
+  number_usage?: number; // int32
+  transferable?: boolean;
+  state?: ProductStateType;
+  max_reservation?: number; // int32
+  is_tangible?: boolean;
+  expires_at?: string | null; // date-time
+  // organization_id also appears at the end of DTO in spec, might be redundant or context specific.
+}
+
+export interface ResourceDto extends BaseProductDto {
+  resource_id?: string; // uuid
+  // product_compositions are in request but not DTO in spec
+}
+
+export interface ServiceDto extends BaseProductDto {
+  service_id?: string; // uuid
+}
+
+export interface CreateProductCompositionRequest {
+  id?: string; // uuid (optional in create)
+  label?: string;
+  value_range?: string;
+  comment?: string;
+}
+// No ProductCompositionDto in spec
+
+
+// --- Product Posts ---
+export interface CreateProductPostRequest {
+  // createdAt, updatedAt, deletedAt typically not in create requests
+  marchand_id?: string; // uuid
+  variation_id?: string; // uuid
+  product_id?: string; // uuid (Resource or Service ID it's posting)
+  category_id?: string; // uuid
+  name?: string; // Often derived from product, but can be overridden for the post
+  long_description?: string;
+  short_description?: string;
+  sale_unit_id?: string; // uuid (references UnitDto)
+  base_price?: number; // Can be different from product's base_price
+  weight?: number;
+  default_currency?: string; // e.g., "USD"
+  next_available_time?: string; // date-time
+  life_span?: number; // int32 (e.g., days for a perishable item post)
+  quantity?: number; // int32 (quantity specifically for this post/listing)
+  status?: ProductPostStatusType;
+  expired_at?: string; // date-time
+  brand_id?: string; // uuid
+  immatriculation?: string;
+  model_id?: string; // uuid
+  // organisation_id is path param for create, not in body
+  default_agency_id?: string; // uuid
+  default_price?: number; // Might be final price after variations/options for this post
+  alert_quantity?: number; // int32
+  is_tax_exempt_for_com_transactions?: boolean;
+}
+export interface UpdateProductPostRequest extends Partial<Omit<CreateProductPostRequest, 'product_id' | 'marchand_id'>> {
+  // Some fields might be immutable on update
+  id?: string; // uuid for the ProductPost itself
+}
+
+export interface ProductPostDto { // Properties seem same as Create request + timestamps
+  id?: string; // uuid of the ProductPost
+  createdAt?: string; // date-time
+  updatedAt?: string; // date-time
+  deletedAt?: string | null; // date-time
+  marchand_id?: string;
+  variation_id?: string;
+  product_id?: string;
+  category_id?: string;
+  name?: string;
+  long_description?: string;
+  short_description?: string;
+  sale_unit_id?: string;
+  base_price?: number;
+  weight?: number;
+  default_currency?: string;
+  next_available_time?: string | null;
+  life_span?: number;
+  quantity?: number;
+  status?: ProductPostStatusType;
+  expired_at?: string | null;
+  brand_id?: string;
+  immatriculation?: string;
+  model_id?: string;
+  organisation_id?: string; // Present in DTO
+  default_agency_id?: string;
+  default_price?: number;
+  alert_quantity?: number;
+  is_tax_exempt_for_com_transactions?: boolean;
+}
+
+// --- Variations ---
+export interface CreateVariationRequest { // Based on spec, seems to take full set of fields
+  name?: string;
+  default_purchase_price?: number; // double
+  default_purchase_price_in_tax?: number; // double
+  default_sell_price?: number; // double
+  default_sell_price_in_tax?: number; // double
+  profit_percent?: number; // double
+  //Timestamps in create request is unusual, usually set by backend.
+  createdAt?: string; // date-time
+  updatedAt?: string; // date-time
+  deletedAt?: string | null; // date-time
+}
+export interface UpdateVariationRequest extends CreateVariationRequest { } // Full update seems to be the case
+
+export interface VariationRequest { // For saveVariations array
+  vairation_id?: string; // uuid (Typo in spec: 'vairation_id') - assuming it means existing ID for update
+  name?: string;
+  default_purchase_price?: number;
+  default_purchase_price_in_tax?: number;
+  default_sell_price?: number;
+  default_sell_price_in_tax?: number;
+  profit_percent?: number;
+  // Timestamps here too
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface VariationDto {
+  id?: string; // uuid
+  product_id?: string; // uuid
+  name?: string;
+  default_purchase_price?: number;
+  default_purchase_price_in_tax?: number;
+  default_sell_price?: number;
+  default_sell_price_in_tax?: number;
+  profit_percent?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+// --- Sale Prices ---
+export type SalePriceType = "RETAIL" | "WHOLESALE" | "SEMI_WHOLESALE" | "SUPER_WHOLESALE" | "DELIVERY" | "PURCHASE" | "OTHER_PRICE";
+export interface CreateSalePriceRequest {
+  // product_post_id is path param
+  sale_price_type?: SalePriceType;
+  min_quantity?: number; // int32
+  max_quantity?: number; // int32
+  value?: number;
+  max_reduction?: number;
+  currency?: string; // e.g. "USD"
+  is_negociable?: boolean;
+  validity_date?: string; // date-time
+  notes?: string;
+}
+export interface UpdateSalePriceRequest extends Partial<CreateSalePriceRequest> {
+  product_post_id?: string; // uuid (included in spec for update, though it's a path param)
+}
+export interface SalePriceDto extends Auditable {
+  id?: string; // uuid
+  product_post_id?: string; // uuid
+  sale_price_type?: SalePriceType;
+  min_quantity?: number;
+  max_quantity?: number;
+  value?: number;
+  max_reduction?: number;
+  currency?: string;
+  is_negociable?: boolean;
+  validity_date?: string | null; // date-time
+  notes?: string;
+}
+
+// --- Units (Pricing Mode) ---
+export interface CreateUnitRequest {
+  base_unit_id?: string | null; // uuid (can be null for a base unit itself)
+  actual_name?: string;
+  short_name?: string;
+  base_unit_multiplier?: number; // float
+  allow_decimal?: boolean;
+}
+export interface UpdateUnitRequest extends Partial<CreateUnitRequest> { }
+export interface UnitDto extends Auditable {
+  id?: string; // uuid
+  organization_id?: string; // uuid
+  base_unit_id?: string | null; // uuid
+  actual_name?: string;
+  short_name?: string;
+  base_unit_multiplier?: number;
+  allow_decimal?: boolean;
+}
+
+// --- Categories, Brands, Models, Attributes ---
+export type CategoryState = "AVAILABLE" | "UNAVAILABLE";
+export interface CreateCategoryRequest {
+  name?: string;
+  description?: string;
+  owner_id?: string; // uuid (likely organization_id or user_id)
+  image_icon_id?: string; // uuid
+  parent_id?: string | null; // uuid
+  short_code?: string;
+  state?: CategoryState;
+}
+export interface UpdateCategoryRequest extends Partial<CreateCategoryRequest> { }
+export interface CategoryDto extends Auditable {
+  id?: string; // uuid
+  name?: string;
+  description?: string;
+  short_code?: string;
+  owner_id?: string; // uuid
+  image_icon_id?: string; // uuid
+  parent_id?: string | null; // uuid
+  root?: boolean;
+  state?: CategoryState;
+}
+export interface CreateCategoryResponse extends Auditable { // Matches DTO structure but with sub_categories
+  id?: string;
+  name?: string;
+  description?: string;
+  short_code?: string;
+  state?: CategoryState;
+  sub_categories?: CategoryDto[];
+}
+
+
+export interface CreateProductBrandRequest {
+  name?: string;
+  description?: string;
+  code?: string;
+  image_id?: string; // uuid
+  created_by_user_id?: string; // uuid
+  notes?: string;
+}
+export interface UpdateProductBrandRequest extends Partial<CreateProductBrandRequest> { }
+export interface ProductBrandDto extends Auditable {
+  id?: string; // uuid
+  name?: string;
+  description?: string;
+  code?: string;
+  image_id?: string; // uuid
+  created_by_user_id?: string; // uuid
+  notes?: string;
+}
+
+export interface CreateModelRequest { // Timestamps in request is odd
+  created_by_user_id?: string; // uuid
+  name?: string;
+  description?: string;
+}
+export interface UpdateModelRequest extends Partial<Omit<CreateModelRequest, 'created_by_user_id'>> { }
+export interface ModelDto extends Auditable { // Based on UpdateModelResponse and common DTO patterns
+  id?: string; // uuid
+  created_by_user_id?: string; // uuid
+  name?: string;
+  description?: string;
+}
+// UpdateModelResponse in spec is same as ModelDto
+
+
+export interface CreateAttributeRequest {
+  name?: string;
+  description?: string;
+}
+export interface UpdateAttributeRequest extends Partial<CreateAttributeRequest> { }
+export interface AttributeDto extends Auditable { // Based on UpdateAttributeResponse and common DTO patterns
+  id?: string; // uuid
+  name?: string;
+  description?: string;
+}
+// UpdateAttributeResponse in spec is same as AttributeDto
+
+export interface AttributeValueDto extends Auditable {
+  id?: string; // uuid
+  product_id?: string; // uuid
+  attribut_id?: string; // uuid (Typo in spec: 'attribut_id')
+  value?: string;
+}
+// AttributeValueResponse in spec is same as AttributeValueDto
+
+
+// --- Reviews & Reactions ---
+export type ReactionType = "LIKE" | "LOVE" | "HAHA" | "WOW" | "SAD" | "ANGRY" | "CELEBRATE";
+export interface CreateReviewRequest {
+  user_id?: string; // uuid
+  targe_id?: string; // uuid (Typo in spec: 'targe_id') -> target_id
+  rating?: number; // int32
+  comment?: string;
+}
+export interface UpdateReviewRequest {
+  rating?: number; // int32
+  comment?: string;
+}
+export interface ReviewDto extends Auditable {
+  id?: string; // uuid
+  user_id?: string; // uuid
+  targe_id?: string; // uuid -> target_id
+  rating?: number; // int32
+  comment?: string;
+}
+
+export interface CreateReactionRequest {
+  target_id?: string; // uuid
+  user_id?: string; // uuid
+  reaction_type?: ReactionType;
+}
+export interface ReactionDto extends Auditable {
+  id?: string; // uuid
+  target_id?: string; // uuid
+  user_id?: string; // uuid
+  reaction_type?: ReactionType;
+}
+
+// --- Media ---
+export interface MediaDto { // From spec
+  id?: string; // uuid
+  target_id?: string; // uuid
+  name?: string; // Original filename
+  real_name?: string; // Stored filename (often a UUID or hash)
+  size?: number; // int64
+  file_type?: string; // MIME type
+  is_primary?: boolean;
+  // Timestamps from spec for MediaDto are unusual (createdAt etc.)
+  createdAt?: string; // date-time
+  updatedAt?: string; // date-time
+  deletedAt?: string | null; // date-time
+}
+export interface MediaResponse extends MediaDto { } // As per spec for POST /media/add/product/{productId}

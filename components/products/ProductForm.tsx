@@ -17,9 +17,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, Loader2, ClockIcon, Settings2Icon } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
@@ -27,15 +46,22 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ProductFormProps {
-  initialData?: Partial<Omit<ProductFormData, 'scheduledAt'> & { id?: string; scheduledAt?: string | Date }>;
+  initialData?: Partial<
+    Omit<ProductFormData, "scheduledAt"> & {
+      id?: string;
+      scheduledAt?: string | Date;
+    }
+  >;
   onFormSubmitSuccess?: (data: any) => void;
   mode?: "create" | "edit";
 }
 
-const parseInitialScheduledAt = (scheduledAt?: string | Date): Date | undefined => {
+const parseInitialScheduledAt = (
+  scheduledAt?: string | Date
+): Date | undefined => {
   if (!scheduledAt) return undefined;
   if (scheduledAt instanceof Date && isValid(scheduledAt)) return scheduledAt;
-  if (typeof scheduledAt === 'string') {
+  if (typeof scheduledAt === "string") {
     const parsedDate = parseISO(scheduledAt);
     if (isValid(parsedDate)) return parsedDate;
   }
@@ -49,8 +75,12 @@ export function ProductForm({
 }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   // Local state for conditional rendering, but primary source of truth for submission is form state
-  const [enableScheduling, setEnableScheduling] = useState(initialData?.isScheduled || false);
-  const [enableCustomAction, setEnableCustomAction] = useState(initialData?.isCustomAction || false);
+  const [enableScheduling, setEnableScheduling] = useState(
+    initialData?.isScheduled || false
+  );
+  const [enableCustomAction, setEnableCustomAction] = useState(
+    initialData?.isCustomAction || false
+  );
 
   const formSchema = fullProductFormSchema;
 
@@ -73,7 +103,9 @@ export function ProductForm({
 
   useEffect(() => {
     const defaultVals = {
-      productType: initialData?.productType || (mode === "create" ? "SERVICE" : watchedProductType),
+      productType:
+        initialData?.productType ||
+        (mode === "create" ? "SERVICE" : watchedProductType),
       name: initialData?.name || "",
       description: initialData?.description || "",
       basePrice: initialData?.basePrice || undefined,
@@ -86,7 +118,6 @@ export function ProductForm({
 
     setEnableScheduling(initialData?.isScheduled || false);
     setEnableCustomAction(initialData?.isCustomAction || false);
-
   }, [initialData, mode, form.reset, watchedProductType]); // Use watchedProductType from form
 
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
@@ -96,10 +127,11 @@ export function ProductForm({
       setIsLoading(false);
       return;
     }
-    if (!data.productType) { // Should be caught by Zod, but good to have a check
-        toast.error("Product type is required.");
-        setIsLoading(false);
-        return;
+    if (!data.productType) {
+      // Should be caught by Zod, but good to have a check
+      toast.error("Product type is required.");
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -113,8 +145,10 @@ export function ProductForm({
       payload.isScheduled = data.isScheduled || false; // Ensure boolean
       if (data.isScheduled && data.scheduledAt && isValid(data.scheduledAt)) {
         payload.scheduledAt = data.scheduledAt.toISOString();
-      } else if (data.isScheduled && !data.scheduledAt){
-        toast.error("Scheduled date is missing for a scheduled action."); setIsLoading(false); return;
+      } else if (data.isScheduled && !data.scheduledAt) {
+        toast.error("Scheduled date is missing for a scheduled action.");
+        setIsLoading(false);
+        return;
       } else {
         delete payload.scheduledAt;
       }
@@ -123,7 +157,9 @@ export function ProductForm({
       if (data.isCustomAction && data.customActionQuery) {
         payload.customActionQuery = data.customActionQuery;
       } else if (data.isCustomAction && !data.customActionQuery) {
-        toast.error("Custom query is missing for a custom action."); setIsLoading(false); return;
+        toast.error("Custom query is missing for a custom action.");
+        setIsLoading(false);
+        return;
       } else {
         delete payload.customActionQuery;
       }
@@ -133,46 +169,76 @@ export function ProductForm({
 
       if (data.productType === "RESOURCE") {
         if (mode === "create") {
-          response = data.isScheduled ? await resourceApi.scheduleCreate(payload) : await resourceApi.create(payload);
+          response = data.isScheduled
+            ? await resourceApi.scheduleCreate(payload)
+            : await resourceApi.create(payload);
         } else {
           response = data.isScheduled
-            ? await resourceApi.scheduleUpdate({ ...payload, id: initialData!.id })
+            ? await resourceApi.scheduleUpdate({
+                ...payload,
+                id: initialData!.id,
+              })
             : await resourceApi.update(initialData!.id!, payload);
         }
       } else if (data.productType === "SERVICE") {
-         if (mode === "create") {
-          response = data.isScheduled ? await serviceApi.scheduleCreate(payload) : await serviceApi.create(payload);
+        if (mode === "create") {
+          response = data.isScheduled
+            ? await serviceApi.scheduleCreate(payload)
+            : await serviceApi.create(payload);
         } else {
           response = data.isScheduled
-            ? await serviceApi.scheduleUpdate({ ...payload, id: initialData!.id })
+            ? await serviceApi.scheduleUpdate({
+                ...payload,
+                id: initialData!.id,
+              })
             : await serviceApi.update(initialData!.id!, payload);
         }
       }
       // No else needed here because of the check at the start of onSubmit
 
-      toast.success(`Product ${mode === "create" ? "created" : "updated"} successfully!`);
+      toast.success(
+        `Product ${mode === "create" ? "created" : "updated"} successfully!`
+      );
       if (onFormSubmitSuccess) onFormSubmitSuccess(response);
       if (mode === "create") {
-        form.reset({ // Reset to a truly blank state for create mode
-            productType: undefined, name: "", description: "", basePrice: undefined,
-            isScheduled: false, scheduledAt: undefined,
-            isCustomAction: false, customActionQuery: ""
+        form.reset({
+          // Reset to a truly blank state for create mode
+          productType: undefined,
+          name: "",
+          description: "",
+          basePrice: undefined,
+          isScheduled: false,
+          scheduledAt: undefined,
+          isCustomAction: false,
+          customActionQuery: "",
         });
         // setSelectedProductType(undefined); // This is now driven by watchedProductType
         setEnableScheduling(false);
         setEnableCustomAction(false);
       }
-    } catch (error: any) { console.error("Form submission error:", error);
-    } finally { setIsLoading(false); }
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-lg">
       <CardHeader>
-        <CardTitle className="text-xl sm:text-2xl">{mode === "create" ? "Create New Product/Service" : `Edit ${watchedProductType?.toLowerCase() || "Item"}`}</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">
+          {mode === "create"
+            ? "Create New Product/Service"
+            : `Edit ${watchedProductType?.toLowerCase() || "Item"}`}
+        </CardTitle>
         <CardDescription>
-          Provide the necessary details for your {watchedProductType ? watchedProductType.toLowerCase() : "item"}.
-          {mode === "edit" && initialData?.id && <span className="block text-xs mt-1 text-muted-foreground">Editing ID: {initialData.id}</span>}
+          Provide the necessary details for your{" "}
+          {watchedProductType ? watchedProductType.toLowerCase() : "item"}.
+          {mode === "edit" && initialData?.id && (
+            <span className="block text-xs mt-1 text-muted-foreground">
+              Editing ID: {initialData.id}
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -185,7 +251,9 @@ export function ProductForm({
                 name="productType"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-sm font-semibold">Item Type <span className="text-destructive">*</span></FormLabel>
+                    <FormLabel className="text-sm font-semibold">
+                      Item Type <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={(value) => {
@@ -200,12 +268,26 @@ export function ProductForm({
                         className="flex gap-4"
                       >
                         <FormItem className="flex items-center space-x-2">
-                          <FormControl><RadioGroupItem value="RESOURCE" disabled={mode === "edit"} /></FormControl>
-                          <FormLabel className="font-normal text-sm">Resource</FormLabel>
+                          <FormControl>
+                            <RadioGroupItem
+                              value="RESOURCE"
+                              disabled={mode === "edit"}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal text-sm">
+                            Resource
+                          </FormLabel>
                         </FormItem>
                         <FormItem className="flex items-center space-x-2">
-                          <FormControl><RadioGroupItem value="SERVICE" disabled={mode === "edit"} /></FormControl>
-                          <FormLabel className="font-normal text-sm">Service</FormLabel>
+                          <FormControl>
+                            <RadioGroupItem
+                              value="SERVICE"
+                              disabled={mode === "edit"}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal text-sm">
+                            Service
+                          </FormLabel>
                         </FormItem>
                       </RadioGroup>
                     </FormControl>
@@ -221,28 +303,62 @@ export function ProductForm({
                     name="name"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel>Name <span className="text-destructive">*</span></FormLabel>
-                        <FormControl><Input placeholder={`${watchedProductType === "RESOURCE" ? "Resource" : "Service"} name`} {...field} /></FormControl>
+                        <FormLabel>
+                          Name <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={`${
+                              watchedProductType === "RESOURCE"
+                                ? "Resource"
+                                : "Service"
+                            } name`}
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField /* ... description ... */
-                    control={form.control} name="description"
+                    control={form.control}
+                    name="description"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
                         <FormLabel>Description</FormLabel>
-                        <FormControl><Textarea placeholder="Provide a detailed description..." {...field} rows={3} /></FormControl>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Provide a detailed description..."
+                            {...field}
+                            rows={3}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField /* ... basePrice ... */
-                    control={form.control} name="basePrice"
+                    control={form.control}
+                    name="basePrice"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Base Price (USD)</FormLabel>
-                        <FormControl><Input type="number" placeholder="0.00" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} value={field.value ?? ""} step="0.01" /></FormControl>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === ""
+                                  ? undefined
+                                  : parseFloat(e.target.value)
+                              )
+                            }
+                            value={field.value ?? ""}
+                            step="0.01"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -255,115 +371,217 @@ export function ProductForm({
               <>
                 {/* Section 2: Scheduling Options */}
                 <div className="space-y-4 p-4 border rounded-md bg-background/50">
-                    {/* ... Scheduling FormField for isScheduled ... */}
-                    <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                            <FormLabel className="text-base font-semibold flex items-center"><ClockIcon className="mr-2 h-5 w-5 text-primary"/>Scheduling Options</FormLabel>
-                            <FormDescription className="text-xs">
-                                Configure if this operation should occur at a future time.
-                            </FormDescription>
-                        </div>
-                        <FormField control={form.control} name="isScheduled" render={({ field }) => (
-                            <FormControl>
-                                <Switch
-                                    checked={field.value || false}
-                                    onCheckedChange={(checked) => {
-                                    field.onChange(checked); setEnableScheduling(checked);
-                                    if (!checked) form.setValue("scheduledAt", undefined, { shouldValidate: true });
-                                    }}
-                                    aria-labelledby="scheduling-label"
-                                />
-                            </FormControl>
-                        )}/>
+                  {/* ... Scheduling FormField for isScheduled ... */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-semibold flex items-center">
+                        <ClockIcon className="mr-2 h-5 w-5 text-primary" />
+                        Scheduling Options
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        Configure if this operation should occur at a future
+                        time.
+                      </FormDescription>
                     </div>
-                    {enableScheduling && ( /* ... FormField for scheduledAt ... */
-                      <div className="pt-2 pl-1">
-                        <FormField
-                            control={form.control} name="scheduledAt"
-                            render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel className="text-sm mb-1">Scheduled Date & Time <span className="text-destructive">*</span></FormLabel>
-                                <Popover>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal h-10", !field.value && "text-muted-foreground")}>
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {field.value && isValid(field.value) ? format(field.value, "PPP HH:mm") : <span>Pick a date and time</span>}
-                                    </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                        mode="single" selected={field.value}
-                                        onSelect={(date) => { /* ... onSelect logic ... */
-                                            const newDate = date || new Date(); const currentTime = field.value && isValid(field.value) ? field.value : new Date();
-                                            newDate.setHours(currentTime.getHours()); newDate.setMinutes(currentTime.getMinutes()); newDate.setSeconds(0,0);
-                                            field.onChange(newDate);
-                                        }}
-                                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} initialFocus
-                                    />
-                                    <div className="p-2 border-t"><Input type="time"
-                                        defaultValue={field.value && isValid(field.value) ? format(field.value, "HH:mm") : ""}
-                                        onChange={(e) => { /* ... time input onChange logic ... */
-                                            const time = e.target.value; const currentDate = field.value && isValid(field.value) ? new Date(field.value) : new Date();
-                                            if (time) { const [hours, minutes] = time.split(':').map(Number); currentDate.setHours(hours, minutes, 0, 0); field.onChange(currentDate); }
-                                        }}
-                                        className="w-full h-9" />
-                                    </div>
-                                </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                      </div>
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="isScheduled"
+                      render={({ field }) => (
+                        <FormControl>
+                          <Switch
+                            checked={field.value || false}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              setEnableScheduling(checked);
+                              if (!checked)
+                                form.setValue("scheduledAt", undefined, {
+                                  shouldValidate: true,
+                                });
+                            }}
+                            aria-labelledby="scheduling-label"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+                  {enableScheduling /* ... FormField for scheduledAt ... */ && (
+                    <div className="pt-2 pl-1">
+                      <FormField
+                        control={form.control}
+                        name="scheduledAt"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="text-sm mb-1">
+                              Scheduled Date & Time{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full justify-start text-left font-normal h-10",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {field.value && isValid(field.value) ? (
+                                      format(field.value, "PPP HH:mm")
+                                    ) : (
+                                      <span>Pick a date and time</span>
+                                    )}
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                    /* ... onSelect logic ... */
+                                    const newDate = date || new Date();
+                                    const currentTime =
+                                      field.value && isValid(field.value)
+                                        ? field.value
+                                        : new Date();
+                                    newDate.setHours(currentTime.getHours());
+                                    newDate.setMinutes(
+                                      currentTime.getMinutes()
+                                    );
+                                    newDate.setSeconds(0, 0);
+                                    field.onChange(newDate);
+                                  }}
+                                  disabled={(date) =>
+                                    date <
+                                    new Date(new Date().setHours(0, 0, 0, 0))
+                                  }
+                                  initialFocus
+                                />
+                                <div className="p-2 border-t">
+                                  <Input
+                                    type="time"
+                                    defaultValue={
+                                      field.value && isValid(field.value)
+                                        ? format(field.value, "HH:mm")
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      /* ... time input onChange logic ... */
+                                      const time = e.target.value;
+                                      const currentDate =
+                                        field.value && isValid(field.value)
+                                          ? new Date(field.value)
+                                          : new Date();
+                                      if (time) {
+                                        const [hours, minutes] = time
+                                          .split(":")
+                                          .map(Number);
+                                        currentDate.setHours(
+                                          hours,
+                                          minutes,
+                                          0,
+                                          0
+                                        );
+                                        field.onChange(currentDate);
+                                      }
+                                    }}
+                                    className="w-full h-9"
+                                  />
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Section 3: Custom Action */}
                 <div className="space-y-4 p-4 border rounded-md bg-background/50">
-                    {/* ... Custom Action FormField for isCustomAction ... */}
-                     <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                            <FormLabel className="text-base font-semibold flex items-center"><Settings2Icon className="mr-2 h-5 w-5 text-primary"/>Advanced: Custom Action</FormLabel>
-                            <FormDescription className="text-xs"> For specific backend operations requiring a custom query. </FormDescription>
-                        </div>
-                        <FormField control={form.control} name="isCustomAction" render={({ field }) => (
-                            <FormControl>
-                                <Switch
-                                    checked={field.value || false}
-                                    onCheckedChange={(checked) => {
-                                    field.onChange(checked); setEnableCustomAction(checked);
-                                    if (!checked) form.setValue("customActionQuery", "", { shouldValidate: true });
-                                    }}
-                                />
-                            </FormControl>
-                        )}/>
+                  {/* ... Custom Action FormField for isCustomAction ... */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-semibold flex items-center">
+                        <Settings2Icon className="mr-2 h-5 w-5 text-primary" />
+                        Advanced: Custom Action
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        {" "}
+                        For specific backend operations requiring a custom
+                        query.{" "}
+                      </FormDescription>
                     </div>
-                    {enableCustomAction && ( /* ... FormField for customActionQuery ... */
-                      <div className="pt-2 pl-1">
-                        <FormField
-                            control={form.control} name="customActionQuery"
-                            render={({ field }) => (
-                            <FormItem>
-                          
-                                <FormLabel className="text-sm">Custom Action Query <span className="text-destructive">*</span></FormLabel>
-                                <FormControl><Input  placeholder="e.g., {'action': 'applyDiscount', 'rate': 0.1}" {...field} value={field.value ?? ""} /></FormControl>
-                                <FormDescription className="text-xs">Enter JSON or string query for the custom action.</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                      </div>
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="isCustomAction"
+                      render={({ field }) => (
+                        <FormControl>
+                          <Switch
+                            checked={field.value || false}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              setEnableCustomAction(checked);
+                              if (!checked)
+                                form.setValue("customActionQuery", "", {
+                                  shouldValidate: true,
+                                });
+                            }}
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+                  {enableCustomAction /* ... FormField for customActionQuery ... */ && (
+                    <div className="pt-2 pl-1">
+                      <FormField
+                        control={form.control}
+                        name="customActionQuery"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">
+                              Custom Action Query{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., {'action': 'applyDiscount', 'rate': 0.1}"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-xs">
+                              Enter JSON or string query for the custom action.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
               </>
             )}
           </CardContent>
           <CardFooter className="border-t px-4 sm:px-6 py-4">
-            <Button type="submit" disabled={isLoading || !watchedProductType} className="w-full sm:w-auto ml-auto"> {/* Use watchedProductType */}
+            <Button
+              type="submit"
+              disabled={isLoading || !watchedProductType}
+              className="w-full sm:w-auto ml-auto"
+            >
+              {" "}
+              {/* Use watchedProductType */}
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? "Processing..." : (mode === "create" ? `Create ${watchedProductType?.toLocaleLowerCase() || "Item"}` : "Save Changes")}
+              {isLoading
+                ? "Processing..."
+                : mode === "create"
+                ? `Create ${watchedProductType?.toLocaleLowerCase() || "Item"}`
+                : "Save Changes"}
             </Button>
           </CardFooter>
         </form>
