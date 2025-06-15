@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ProductListItemData } from "@/types/product";
+import { ProductListItemData } from "@/lib/types/product";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";

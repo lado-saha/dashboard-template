@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation"; // Use for orgId from URL
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { ProductListItemData } from "@/types/product"; // Assuming this type is suitable for ResourceDto/ServiceDto list items
+import { ProductListItemData } from "@/lib/types/product"; // Assuming this type is suitable for ResourceDto/ServiceDto list items
 import {
   ProductFormData,
   fullProductFormSchema,
@@ -64,7 +64,7 @@ import {
   CreateServiceRequest,
   UpdateResourceRequest,
   UpdateServiceRequest,
-} from "@/types/resourceManagement";
+} from "@/lib/types/resourceManagement";
 import {
   Card,
   CardContent,

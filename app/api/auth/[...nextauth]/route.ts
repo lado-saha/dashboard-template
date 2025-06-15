@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authApi } from "@/lib/apiClient"; // Import your authApi
-import { AuthRequest, LoginResponse, UserInfo } from "@/types/auth"; // Import DTOs
+import { AuthRequest, LoginResponse, UserInfo } from "@/lib/types/auth"; // Import DTOs
 
 // Extend NextAuthUser to include properties from your API's UserInfo and LoginResponse
 interface ExtendedUser extends Omit<NextAuthUser, 'id' | 'name' | 'email'> { // Omit to redefine or ensure our types take precedence if needed

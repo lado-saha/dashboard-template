@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { OrganizationDto } from "@/types/organization";
+import { OrganizationDto } from "@/lib/types/organization";
 import {
   Card,
   CardContent,

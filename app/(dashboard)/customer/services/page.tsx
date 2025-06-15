@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { ProductListItemData } from "@/types/product";
+import { ProductListItemData } from "@/lib/types/product";
 import { CustomerProductCard } from "@/components/customer/CustomerProductCard";
 import { getCustomerProductColumns } from "@/components/customer/columns";
 import { CustomerProductDataTableToolbar } from "@/components/customer/CustomerProductDataTableToolbar";

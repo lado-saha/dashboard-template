@@ -3,7 +3,7 @@
 import { Table } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ProductListItemData } from "@/types/product";
+import { ProductListItemData } from "@/lib/types/product";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -23,7 +23,7 @@ import {
   InfoIcon, // For generic states
 } from "lucide-react";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
-import { DataTableFilterOption } from "@/types/table";
+import { DataTableFilterOption } from "@/lib/types/table";
 import { cn } from "@/lib/utils";
 
 export const customerProductTypeOptions: DataTableFilterOption[] = [

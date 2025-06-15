@@ -9,7 +9,7 @@ import {
   UpdateContactRequest,
   ContactDto,
   ContactableType,
-} from "@/types/organization";
+} from "@/lib/types/organization";
 import { organizationApi } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

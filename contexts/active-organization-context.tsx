@@ -8,7 +8,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { OrganizationDto, OrganizationTableRow } from "@/types/organization";
+import { OrganizationDto, OrganizationTableRow } from "@/lib/types/organization";
 import { organizationApi } from "@/lib/apiClient";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ProductListItemData } from "@/types/product";
+import { ProductListItemData } from "@/lib/types/product";
 import { ProductCard } from "./ProductCard"; // Assuming ProductCard is in the same directory
 import { ProductRowActionsProps } from "./columns"; // For action handlers consistency
 import { Loader2, AlertTriangle, Inbox } from "lucide-react";

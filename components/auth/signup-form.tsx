@@ -19,7 +19,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { authApi } from "@/lib/apiClient";
-import { CreateUserRequest } from "@/types/auth";
+import { CreateUserRequest } from "@/lib/types/auth";
 import { toast } from "sonner";
 
 // Schema based on CreateUserRequest from OpenAPI spec

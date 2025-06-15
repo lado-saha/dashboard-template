@@ -1,16 +1,16 @@
 import { getSession } from "next-auth/react";
 import { toast } from "sonner";
-import { AuthRequest, CreateUserRequest, LoginResponse, UserDto, UserInfo } from "@/types/auth";
+import { AuthRequest, CreateUserRequest, LoginResponse, UserDto, UserInfo } from "@/lib/types/auth";
 import {
   CreateOrganizationRequest, OrganizationDto, OrganizationTableRow, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
   AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest,
   // Add other DTOs from types/organization.ts as you implement their API calls
-} from "@/types/organization";
+} from "@/lib/types/organization";
 import {
   CreateResourceRequest, ResourceDto, UpdateResourceRequest,
   CreateServiceRequest, ServiceDto, UpdateServiceRequest,
   // Add other DTOs from types/resourceManagement.ts as you implement their API calls
-} from "@/types/resourceManagement";
+} from "@/lib/types/resourceManagement";
 
 // Import Mock Data
 import {

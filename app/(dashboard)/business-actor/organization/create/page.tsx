@@ -4,7 +4,7 @@ import React from "react";
 import { OrganizationForm } from "@/components/organization/organization-form";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { useRouter } from "next/navigation";
-import { OrganizationDto } from "@/types/organization"; // For the callback
+import { OrganizationDto } from "@/lib/types/organization"; // For the callback
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
