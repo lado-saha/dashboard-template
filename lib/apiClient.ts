@@ -1,41 +1,34 @@
 import { getSession } from "next-auth/react";
 import { toast } from "sonner";
-import { AuthRequest, CreateUserRequest, LoginResponse, UserDto, UserInfo } from "@/lib/types/auth";
+import {
+  AuthRequest, CreateUserRequest, LoginResponse, UserDto, UserInfo,
+  RoleDto, CreateRoleRequest, UpdateRoleRequest,
+  PermissionDto, CreatePermissionRequest, UpdatePermissionRequest,
+  RolePermissionDto, RbacResource, ApiResponseBoolean
+} from "@/types/auth";
 import {
   CreateOrganizationRequest, OrganizationDto, OrganizationTableRow, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
-  AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest,
-  // Add other DTOs from types/organization.ts as you implement their API calls
-} from "@/lib/types/organization";
+  AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest
+} from "@/types/organization";
 import {
   CreateResourceRequest, ResourceDto, UpdateResourceRequest,
   CreateServiceRequest, ServiceDto, UpdateServiceRequest,
-  // Add other DTOs from types/resourceManagement.ts as you implement their API calls
-} from "@/lib/types/resourceManagement";
-
-// Import Mock Data
-import {
-  mockUserOrganizations,
-  mockOrganizationDetails,
-  mockOrgAddresses,
-  mockOrgContacts,
-  mockAvailableBusinessDomains,
-  // Import other mock data arrays as you create them
-} from "@/lib/mock-data/organization-mocks";
+} from "@/types/resourceManagement";
 
 
 interface ApiErrorResponse {
   timestamp?: string; status?: number; error?: string; message?: string; path?: string; errors?: Record<string, string>;
 }
 
-// --- Base URLs ---
-const AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/auth-service";
-const ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_ORGANIZATION_SERVICE_BASE_URL || "http://localhost:8080/organization-service";
-const RESOURCE_API_BASE_URL = process.env.NEXT_PUBLIC_RESOURCE_SERVICE_BASE_URL || "http://localhost:8080/resource-service";
-const PRODUCT_STATE_API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCT_SERVICE_BASE_URL || "http://localhost:8080/product-management-service"; // Original Product Mgmt for states
+const YOWYOB_AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL; // Defined in .env.local
+const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_ORGANIZATION_SERVICE_BASE_URL;
+const YOWYOB_RESOURCE_API_BASE_URL = process.env.NEXT_PUBLIC_RESOURCE_SERVICE_BASE_URL;
+const YOWYOB_PRODUCT_STATE_API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCT_SERVICE_BASE_URL;
 
 const AUTH_SERVICE_CLIENT_ID = process.env.NEXT_PUBLIC_AUTH_SERVICE_CLIENT_ID;
 const AUTH_SERVICE_CLIENT_SECRET = process.env.NEXT_PUBLIC_AUTH_SERVICE_CLIENT_SECRET;
 let CLIENT_BASIC_AUTH_TOKEN: string | null = null;
+
 if (AUTH_SERVICE_CLIENT_ID && AUTH_SERVICE_CLIENT_SECRET) {
   if (typeof window !== "undefined") {
     CLIENT_BASIC_AUTH_TOKEN = `Basic ${btoa(`${AUTH_SERVICE_CLIENT_ID}:${AUTH_SERVICE_CLIENT_SECRET}`)}`;
@@ -44,153 +37,34 @@ if (AUTH_SERVICE_CLIENT_ID && AUTH_SERVICE_CLIENT_SECRET) {
   }
 }
 
-async function getAuthToken(): Promise<string | null> {
+async function getUserBearerToken(): Promise<string | null> {
   const session = await getSession();
   return (session as any)?.accessToken || null;
 }
 
-interface RequestOptions extends RequestInit {
+interface YowyobRequestOptions extends RequestInit {
   isFormData?: boolean;
   useClientBasicAuth?: boolean;
-  // customBaseUrl is now handled by the 'service' parameter in combinedApiRequest
 }
 
-// --- MOCK API REQUEST LOGIC ---
-const USE_MOCK_API = true; // Global toggle for using mock API
-
-async function mockApiRequest<T = any>(
+export async function yowyobApiRequest<T = any>(
+  serviceBaseUrl: string | undefined,
   endpoint: string,
-  options: RequestOptions = {},
-  isUserAuthAction: boolean = false, // Kept for consistency, though less critical for pure mock
-  service: 'auth' | 'organization' | 'resource' | 'product_state'
+  options: YowyobRequestOptions = {},
+  isUserAuthAction: boolean = false
 ): Promise<T> {
-  const method = options.method || "GET";
-  const body = options.body ? JSON.parse(options.body as string) : null;
-  console.log(`MOCK API Request to ${service} service: ${method} ${endpoint}`, body);
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 300 + 100)); // Shorter mock delay
-
-  if (service === 'auth') {
-    if (endpoint === "/api/register" && method === "POST") {
-      const data = body as CreateUserRequest;
-      const newUser: UserDto = { id: `user-mock-${Date.now()}`, username: data.username, first_name: data.first_name, last_name: data.last_name, email: data.email, is_enabled: true, email_verified: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      return newUser as T;
-    }
-    if (endpoint === "/api/login" && method === "POST") {
-      const data = body as AuthRequest;
-      // Simple mock login, doesn't actually check password for this mock
-      if (data.username) {
-        const response: LoginResponse = {
-          access_token: { token: `mock-jwt-${data.username}-${Date.now()}`, type: "Bearer", expire_in: 3600000 },
-          user: { id: `user-mock-${data.username}`, username: data.username, first_name: data.username?.split('@')[0] || "Mock", last_name: "User", email: `${data.username}`, email_verified: true },
-          roles: ["BUSINESS_ACTOR_ROLE", "GENERAL_USER_ROLE"],
-          permissions: ["org:read", "org:create", "product:read", "product:manage"]
-        };
-        return response as T;
-      }
-      const error = new Error("Mock: Invalid username or password") as any; error.status = 401; throw error;
-    }
-    if (endpoint === "/api/user" && method === "GET") {
-      const session = await getSession(); // Check if there's a mock session
-      if (session && (session.user as any)?.username) {
-        const extendedUser = session.user as UserInfo; // Or your ExtendedUser type from NextAuth
-        return {
-          id: (extendedUser as any).id || "mock-current-user-id",
-          username: extendedUser.username,
-          first_name: extendedUser.first_name,
-          last_name: extendedUser.last_name,
-          email: extendedUser.email,
-          email_verified: true,
-        } as T;
-      }
-      const error = new Error("Mock: Not authenticated") as any; error.status = 401; throw error;
-    }
+  if (!serviceBaseUrl) {
+    console.error("Service base URL is not configured for remote API call. Endpoint:", endpoint, "Options:", options);
+    toast.error("API service is not configured properly.");
+    throw new Error("Service base URL is not configured.");
   }
 
-  if (service === 'organization') {
-    if (endpoint === "/organizations/user" && method === "GET") return mockUserOrganizations as T;
-    if (endpoint.startsWith("/organizations/") && !endpoint.includes("/status") && !endpoint.includes("/contacts") && !endpoint.includes("/addresses") && !endpoint.includes("/domains") && method === "GET") {
-      const orgId = endpoint.substring("/organizations/".length);
-      const orgDetail = mockOrganizationDetails[orgId];
-      if (orgDetail) return orgDetail as T;
-      const error = new Error("Organization not found in mock") as any; error.status = 404; throw error;
-    }
-    if (endpoint === "/organizations" && method === "POST") {
-      const data = body as CreateOrganizationRequest;
-      const newOrgId = `org-mock-${Date.now()}`;
-      const newOrg: OrganizationDto = { ...data, organization_id: newOrgId, status: "PENDING_APPROVAL", is_active: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      mockUserOrganizations.push(newOrg as OrganizationTableRow);
-      mockOrganizationDetails[newOrgId] = newOrg;
-      return newOrg as T;
-    }
-    if (endpoint.startsWith("/organizations/") && !endpoint.includes("/status") && method === "PUT") {
-      const orgId = endpoint.substring("/organizations/".length);
-      const data = body as UpdateOrganizationRequest;
-      if (mockOrganizationDetails[orgId]) {
-        mockOrganizationDetails[orgId] = { ...mockOrganizationDetails[orgId], ...data, updated_at: new Date().toISOString() };
-        const orgIndex = mockUserOrganizations.findIndex(o => o.organization_id === orgId);
-        if (orgIndex > -1) mockUserOrganizations[orgIndex] = { ...mockUserOrganizations[orgIndex], ...data, short_name: data.short_name || mockUserOrganizations[orgIndex].short_name, long_name: data.long_name || mockUserOrganizations[orgIndex].long_name }
-        return mockOrganizationDetails[orgId] as T;
-      }
-      const error = new Error("Mock: Organization not found for update") as any; error.status = 404; throw error;
-    }
-    if (endpoint.startsWith("/organizations/") && endpoint.endsWith("/status") && method === "PUT") {
-      const orgId = endpoint.substring("/organizations/".length).replace("/status", "");
-      const data = body as UpdateOrganizationStatusRequest;
-      if (mockOrganizationDetails[orgId]) {
-        mockOrganizationDetails[orgId].status = data.status;
-        mockOrganizationDetails[orgId].is_active = data.status === "ACTIVE";
-        mockOrganizationDetails[orgId].updated_at = new Date().toISOString();
-        const orgIndex = mockUserOrganizations.findIndex(o => o.organization_id === orgId);
-        if (orgIndex > -1) mockUserOrganizations[orgIndex].status = data.status;
-        return mockOrganizationDetails[orgId] as T;
-      }
-      const error = new Error("Mock: Organization not found for status update") as any; error.status = 404; throw error;
-    }
-    if (endpoint.match(/\/(ORGANIZATION|AGENCY)\/([^/]+)\/addresses$/) && method === "GET") {
-      const parts = endpoint.match(/\/(ORGANIZATION|AGENCY)\/([^/]+)\/addresses$/);
-      const addressableId = parts![2]; // orgId or agencyId
-      return (mockOrgAddresses[addressableId] || []) as T;
-    }
-    if (endpoint.match(/\/(ORGANIZATION|AGENCY)\/([^/]+)\/contacts$/) && method === "GET") {
-      const parts = endpoint.match(/\/(ORGANIZATION|AGENCY)\/([^/]+)\/contacts$/);
-      const contactableId = parts![2];
-      return (mockOrgContacts[contactableId] || []) as T;
-    }
-    if (endpoint === "/business-domains" && method === "GET") {
-      return mockAvailableBusinessDomains as T;
-    }
-    // Add more mock handlers for organization service here
-  }
-
-  if (service === 'resource') {
-    // Add mock handlers for resource management service here
-    if (endpoint.match(/\/(.+)\/resources$/) && method === "GET") { // e.g. /org-id/resources
-      return [] as T; // Return empty array for now
-    }
-    if (endpoint.match(/\/(.+)\/services$/) && method === "GET") { // e.g. /org-id/services
-      return [] as T;
-    }
-  }
-
-  if (service === 'product_state') {
-    // Add mock handlers for product state management service here
-  }
-
-  console.warn(`MOCK API: Unhandled endpoint ${service} ${method} ${endpoint}`);
-  if (method !== "GET") return { success: true, message: `Mocked ${method} to ${endpoint}` } as T;
-  return {} as T; // Default empty for unmocked GET
-}
-
-// --- REAL API REQUEST LOGIC (from previous version) ---
-async function realApiRequest<T = any>(
-  endpoint: string,
-  options: RequestOptions = {},
-  isUserAuthAction: boolean = false,
-  service: 'auth' | 'organization' | 'resource' | 'product_state'
-): Promise<T> {
   let userAccessToken: string | null = null;
   if (!isUserAuthAction && !options.useClientBasicAuth) {
-    userAccessToken = await getAuthToken();
+    userAccessToken = await getUserBearerToken();
+    if (!userAccessToken && endpoint !== "/api/login" && endpoint !== "/api/register") { // Allow unauth for login/register itself
+      console.warn(`No user access token for Yowyob API ${serviceBaseUrl}${endpoint}. Request might fail if auth is required.`);
+    }
   }
 
   const headers: HeadersInit = { ...(options.isFormData ? {} : { "Content-Type": "application/json" }), ...options.headers };
@@ -200,22 +74,10 @@ async function realApiRequest<T = any>(
   } else if (userAccessToken) {
     (headers as Record<string, string>)["Authorization"] = `Bearer ${userAccessToken}`;
   } else if (options.useClientBasicAuth && !CLIENT_BASIC_AUTH_TOKEN) {
-    console.error("Client basic auth requested but token not configured.");
-    // Potentially throw an error or handle this as a critical configuration issue.
-    // For now, the request will proceed without Authorization if this condition is met.
+    console.error("Client basic auth requested but token is not configured for Yowyob API.");
   }
 
-  let baseUrl = "";
-  switch (service) {
-    case 'auth': baseUrl = AUTH_API_BASE_URL; break;
-    case 'organization': baseUrl = ORGANIZATION_API_BASE_URL; break;
-    case 'resource': baseUrl = RESOURCE_API_BASE_URL; break;
-    case 'product_state': baseUrl = PRODUCT_STATE_API_BASE_URL; break;
-    default: throw new Error("Invalid service specified for API request.");
-  }
-  // options.customBaseUrl is removed as 'service' parameter now dictates the base URL.
-
-  const fullUrl = `${baseUrl}${endpoint}`;
+  const fullUrl = `${serviceBaseUrl}${endpoint}`;
   const config: RequestInit = { ...options, headers };
 
   try {
@@ -227,11 +89,9 @@ async function realApiRequest<T = any>(
         errorData = await response.json();
         errorMessage = errorData?.message || errorMessage;
         if (errorData?.errors) errorMessage += ` (${Object.values(errorData.errors).join(', ')})`;
-      } catch (e) { /* ignore if response is not JSON */ }
-      console.error(`API Error: ${errorMessage} for ${fullUrl}`, { data: errorData, options: config });
-      if (!(isUserAuthAction && (response.status === 401 || response.status === 403))) {
-        toast.error(errorMessage);
-      }
+      } catch (e) { /* ignore */ }
+      console.error(`YOWYOB API Error: ${errorMessage} for ${fullUrl}`, { data: errorData, options: config });
+      if (!(isUserAuthAction && (response.status === 401 || response.status === 403))) toast.error(errorMessage);
       const error = new Error(errorMessage) as any;
       error.status = response.status; error.data = errorData;
       throw error;
@@ -239,54 +99,74 @@ async function realApiRequest<T = any>(
     if (response.status === 204 || response.headers.get("content-length") === "0") return null as T;
     return (await response.json()) as T;
   } catch (error: any) {
-    if (!error.status && !(error instanceof SyntaxError)) { // Avoid logging SyntaxError from failed .json() parse twice
-      console.error("Network or unhandled API error:", error);
-      if (!isUserAuthAction) { // Avoid double toasting if NextAuth handles it for login/register
-        toast.error("Network error or server unreachable.");
-      }
+    if (!error.status && !(error instanceof SyntaxError)) {
+      console.error("Network or unhandled Yowyob API error:", error);
+      if (!isUserAuthAction) toast.error("Network error or Yowyob server unreachable.");
     }
     throw error;
   }
 }
 
-// Combined request function
-const combinedApiRequest = USE_MOCK_API ? mockApiRequest : realApiRequest;
+export const yowyobAuthApi = {
+  // User Management
+  register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
+  getAllUsers: () => yowyobApiRequest<UserDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/users", { method: "GET" }),
+  getUserByUsername: (username: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/username/${username}`, { method: "GET" }),
+  getUserByPhoneNumber: (phoneNumber: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/phone-number/${phoneNumber}`, { method: "GET" }),
+  getUserByEmail: (email: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/email/${email}`, { method: "GET" }),
 
-// --- EXPORTED API OBJECTS ---
-export const authApi = {
-  register: (data: CreateUserRequest) => combinedApiRequest<UserDto>("/api/register", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true, 'auth'),
-  login: (data: AuthRequest) => combinedApiRequest<LoginResponse>("/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true, 'auth'),
-  getCurrentUser: () => combinedApiRequest<UserInfo>("/api/user", { method: "GET" }, false, 'auth'),
+  // Login & Session
+  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
+  getCurrentUser: () => yowyobApiRequest<UserInfo>(YOWYOB_AUTH_API_BASE_URL, "/api/user", { method: "GET" }),
+
+  // Role Management
+  getRoles: () => yowyobApiRequest<RoleDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "GET" }),
+  createRole: (data: CreateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "POST", body: JSON.stringify(data) }),
+  updateRole: (roleId: string, data: UpdateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "PUT", body: JSON.stringify(data) }),
+  deleteRole: (roleId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "DELETE" }),
+
+  // Permission Management
+  getAllPermissions: () => yowyobApiRequest<PermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "GET" }),
+  getPermissionById: (permissionId: string) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "GET" }),
+  createPermission: (data: CreatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "POST", body: JSON.stringify(data) }),
+  updatePermission: (permissionId: string, data: UpdatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "PUT", body: JSON.stringify(data) }),
+  deletePermission: (permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "DELETE" }),
+
+  // Role-Permission Assignments
+  assignPermissionsToRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<RolePermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "POST", body: JSON.stringify(permissionIds) }),
+  removePermissionsFromRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "DELETE", body: JSON.stringify(permissionIds) }),
+  assignPermissionToRole: (roleId: string, permissionId: string) => yowyobApiRequest<RolePermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "POST" }),
+  removePermissionFromRole: (roleId: string, permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "DELETE" }),
+
+  // RBAC Resource
+  createRbacResource: (data: RbacResource) => yowyobApiRequest<ApiResponseBoolean>(YOWYOB_AUTH_API_BASE_URL, "/api/resources/save", { method: "POST", body: JSON.stringify(data) }),
+
+  // Roles Hierarchy
+  getRolesHierarchy: () => yowyobApiRequest<string>(YOWYOB_AUTH_API_BASE_URL, "/api/roles/hierarchy", { method: "GET" }),
 };
 
-export const organizationApi = {
-  getMyOrganizations: () => combinedApiRequest<OrganizationTableRow[]>("/organizations/user", { method: "GET" }, false, 'organization'),
-  getOrganizationById: (orgId: string) => combinedApiRequest<OrganizationDto>(`/organizations/${orgId}`, { method: "GET" }, false, 'organization'),
-  createOrganization: (data: CreateOrganizationRequest) => combinedApiRequest<OrganizationDto>("/organizations", { method: "POST", body: JSON.stringify(data) }, false, 'organization'),
-  updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => combinedApiRequest<OrganizationDto>(`/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data) }, false, 'organization'),
-  updateOrganizationStatus: (orgId: string, data: UpdateOrganizationStatusRequest) => combinedApiRequest<OrganizationDto>(`/organizations/${orgId}/status`, { method: "PUT", body: JSON.stringify(data) }, false, 'organization'),
-  getAddresses: (addressableType: AddressableType, addressableId: string) => combinedApiRequest<AddressDto[]>(`/${addressableType}/${addressableId}/addresses`, { method: "GET" }, false, 'organization'),
-  createAddress: (addressableType: AddressableType, addressableId: string, data: CreateAddressRequest) => combinedApiRequest<AddressDto>(`/${addressableType}/${addressableId}/addresses`, { method: "POST", body: JSON.stringify(data) }, false, 'organization'),
-  getContacts: (contactableType: ContactableType, contactableId: string) => combinedApiRequest<ContactDto[]>(`/${contactableType}/${contactableId}/contacts`, { method: "GET" }, false, 'organization'),
-  createContact: (contactableType: ContactableType, contactableId: string, data: CreateContactRequest) => combinedApiRequest<ContactDto>(`/${contactableType}/${contactableId}/contacts`, { method: "POST", body: JSON.stringify(data) }, false, 'organization'),
+export const yowyobOrganizationApi = {
+  getMyOrganizations: () => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user", { method: "GET" }, false),
+  getOrganizationById: (orgId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "GET" }, false),
+  createOrganization: (data: CreateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "POST", body: JSON.stringify(data) }, false),
+  updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data) }, false),
+  updateOrganizationStatus: (orgId: string, data: UpdateOrganizationStatusRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/status`, { method: "PUT", body: JSON.stringify(data) }, false),
+  getAddresses: (addressableType: AddressableType, addressableId: string) => yowyobApiRequest<AddressDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`, { method: "GET" }, false),
+  createAddress: (addressableType: AddressableType, addressableId: string, data: CreateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`, { method: "POST", body: JSON.stringify(data) }, false),
+  getContacts: (contactableType: ContactableType, contactableId: string) => yowyobApiRequest<ContactDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`, { method: "GET" }, false),
+  createContact: (contactableType: ContactableType, contactableId: string, data: CreateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`, { method: "POST", body: JSON.stringify(data) }, false),
   getAllBusinessDomains: (params?: GetBusinessDomainRequest) => {
-    // For GET requests with query params, they need to be stringified if using fetch directly.
-    // Or, use URLSearchParams. For mock, we can ignore params for now.
     const queryParams = params ? `?${new URLSearchParams(params as any).toString()}` : "";
-    return combinedApiRequest<BusinessDomainDto[]>(`/business-domains${queryParams}`, { method: "GET" }, false, 'organization');
+    return yowyobApiRequest<BusinessDomainDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains${queryParams}`, { method: "GET" }, false);
   },
-  // ... Add other organizationApi functions here, calling combinedApiRequest with service: 'organization'
 };
-
-export const resourceManagementApi = {
-  getResources: (orgId: string) => combinedApiRequest<ResourceDto[]>(`/${orgId}/resources`, { method: "GET" }, false, 'resource'),
-  createResource: (orgId: string, data: CreateResourceRequest) => combinedApiRequest<ResourceDto>(`/${orgId}/resources`, { method: "POST", body: JSON.stringify(data) }, false, 'resource'),
-  getServices: (orgId: string) => combinedApiRequest<ServiceDto[]>(`/${orgId}/services`, { method: "GET" }, false, 'resource'),
-  createService: (orgId: string, data: CreateServiceRequest) => combinedApiRequest<ServiceDto>(`/${orgId}/services`, { method: "POST", body: JSON.stringify(data) }, false, 'resource'),
-  // ... Add other resourceManagementApi functions here, calling combinedApiRequest with service: 'resource'
+export const yowyobResourceManagementApi = {
+  getResources: (orgId: string) => yowyobApiRequest<ResourceDto[]>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/resources`, { method: "GET" }, false),
+  createResource: (orgId: string, data: CreateResourceRequest) => yowyobApiRequest<ResourceDto>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/resources`, { method: "POST", body: JSON.stringify(data) }, false),
+  getServices: (orgId: string) => yowyobApiRequest<ServiceDto[]>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/services`, { method: "GET" }, false),
+  createService: (orgId: string, data: CreateServiceRequest) => yowyobApiRequest<ServiceDto>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/services`, { method: "POST", body: JSON.stringify(data) }, false),
 };
-
-export const productStateApi = {
-  updateResourceState: (resourceId: string, data: { currentState: string }) => combinedApiRequest(`/api/resource/${resourceId}`, { method: "PUT", body: JSON.stringify(data) }, false, 'product_state'),
-  updateServiceState: (serviceId: string, data: { currentState: string }) => combinedApiRequest(`/api/service/${serviceId}`, { method: "PUT", body: JSON.stringify(data) }, false, 'product_state'),
+export const yowyobProductStateApi = {
+  updateResourceState: (resourceId: string, data: { currentState: string }) => yowyobApiRequest(YOWYOB_PRODUCT_STATE_API_BASE_URL, `/api/resource/${resourceId}`, { method: "PUT", body: JSON.stringify(data) }, false),
+  updateServiceState: (serviceId: string, data: { currentState: string }) => yowyobApiRequest(YOWYOB_PRODUCT_STATE_API_BASE_URL, `/api/service/${serviceId}`, { method: "PUT", body: JSON.stringify(data) }, false),
 };

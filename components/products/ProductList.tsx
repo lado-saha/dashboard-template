@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { ProductListItemData } from "@/lib/types/product";
+import { ProductListItemData } from "@/types/product";
 import { getProductColumns, ProductRowActionsProps } from "./columns";
 import { DataTable } from "@/components/ui/data-table";
 

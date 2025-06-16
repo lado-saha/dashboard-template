@@ -30,7 +30,7 @@ import { ContactList } from "@/components/organization/contact-list"; // To be c
 import {
   OrganizationDto,
   UpdateOrganizationStatusRequest,
-} from "@/lib/types/organization";
+} from "@/types/organization";
 import { toast } from "sonner";
 import { organizationApi } from "@/lib/apiClient";
 import {

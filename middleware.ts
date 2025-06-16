@@ -41,7 +41,7 @@ export const config = {
      * - login, signup, forgot-password (auth pages)
      * - The root landing page '/'
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|signup|forgot-password|$).*)", // Protects everything else including dashboard routes
+    "/((?!api|_next/static|_next/image|favicon.ico|login|auth|signup|data|forgot-password|$).*)", // Protects everything else including dashboard routes
     // Or be more specific:
     // "/business-actor/:path*",
     // "/customer/:path*",

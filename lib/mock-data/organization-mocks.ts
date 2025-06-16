@@ -18,7 +18,7 @@ import {
   OrganizationStatus,
   OrganizationLegalForm,
   EmployeeRole
-} from '@/lib/types/organization'; // Assuming all types are correctly defined here
+} from '@/types/organization'; // Assuming all types are correctly defined here
 
 const placeholderImageUrl = "/placeholder.svg";
 

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react";
-import { authApi } from "@/lib/apiClient";
-import { CreateUserRequest } from "@/lib/types/auth";
+import { authRepository } from "@/lib/data-repo/auth";
+import { CreateUserRequest } from "@/types/auth";
 import { toast } from "sonner";
 
 // Schema based on CreateUserRequest from OpenAPI spec
@@ -77,25 +77,22 @@ export const SignUpForm = () => {
   const onSubmit: SubmitHandler<SignUpFormValues> = (values) => {
     setError(null);
     setSuccess(null);
-
     startTransition(async () => {
       try {
         const requestPayload: CreateUserRequest = {
           username: values.username,
           password: values.password,
           first_name: values.first_name,
-          // Only include optional fields if they have a value
           ...(values.email && { email: values.email }),
           ...(values.last_name && { last_name: values.last_name }),
           ...(values.phone_number && { phone_number: values.phone_number }),
         };
 
-        const registeredUser = await authApi.register(requestPayload);
-        console.log("Registered User:", registeredUser); // For debugging
+        const registeredUser = await authRepository.register(requestPayload);
         toast.success(
           `Account for ${registeredUser.username} created! Redirecting to login...`
         );
-        setSuccess(`Account created successfully! Please proceed to login.`); // For UI feedback before redirect
+        setSuccess(`Account created successfully! Please proceed to login.`);
 
         setTimeout(() => {
           router.push("/login");

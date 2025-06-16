@@ -1,5 +1,5 @@
 // types/resourceManagement.ts
-import { Timestamps, Auditable } from "@/lib/types/organization"; // Assuming Timestamps, Auditable are in organization.ts
+import { Timestamps, Auditable } from "@/types/organization"; // Assuming Timestamps, Auditable are in organization.ts
 
 // --- General ---
 export type ProductAccessibility = "PUBLIC" | "PRIVATE";

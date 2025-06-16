@@ -20,7 +20,7 @@ import {
   AlertTriangle,
   Briefcase,
 } from "lucide-react";
-import { OrganizationTableRow } from "@/lib/types/organization";
+import { OrganizationTableRow } from "@/types/organization";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";

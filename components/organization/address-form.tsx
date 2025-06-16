@@ -9,7 +9,7 @@ import {
   UpdateAddressRequest,
   AddressDto,
   AddressableType,
-} from "@/lib/types/organization";
+} from "@/types/organization";
 import { organizationApi } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

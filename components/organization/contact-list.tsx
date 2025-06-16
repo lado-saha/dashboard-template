@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { ContactDto, ContactableType } from "@/lib/types/organization";
+import { ContactDto, ContactableType } from "@/types/organization";
 import { organizationApi } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import {
