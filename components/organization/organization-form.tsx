@@ -11,7 +11,7 @@ import {
   OrganizationLegalForm,
   BusinessDomainDto,
 } from "@/types/organization"; // Assuming types are defined
-import { organizationApi } from "@/lib/apiClient"; // Assuming API client is set up
+// import { organizationApi } from "@/lib/apiClient"; // Assuming API client is set up
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

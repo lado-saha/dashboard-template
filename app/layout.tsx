@@ -1,49 +1,47 @@
 import "./globals.css"; // Ensure globals are imported first
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google"; // Change here
 import type React from "react";
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner" // Import Sonner Toaster for notifications
+import { Toaster } from "@/components/ui/sonner"; // Sonner Toaster for notifications
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 
-const inter = Inter({ subsets: ["latin"] });
+// Initialize Montserrat font (adjust subsets and weights as needed)
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap", // Optional but recommended
+  variable: "--font-montserrat", // Optional: if using CSS variable
+});
 
-// Metadata remains the same
 export const metadata = {
-  title: "Dashboard Template",
+  title: "YowYob Dashboard",
   description: "A modern, adaptable responsive dashboard",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    // Add 'dark' class handling for ThemeProvider
     <html lang="en" suppressHydrationWarning>
-      {/* Apply base font and ensure full height */}
-      <body className={`${inter.className} antialiased min-h-screen flex flex-col`}>
-        {/* SessionProvider wraps everything needing session access */}
+      <body
+        className={`${montserrat.className} antialiased min-h-screen flex flex-col`}
+      >
         <SessionProvider>
-          {/* ThemeProvider enables light/dark/system themes */}
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {/* SettingsProvider manages user display preferences */}
             <SettingsProvider>
-              {/* TooltipProvider enables tooltips across the app */}
               <TooltipProvider delayDuration={0}>
-                 {/* Main container */}
                 <div className="relative flex-1">
-                   {/* ModeToggle positioned globally */}
-                   <div className="fixed top-4 right-4 z-50 print:hidden"> {/* Hide toggle when printing */}
-                    <ModeToggle />
+                  <div className="fixed top-4 right-4 z-50 print:hidden">
+                    {/* <ModeToggle /> */}
                   </div>
-
-                  {/* Render the active page content */}
                   {children}
                 </div>
-
-                {/* Sonner Toaster for displaying brief notifications */}
-                 <Toaster position="top-right" richColors closeButton />
+                <Toaster position="top-right" richColors closeButton />
               </TooltipProvider>
             </SettingsProvider>
           </ThemeProvider>

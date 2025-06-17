@@ -32,7 +32,7 @@ import {
   UpdateOrganizationStatusRequest,
 } from "@/types/organization";
 import { toast } from "sonner";
-import { organizationApi } from "@/lib/apiClient";
+// import { organizationApi } from "@/lib/apiClient";
 import {
   Select,
   SelectContent,

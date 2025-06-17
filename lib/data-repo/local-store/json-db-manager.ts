@@ -3,6 +3,8 @@ import path from 'path';
 import { UserDto, RoleDto, PermissionDto, RolePermissionDto, RbacResource } from '@/types/auth'; // Import all necessary auth types
 import { OrganizationDto, OrganizationTableRow, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto } from '@/types/organization';
 import { ResourceDto, ServiceDto } from '@/types/resourceManagement';
+import { UserPreferencesDto } from '@/types/user-preferences'; // NEW IMPORT
+
 
 // Define the collections (filenames without .json)
 export type CollectionName =
@@ -19,7 +21,8 @@ export type CollectionName =
   | 'employees'
   | 'businessDomains'
   | 'resources'
-  | 'services';
+  | 'services'
+  | 'userPreferences'; // NEW COLLECTION
 
 // Map collection names to their expected data types for type safety
 export interface LocalJsonDBCollections {
@@ -37,6 +40,7 @@ export interface LocalJsonDBCollections {
   businessDomains: BusinessDomainDto[];
   resources: ResourceDto[];
   services: ServiceDto[];
+  userPreferences: UserPreferencesDto[]; // NEW COLLECTION TYPE
 }
 
 const collectionFileMap: Record<CollectionName, string> = {
@@ -53,6 +57,7 @@ const collectionFileMap: Record<CollectionName, string> = {
   employees: 'employees.json',
   businessDomains: 'business-domains.json',
   resources: 'resources.json',
+  userPreferences: 'user-preferences.json',
   services: 'services.json',
 };
 

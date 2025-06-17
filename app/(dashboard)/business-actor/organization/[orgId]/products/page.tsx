@@ -608,11 +608,7 @@ export default function OrganizationProductsPage() {
 
   return (
     <div className="space-y-6">
-      {" "}
-      {/* Removed container, as layout.tsx provides it */}
       <header>
-        {" "}
-        {/* This header is inside the OrganizationManagementLayout, which has its own title */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
