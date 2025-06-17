@@ -8,7 +8,7 @@ export async function POST(request: NextRequest, { params }: { params: { role_id
     if (!role_id || !permission_id) {
       return NextResponse.json({ message: "Role ID and Permission ID are required." }, { status: 400 });
     }
-    let rolePermissions = dbManager.getCollection<RolePermissionDto>('authRolePermissions');
+    let rolePermissions = dbManager.getCollection('authRolePermissions');
     if (rolePermissions.find(rp => rp.role_id === role_id && rp.permission_id === permission_id)) {
       return NextResponse.json({ message: "Permission already assigned to this role." }, { status: 409 });
     }
@@ -27,7 +27,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { role_
     if (!role_id || !permission_id) {
       return NextResponse.json({ message: "Role ID and Permission ID are required." }, { status: 400 });
     }
-    let rolePermissions = dbManager.getCollection<RolePermissionDto>('authRolePermissions');
+    let rolePermissions = dbManager.getCollection('authRolePermissions');
     const initialCount = rolePermissions.length;
     rolePermissions = rolePermissions.filter(rp => !(rp.role_id === role_id && rp.permission_id === permission_id));
 

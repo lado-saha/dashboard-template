@@ -5,7 +5,7 @@ import { RoleDto, CreateRoleRequest } from '@/types/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const roles = dbManager.getCollection<RoleDto>('authRoles'); // Assuming 'authRoles' collection in dbManager
+    const roles = dbManager.getCollection('authRoles'); // Assuming 'authRoles' collection in dbManager
     return NextResponse.json(roles, { status: 200 });
   } catch (error: any) {
     console.error("[MOCK API /auth/roles GET ERROR]:", error);
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Role name is required." }, { status: 400 });
     }
 
-    const roles = dbManager.getCollection<RoleDto>('authRoles');
+    const roles = dbManager.getCollection('authRoles');
     if (roles.find(r => r.name === body.name)) {
       return NextResponse.json({ message: "Role with this name already exists." }, { status: 409 });
     }

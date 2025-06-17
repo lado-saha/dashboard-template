@@ -6,7 +6,7 @@ import { UserDto } from '@/types/auth';
 export async function GET(request: NextRequest, { params }: { params: { phone_number: string } }) {
   try {
     const phoneNumber = params.phone_number;
-    const users = dbManager.getCollection<UserDto>('authUsers');
+    const users = dbManager.getCollection('authUsers');
     const user = users.find(u => u.phone_number === phoneNumber);
     if (!user) {
       return NextResponse.json({ message: `User with phone number ${phoneNumber} not found.` }, { status: 404 });

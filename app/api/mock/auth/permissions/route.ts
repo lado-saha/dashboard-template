@@ -4,7 +4,7 @@ import { PermissionDto, CreatePermissionRequest } from '@/types/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const permissions = dbManager.getCollection<PermissionDto>('authPermissions');
+    const permissions = dbManager.getCollection('authPermissions');
     return NextResponse.json(permissions, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ message: error.message || "Failed to get permissions." }, { status: 500 });

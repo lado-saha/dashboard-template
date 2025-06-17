@@ -34,7 +34,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { permi
     const permissionId = params.permission_id;
     const deleted = dbManager.deleteItem('authPermissions', permissionId);
     // Also remove associated role-permissions
-    const rolePermissions = dbManager.getCollection<RolePermissionDto>('authRolePermissions');
+    const rolePermissions = dbManager.getCollection('authRolePermissions');
     const updatedRolePermissions = rolePermissions.filter(rp => rp.permission_id !== permissionId);
     dbManager.saveCollection('authRolePermissions', updatedRolePermissions);
     if (!deleted) {

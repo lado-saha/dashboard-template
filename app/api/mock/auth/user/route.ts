@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const nextAuthToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
     if (nextAuthToken && (nextAuthToken.email || nextAuthToken.name || nextAuthToken.sub)) {
-      const users = dbManager.getCollection<UserDto>('authUsers');
+      const users = dbManager.getCollection('authUsers');
       let user: UserDto | undefined | null;
 
       // Prefer matching by 'id' (which is 'sub' in NextAuth token)

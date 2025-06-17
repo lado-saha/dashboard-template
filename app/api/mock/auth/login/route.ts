@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Username and password are required." }, { status: 400 });
     }
 
-    const users = dbManager.getCollection<UserDto>('authUsers');
+    const users = dbManager.getCollection('authUsers');
     const user = users.find(u => u.username === body.username || u.email === body.username);
 
     if (!user || !user.password_hash || !user.is_enabled) {

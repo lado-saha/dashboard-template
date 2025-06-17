@@ -1,0 +1,24 @@
+// app/api/mock/organization/[orgId]/practical-infos/create/route.ts
+import { NextResponse, NextRequest } from 'next/server';
+import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
+import { PracticalInformationDto, CreatePracticalInformationRequest } from '@/types/organization';
+
+export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
+  try {
+    const { orgId } = params;
+    const body = await request.json() as CreatePracticalInformationRequest;
+
+    if (!body.type || !body.value) {
+      return NextResponse.json({ message: "Type and Value are required for practical information." }, { status: 400 });
+    }
+
+    const newInfoData: Omit<PracticalInformationDto, 'information_id' | 'created_at' | 'updated_at'> = {
+      ...body,
+      organization_id: orgId,
+    };
+    const createdInfo = dbManager.addItem('practicalInformation', newInfoData);
+    return NextResponse.json(createdInfo, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ message: "Failed to create practical information", error: error.message }, { status: 500 });
+  }
+}

@@ -5,7 +5,7 @@ import { UserDto } from '@/types/auth';
 export async function GET(request: NextRequest, { params }: { params: { email: string } }) {
   try {
     const email = params.email; // Next.js decodes URL automatically
-    const users = dbManager.getCollection<UserDto>('authUsers');
+    const users = dbManager.getCollection('authUsers');
     const user = users.find(u => u.email === email);
     if (!user) {
       return NextResponse.json({ message: `User with email ${email} not found.` }, { status: 404 });

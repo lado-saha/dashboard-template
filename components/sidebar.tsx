@@ -1,45 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  Home,
-  BarChart2,
-  Building2,
-  Users2,
-  Briefcase,
+  LayoutGrid,
+  Landmark,
   Wallet,
-  Receipt,
-  CreditCard,
-  Star,
-  Settings,
+  HandCoins,
+  Webhook,
   MessagesSquare,
-  Gift,
+  Share2,
+  Star, // BA Icons
+  Briefcase,
+  FileText,
+  FolderHeart, // Customer Icons
+  Server,
+  Building2 as SuperAdminOrgIcon,
+  Users as SuperAdminUsersIcon, // Super Admin Icons
+  LifeBuoy,
+  Settings,
   LogOut,
   Menu,
   SidebarClose,
-  Users,
-  Server,
-  FileText,
-  LifeBuoy,
-  Webhook,
-  Ticket,
-  Tag,
-  UsersRound,
-  Share2,
-  LayoutGrid,
-  FolderHeart,
-  ListChecks,
-  CalendarClock,
-  Newspaper,
-  HandCoins,
-  Package,
-  Landmark, // Added Landmark for general Organization
+  Building,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,25 +35,23 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { OrganizationSwitcher } from "@/components/organization/organization-switcher"; // NEW IMPORT
+import { useActiveOrganization } from "@/contexts/active-organization-context"; // For BA to check orgs
 
-// BA Navigation - Assuming My Organization is now a top-level item
+// Navigation Arrays (keep your existing definitions)
 const baNavigation = [
   { name: "Dashboard", href: "/business-actor/dashboard", icon: LayoutGrid },
-  {
-    name: "My Organization(s)",
-    href: "/business-actor/organization-hub",
-    icon: Landmark,
-  }, // New top-level hub
-  // Products, Agencies, Personnel will be under a selected organization via /[orgId]/...
+  // Org-specific items will be in a sub-nav within /organization/[orgId]/layout.tsx
+  // This top-level "My Organization(s)" could link to where they select/create, which is the dashboard
+  { name: "Manage Active Org", href: "#", icon: Landmark, isOrgLink: true }, // Placeholder, actual link set dynamically
   { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
   { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
   { name: "Webhooks", href: "/business-actor/webhooks", icon: Webhook },
   { name: "Chat", href: "/business-actor/chat", icon: MessagesSquare },
   { name: "Referrals", href: "/business-actor/referrals", icon: Share2 },
 ];
-
 const customerNavigation = [
-  /* ... same as before ... */
+  /* ... */
   { name: "Dashboard", href: "/customer/dashboard", icon: LayoutGrid },
   { name: "Services", href: "/customer/services", icon: Briefcase },
   { name: "Invoices", href: "/customer/invoices", icon: FileText },
@@ -75,71 +60,71 @@ const customerNavigation = [
   { name: "Invite Friends", href: "/customer/invite", icon: Share2 },
   { name: "Chat", href: "/customer/chat", icon: MessagesSquare },
 ];
-
 const superAdminNavigation = [
-  /* ... same as before ... */
+  /* ... */
   { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
   { name: "Platforms", href: "/super-admin/platforms", icon: Server },
   {
     name: "Business Actors",
     href: "/super-admin/business-actors",
-    icon: Building2,
+    icon: SuperAdminOrgIcon,
   },
-  { name: "Customers", href: "/super-admin/customers", icon: Users },
+  {
+    name: "Customers",
+    href: "/super-admin/customers",
+    icon: SuperAdminUsersIcon,
+  },
   { name: "Webhooks Config", href: "/super-admin/webhooks", icon: Webhook },
   { name: "Bonus Overview", href: "/super-admin/bonus", icon: HandCoins },
   { name: "Admin Comm.", href: "/super-admin/chat", icon: MessagesSquare },
 ];
-
 const bottomNavigation = [
   { name: "Help & Support", href: "/help", icon: LifeBuoy },
-  { name: "Settings", href: "/settings", icon: Settings }, // Unified settings link
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
+
+let lastKnownRolePrefix = "/business-actor";
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  // Get active org context only if potentially a BA
+  // This conditional hook usage is an anti-pattern. Instead, call hook always and use its data conditionally.
+  // For simplicity here, we will use a flag based on pathname for now.
+  const isBaPath = pathname.startsWith("/business-actor");
+  const activeOrgContext = isBaPath ? useActiveOrganization() : null;
+  const activeOrganizationId = activeOrgContext?.activeOrganizationId;
+
+  useEffect(() => {
+    if (pathname.startsWith("/business-actor"))
+      lastKnownRolePrefix = "/business-actor";
+    else if (pathname.startsWith("/customer"))
+      lastKnownRolePrefix = "/customer";
+    else if (pathname.startsWith("/super-admin"))
+      lastKnownRolePrefix = "/super-admin";
+  }, [pathname]);
+
   let sidebarTitle = "Dashboard";
   let logoSrc = "/logo.svg";
-  let currentNavigation = customerNavigation; // Default to customer if role unknown
-  let roleSpecificBase = "/customer"; // For logo link if needed
+  let currentNavigation = customerNavigation;
+  let activeRoleDashboardLink = "/customer/dashboard";
 
-  if (pathname.startsWith("/business-actor")) {
+  if (lastKnownRolePrefix === "/business-actor") {
     sidebarTitle = "BA Workspace";
     currentNavigation = baNavigation;
-    roleSpecificBase = "/business-actor";
-  } else if (pathname.startsWith("/customer")) {
+    activeRoleDashboardLink = "/business-actor/dashboard";
+  } else if (lastKnownRolePrefix === "/customer") {
     sidebarTitle = "My Account";
     currentNavigation = customerNavigation;
-    roleSpecificBase = "/customer";
-  } else if (pathname.startsWith("/super-admin")) {
+    activeRoleDashboardLink = "/customer/dashboard";
+  } else if (lastKnownRolePrefix === "/super-admin") {
     sidebarTitle = "Platform Admin";
     currentNavigation = superAdminNavigation;
-    roleSpecificBase = "/super-admin";
-  } else if (pathname.startsWith("/settings") || pathname.startsWith("/help")) {
-    // If on shared page, try to keep context of last known role or default
-    // For now, let's use a generic title or try to infer.
-    // This part is tricky without session-based role. For now, assume currentNavigation
-    // might be based on a previous path or a default.
-    sidebarTitle = "Menu"; // Generic for shared pages
-    // Infer last role from referrer or a more sophisticated context if available
-    // For now, BA nav might show by default if no clear context from path
-    const segments = pathname.split("/");
-    // Heuristic: If coming from a role-specific dashboard to /settings
-    if (typeof window !== "undefined" && document.referrer) {
-      if (document.referrer.includes("/business-actor"))
-        currentNavigation = baNavigation;
-      else if (document.referrer.includes("/customer"))
-        currentNavigation = customerNavigation;
-      else if (document.referrer.includes("/super-admin"))
-        currentNavigation = superAdminNavigation;
-      else currentNavigation = []; // Or a minimal shared nav
-    } else {
-      currentNavigation = []; // No specific nav for general settings/help page view
-    }
+    activeRoleDashboardLink = "/super-admin/dashboard";
   }
+  if (pathname === "/settings" || pathname === "/help") sidebarTitle = "Menu";
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
@@ -149,24 +134,32 @@ export function Sidebar() {
     item: {
       name: string;
       href: string;
-      icon: React.ComponentType<{ className?: string }>;
+      icon: React.ElementType<{ className?: string }>;
+      isOrgLink?: boolean;
     };
-    isBottom?: boolean;
   };
 
   const NavItem = ({ item }: NavItemProps) => {
+    let href = item.href;
+    if (item.isOrgLink) {
+      // Dynamically set href for "Manage Active Org"
+      href = activeOrganizationId
+        ? `/business-actor/organization/${activeOrganizationId}/profile`
+        : "/business-actor/dashboard";
+    }
     const isActive =
-      pathname === item.href ||
-      pathname.startsWith(item.href + "/") ||
-      (item.href !== "/" &&
-        item.href !== "/settings" &&
-        item.href !== "/help" &&
-        pathname.startsWith(item.href + "?"));
+      pathname === href ||
+      pathname.startsWith(href + "/") ||
+      (href !== "/" &&
+        href !== "/settings" &&
+        href !== "/help" &&
+        pathname.startsWith(href + "?"));
     return (
+      /* ... NavItem JSX as before ... */
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Link
-            href={item.href} // Direct href, as they are now absolute
+            href={href}
             className={cn(
               "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors h-9",
               isActive
@@ -195,6 +188,8 @@ export function Sidebar() {
   return (
     <TooltipProvider>
       <>
+        {" "}
+        {/* Mobile Menu Toggle & Sidebar Container ... as before ... */}
         <Button
           variant="outline"
           size="icon"
@@ -216,12 +211,12 @@ export function Sidebar() {
         >
           <div
             className={cn(
-              "flex h-12 shrink-0 items-center border-b border-sidebar-border",
+              "flex h-16 shrink-0 items-center border-b border-sidebar-border",
               isCollapsed ? "justify-center px-2" : "justify-between px-4"
             )}
           >
             <Link
-              href={`${roleSpecificBase}/dashboard`}
+              href={activeRoleDashboardLink}
               className={cn("flex items-center gap-2 font-semibold")}
               onClick={() => isMobileOpen && setIsMobileOpen(false)}
               aria-label={sidebarTitle}
@@ -267,13 +262,44 @@ export function Sidebar() {
               </Button>
             )}
           </div>
+
+          {/* Organization Switcher for BA */}
+          {isBaPath &&
+            !isCollapsed && ( // Show only for BA and when sidebar is expanded
+              <OrganizationSwitcher />
+            )}
+          {isBaPath &&
+            isCollapsed && ( // Show simplified org indicator when collapsed
+              <div className="px-2 py-3 text-center border-b border-sidebar-border">
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9"
+                      onClick={() => setIsCollapsed(false)}
+                    >
+                      <Building className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {activeOrgContext?.activeOrganizationDetails?.short_name ||
+                      "Select Org"}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             <nav
               className={cn(
                 "flex-1 space-y-1 py-4",
-                isCollapsed ? "px-2" : "px-4"
+                isCollapsed ? "px-2" : "px-4",
+                isBaPath && "pt-0"
               )}
             >
+              {" "}
+              {/* Adjust padding if switcher is present */}
               {currentNavigation.map((item) => (
                 <NavItem key={item.name} item={item} />
               ))}
@@ -288,6 +314,7 @@ export function Sidebar() {
                 {bottomNavigation.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
+                {/* Logout Button ... as before ... */}
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <Button

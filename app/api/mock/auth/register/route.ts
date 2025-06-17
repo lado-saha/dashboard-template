@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Password must be at least 6 characters." }, { status: 400 });
     }
 
-    const users = dbManager.getCollection<UserDto>('authUsers');
+    const users = dbManager.getCollection('authUsers');
 
     if (users.find(u => u.username === body.username)) {
       return NextResponse.json({ message: "Username already exists." }, { status: 409 });

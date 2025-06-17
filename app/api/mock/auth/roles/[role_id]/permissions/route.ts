@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, { params }: { params: { role_id
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
     }
 
-    let rolePermissions = dbManager.getCollection<RolePermissionDto>('authRolePermissions');
+    let rolePermissions = dbManager.getCollection('authRolePermissions');
     const added: RolePermissionDto[] = [];
     permissionIds.forEach(permissionId => {
       if (!rolePermissions.find(rp => rp.role_id === roleId && rp.permission_id === permissionId)) {
@@ -35,7 +35,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { role_
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
     }
 
-    let rolePermissions = dbManager.getCollection<RolePermissionDto>('authRolePermissions');
+    let rolePermissions = dbManager.getCollection('authRolePermissions');
     const initialCount = rolePermissions.length;
     rolePermissions = rolePermissions.filter(rp => !(rp.role_id === roleId && permissionIdsToRemove.includes(rp.permission_id!)));
     dbManager.saveCollection('authRolePermissions', rolePermissions);

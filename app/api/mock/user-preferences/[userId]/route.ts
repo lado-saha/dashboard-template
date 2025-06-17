@@ -35,7 +35,7 @@ function getOrCreateUserPreferences(userId: string): UserPreferencesDto {
     // OR, we store a separate 'id' and also 'user_id'. Let's stick to 'user_id' as the primary key here for this collection.
 
     // Modified to ensure 'user_id' is the key for this collection.
-    const collection = dbManager.getCollection<UserPreferencesDto>('userPreferences');
+    const collection = dbManager.getCollection('userPreferences');
     const existing = collection.find(p => p.user_id === userId);
     if (existing) {
       prefs = existing;
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest, { params }: { params: { userId: 
     if (!userId) return NextResponse.json({ message: "User ID is required." }, { status: 400 });
     const body = await request.json() as UpdateUserPreferencesRequest;
 
-    const collection = dbManager.getCollection<UserPreferencesDto>('userPreferences');
+    const collection = dbManager.getCollection('userPreferences');
     let itemIndex = collection.findIndex(p => p.user_id === userId);
     let currentPrefs: UserPreferencesDto;
 

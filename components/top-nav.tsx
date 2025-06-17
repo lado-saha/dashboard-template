@@ -59,7 +59,7 @@ export function TopNav() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-12 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left Side: Breadcrumbs (No changes needed here) */}
         <div className="hidden items-center gap-1.5 text-sm md:flex flex-wrap mr-4">
           <Link

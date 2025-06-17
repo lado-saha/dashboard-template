@@ -5,7 +5,9 @@ import { UserDto } from '@/types/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const users = dbManager.getCollection<UserDto>('authUsers').map(user => {
+    const allUsers = dbManager.getCollection('authUsers');
+    // Corrected mapping to exclude password hash
+    const users = allUsers.map(user => {
       const { password_hash, ...userWithoutPassword } = user; // Exclude password hash
       return userWithoutPassword;
     });
