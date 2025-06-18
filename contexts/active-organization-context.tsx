@@ -13,6 +13,8 @@ import { organizationRepository } from "@/lib/data-repo/organization";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
+// Assuming mock data is handled by the local repository and its mock API routes
+import { mockUserOrganizations as defaultMockOrgs, mockOrganizationDetails as defaultMockDetails } from '@/lib/mock-data/organization-mocks';
 
 interface ActiveOrganizationContextType {
   activeOrganizationId: string | null;
@@ -21,58 +23,22 @@ interface ActiveOrganizationContextType {
     orgDetails?: OrganizationDto
   ) => Promise<void>;
   activeOrganizationDetails: OrganizationDto | null;
-  // This function fetches details for a *specific* org and sets it as active detail
-  fetchAndSetActiveOrganizationDetails: (
+  // This is the function to fetch and set details for a *specific* org ID
+  fetchAndSetOrganizationDetails: (
     id: string
-  ) => Promise<OrganizationDto | null>;
+  ) => Promise<OrganizationDto | null>; // Renamed for clarity from previous versions
   isLoadingOrgDetails: boolean;
   userOrganizations: OrganizationTableRow[];
   // This function fetches the *list* of all orgs for the current user
   fetchUserOrganizationsList: () => Promise<void>;
   isLoadingUserOrgs: boolean;
   clearActiveOrganization: () => void;
-  // refreshUserOrganizations was perhaps a misnomer for fetchUserOrganizationsList
+  isOrgContextInitialized: boolean;
 }
 
 const ActiveOrganizationContext = createContext<
   ActiveOrganizationContextType | undefined
 >(undefined);
-
-// Mock data (should be removed once local JSON files are populated via API routes)
-const defaultMockOrgs: OrganizationTableRow[] = [
-  {
-    organization_id: "org-a1b2c3d4-main",
-    short_name: "Innovate Sol.",
-    long_name: "Innovate Solutions Global LLC",
-    status: "ACTIVE",
-    email: "contact@innovate.com",
-    logo_url: "/placeholder.svg",
-  },
-  {
-    organization_id: "org-e5f6g7h8-side",
-    short_name: "GreenFuture",
-    long_name: "GreenTech Future Inc.",
-    status: "PENDING_APPROVAL",
-    email: "info@greentech.io",
-    logo_url: "/placeholder.svg",
-  },
-];
-const defaultMockDetails: Record<string, OrganizationDto> = {
-  "org-a1b2c3d4-main": {
-    ...defaultMockOrgs[0],
-    description: "Main org detail",
-    website_url: "https://innovate.com",
-    is_active: true,
-    legal_form: "31",
-  },
-  "org-e5f6g7h8-side": {
-    ...defaultMockOrgs[1],
-    description: "Side org detail",
-    website_url: "https://green.io",
-    is_active: false,
-    legal_form: "32",
-  },
-};
 
 export const ActiveOrganizationProvider = ({
   children,
@@ -95,85 +61,80 @@ export const ActiveOrganizationProvider = ({
     OrganizationTableRow[]
   >([]);
   const [isLoadingUserOrgs, setIsLoadingUserOrgs] = useState<boolean>(true);
+  const [isOrgContextInitialized, setIsOrgContextInitialized] =
+    useState<boolean>(false);
 
-  const fetchAndSetActiveOrganizationDetails = useCallback(
+  // Renamed internal function to avoid confusion with the one exposed in context
+  const internalFetchAndSetOrgDetails = useCallback(
     async (id: string): Promise<OrganizationDto | null> => {
       if (!id) {
         setActiveOrganizationDetailsState(null);
-        setActiveOrganizationIdState(null); // Also clear ID if fetching for null/invalid ID
+        // Do not clear activeOrganizationIdState here if we want to preserve it while details are null
         return null;
       }
       setIsLoadingOrgDetails(true);
       console.log(`CONTEXT: Fetching details for active org: ${id}`);
       try {
         const details = await organizationRepository.getOrganizationById(id);
-        setActiveOrganizationDetailsState(details);
+        setActiveOrganizationDetailsState(details); // Can be null if not found
         if (details) {
-          setActiveOrganizationIdState(id); // Ensure active ID is set if details are found
+          setActiveOrganizationIdState(id); // If details found, confirm this ID is active
         } else {
           toast.error(`Organization (ID: ${id}) not found or inaccessible.`);
-          setActiveOrganizationIdState(null); // Clear if not found
+          // If details are not found for an ID that was attempted to be set active, clear it.
+          if (activeOrganizationId === id) {
+            setActiveOrganizationIdState(null);
+          }
         }
         return details;
       } catch (error) {
-        console.error(
-          `CONTEXT: Failed to fetch details for organization ${id}:`,
-          error
-        );
+        console.error(`CONTEXT: Failed to fetch details for org ${id}:`, error);
         toast.error("Could not load organization details.");
         setActiveOrganizationDetailsState(null);
-        setActiveOrganizationIdState(null);
+        if (activeOrganizationId === id) {
+          // Only clear active ID if it was the one failing
+          setActiveOrganizationIdState(null);
+        }
         return null;
       } finally {
         setIsLoadingOrgDetails(false);
       }
     },
-    []
-  );
+    [activeOrganizationId]
+  ); // Added activeOrganizationId to dependencies
 
   const setActiveOrganization = useCallback(
     async (orgId: string | null, orgDetails?: OrganizationDto) => {
-      console.log("CONTEXT: setActiveOrganization called with orgId:", orgId);
-      if (orgId) {
-        setActiveOrganizationIdState(orgId); // Set ID first
-        if (orgDetails && orgDetails.organization_id === orgId) {
-          // Check if details match orgId
-          console.log(
-            "CONTEXT: Setting details directly from provided orgDetails"
-          );
-          setActiveOrganizationDetailsState(orgDetails);
-        } else {
-          console.log(
-            "CONTEXT: orgId provided, fetching details via fetchAndSetActiveOrganizationDetails..."
-          );
-          await fetchAndSetActiveOrganizationDetails(orgId); // This will also set activeOrganizationIdState
-        }
+      setActiveOrganizationIdState(orgId); // Set the ID immediately
+      if (orgDetails && orgId === orgDetails.organization_id) {
+        setActiveOrganizationDetailsState(orgDetails);
+      } else if (orgId) {
+        await internalFetchAndSetOrgDetails(orgId); // This will also set details
       } else {
-        console.log("CONTEXT: orgId is null, clearing details and ID.");
-        setActiveOrganizationIdState(null);
-        setActiveOrganizationDetailsState(null);
+        setActiveOrganizationDetailsState(null); // Clear details if orgId is null
       }
     },
-    [fetchAndSetActiveOrganizationDetails]
-  ); // fetchAndSetActiveOrganizationDetails is stable
+    [internalFetchAndSetOrgDetails]
+  );
 
   const fetchUserOrganizationsList = useCallback(async () => {
     if (sessionStatus !== "authenticated") {
       setUserOrganizations([]);
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
       return;
     }
     setIsLoadingUserOrgs(true);
     try {
       const orgs = await organizationRepository.getMyOrganizations();
       setUserOrganizations(orgs || []);
-      console.log("CONTEXT: User organizations fetched:", orgs);
     } catch (error) {
       console.error("CONTEXT: Failed to fetch user organizations:", error);
       toast.error("Could not load your organizations.");
       setUserOrganizations([]);
     } finally {
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
     }
   }, [sessionStatus]);
 
@@ -183,33 +144,52 @@ export const ActiveOrganizationProvider = ({
   }, []);
 
   useEffect(() => {
-    if (sessionStatus === "authenticated") {
+    if (sessionStatus === "authenticated" && !isOrgContextInitialized) {
       fetchUserOrganizationsList();
     } else if (sessionStatus === "unauthenticated") {
       setUserOrganizations([]);
       clearActiveOrganization();
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(false);
     }
-  }, [sessionStatus, fetchUserOrganizationsList, clearActiveOrganization]);
+  }, [
+    sessionStatus,
+    fetchUserOrganizationsList,
+    clearActiveOrganization,
+    isOrgContextInitialized,
+  ]);
 
   useEffect(() => {
+    if (!isOrgContextInitialized || !session?.user?.id) return;
+
     const pathParts = pathname.split("/");
-    const isOrgManagementPath =
+    const isOrgSpecificPath =
       pathParts[1] === "business-actor" &&
       pathParts[2] === "organization" &&
       pathParts[3] &&
       pathParts[3] !== "create";
 
-    if (isOrgManagementPath) {
+    if (isOrgSpecificPath) {
       const orgIdFromUrl = pathParts[3];
-      if (orgIdFromUrl !== activeOrganizationId || !activeOrganizationDetails) {
-        // Also fetch if details are missing for current ID
-        if (orgIdFromUrl) {
-          // Ensure orgIdFromUrl is not undefined
-          console.log(
-            `CONTEXT: URL sync - Path has orgId ${orgIdFromUrl}. Current activeId: ${activeOrganizationId}. Fetching details.`
-          );
-          fetchAndSetActiveOrganizationDetails(orgIdFromUrl); // This sets both ID and details
+      if (
+        orgIdFromUrl !== activeOrganizationId ||
+        (orgIdFromUrl && !activeOrganizationDetails)
+      ) {
+        // If user has orgs, check if URL orgId is valid before fetching
+        if (
+          userOrganizations.length > 0 &&
+          !userOrganizations.find((o) => o.organization_id === orgIdFromUrl)
+        ) {
+          toast.error("Invalid organization in URL or no access.");
+          router.replace("/business-actor/dashboard");
+          clearActiveOrganization();
+        } else if (userOrganizations.length === 0 && !isLoadingUserOrgs) {
+          // User has no orgs loaded, but URL suggests one - likely invalid state or direct nav to bad URL
+          toast.error("No organizations found for your account.");
+          router.replace("/business-actor/dashboard");
+          clearActiveOrganization();
+        } else {
+          internalFetchAndSetOrgDetails(orgIdFromUrl);
         }
       }
     }
@@ -217,7 +197,13 @@ export const ActiveOrganizationProvider = ({
     pathname,
     activeOrganizationId,
     activeOrganizationDetails,
-    fetchAndSetActiveOrganizationDetails,
+    internalFetchAndSetOrgDetails,
+    isOrgContextInitialized,
+    userOrganizations,
+    isLoadingUserOrgs,
+    router,
+    session?.user?.id,
+    clearActiveOrganization,
   ]);
 
   return (
@@ -226,13 +212,13 @@ export const ActiveOrganizationProvider = ({
         activeOrganizationId,
         setActiveOrganization,
         activeOrganizationDetails,
-        fetchAndSetActiveOrganizationDetails, // Name in context matches the function name
+        fetchAndSetOrganizationDetails: internalFetchAndSetOrgDetails, // Ensure this matches the interface
         isLoadingOrgDetails,
         userOrganizations,
-        fetchUserOrganizationsList, // Correctly named function for fetching the list
+        fetchUserOrganizationsList,
         isLoadingUserOrgs,
         clearActiveOrganization,
-        // refreshUserOrganizations: fetchUserOrganizationsList, // Alias if needed, but direct use is clearer
+        isOrgContextInitialized,
       }}
     >
       {children}

@@ -1,39 +1,31 @@
 "use client";
 
-import React from "react";
 import { OrganizationForm } from "@/components/organization/organization-form";
+import { OrganizationDto } from "@/types/organization";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { useRouter } from "next/navigation";
-import { OrganizationDto } from "@/types/organization"; // For the callback
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export default function CreateOrganizationPage() {
-  const { setActiveOrganization, refreshUserOrganizations } =
-    useActiveOrganization();
   const router = useRouter();
+  const { setActiveOrganization, fetchUserOrganizationsList } =
+    useActiveOrganization();
 
-  const handleCreateSuccess = async (createdOrg: OrganizationDto) => {
-    if (createdOrg.organization_id) {
-      await refreshUserOrganizations(); // Refresh the list of orgs in context
-      setActiveOrganization(createdOrg.organization_id, createdOrg);
-      router.push(
-        `/business-actor/organization/${createdOrg.organization_id}/profile`
-      );
+  const handleCreateSuccess = async (newOrgData: OrganizationDto) => {
+    // Refresh the list of organizations in the context
+    await fetchUserOrganizationsList();
+    // Set the newly created organization as active
+    if (newOrgData.organization_id) {
+      await setActiveOrganization(newOrgData.organization_id, newOrgData);
+      // Redirect to the new organization's profile page
+      router.push(`/business-actor/org/profile`);
+    } else {
+      // Fallback if ID is missing
+      router.push(`/business-actor/dashboard`);
     }
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/business-actor/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-      </div>
+    <div className="space-y-6">
       <OrganizationForm
         mode="create"
         onFormSubmitSuccess={handleCreateSuccess}

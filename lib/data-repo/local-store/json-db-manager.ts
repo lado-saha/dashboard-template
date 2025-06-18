@@ -30,6 +30,7 @@ import {
   BusinessActorDto,
 } from "@/types/organization";
 import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
+import { UserPreferencesDto } from "@/types/user-preferences";
 
 export type CollectionName =
   | "authUsers"
@@ -55,6 +56,7 @@ export type CollectionName =
   | "proposedActivities"
   | "businessActors"
   | "applicationsData"
+  | "userPreferences"
   | "applicationKeysData"
   | "resources"
   | "services";
@@ -69,6 +71,7 @@ export interface LocalJsonDBCollections {
   organizationsDetails: OrganizationDto[];
   contacts: ContactDto[];
   addresses: AddressDto[];
+  userPreferences: UserPreferencesDto[]; // Assuming user preferences are stored in the same format as UserDto
   agencies: AgencyDto[];
   employees: EmployeeDto[];
   salesPersons: SalesPersonDto[];
@@ -103,6 +106,7 @@ const collectionFileMap: Record<CollectionName, string> = {
   salesPersons: "sales-persons.json",
   orgCustomers: "org-customers.json",
   providers: "providers.json",
+  userPreferences: "user-preferences",
   prospects: "prospects.json",
   practicalInformation: "practical-information.json",
   certifications: "certifications.json",

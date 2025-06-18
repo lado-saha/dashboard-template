@@ -1,1 +1,1129 @@
-{"openapi":"3.0.1","info":{"title":"OneID","description":"Yowyob OneId","license":{"name":"Unlicense","url":"https://unlicense.org/"},"version":"1.0.0"},"servers":[{"url":"https://gateway.yowyob.com/auth-service"}],"security":[{"basicAuth":[]},{"bearerAuth":[]},{"Public-Key":[]}],"paths":{"/api/roles/{role_id}":{"put":{"tags":["role-controller"],"operationId":"updateRole","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UpdateRoleRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/RoleDto"}}}}}},"delete":{"tags":["role-controller"],"operationId":"deleteRole","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"OK"}}}},"/api/permissions/{permission_id}":{"get":{"tags":["permission-controller"],"operationId":"getPermissionById","parameters":[{"name":"permission_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/PermissionDto"}}}}}},"put":{"tags":["permission-controller"],"operationId":"updatePermission","parameters":[{"name":"permission_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UpdatePermissionRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/PermissionDto"}}}}}},"delete":{"tags":["permission-controller"],"operationId":"deletePermission","parameters":[{"name":"permission_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"OK"}}}},"/api/roles":{"get":{"tags":["role-controller"],"operationId":"getRoles","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/RoleDto"}}}}}}},"post":{"tags":["role-controller"],"operationId":"createRole","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreateRoleRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/RoleDto"}}}}}}},"/api/roles/{role_id}/permissions":{"post":{"tags":["role-controller"],"operationId":"assignPermissions","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"requestBody":{"content":{"application/json":{"schema":{"type":"array","items":{"type":"string","format":"uuid"}}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/RolePermissionDto"}}}}}}},"delete":{"tags":["role-controller"],"operationId":"removePermissions","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"requestBody":{"content":{"application/json":{"schema":{"type":"array","items":{"type":"string","format":"uuid"}}}},"required":true},"responses":{"200":{"description":"OK"}}}},"/api/roles/{role_id}/permissions/{permission_id}":{"post":{"tags":["role-controller"],"operationId":"assignPermission","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"permission_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/RolePermissionDto"}}}}}},"delete":{"tags":["role-controller"],"operationId":"removePermission","parameters":[{"name":"role_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"permission_id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],"responses":{"200":{"description":"OK"}}}},"/api/resources/save":{"post":{"tags":["resource-controller"],"operationId":"createRbacResource","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RbacResource"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ApiResponseBoolean"}}}}}}},"/api/register":{"post":{"tags":["user-controller"],"operationId":"register","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreateUserRequest"}}},"required":true},"responses":{"201":{"description":"Created","content":{"*/*":{"schema":{"$ref":"#/components/schemas/UserDto"}}}}}}},"/api/permissions":{"get":{"tags":["permission-controller"],"operationId":"getAllPermissions","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/PermissionDto"}}}}}}},"post":{"tags":["permission-controller"],"operationId":"createPermission","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/CreatePermissionRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/PermissionDto"}}}}}}},"/api/login":{"post":{"tags":["login-controller"],"operationId":"login","parameters":[{"name":"X-Environment","in":"header","required":false,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/AuthRequest"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/LoginResponse"}}}}}}},"/api/user":{"get":{"tags":["login-controller"],"operationId":"getCurrentUser","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/UserInfo"}}}}}}},"/api/users":{"get":{"tags":["user-controller"],"operationId":"getAllUsers","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/UserDto"}}}}}}}},"/api/user/username/{username}":{"get":{"tags":["user-controller"],"operationId":"getUserByUsername","parameters":[{"name":"username","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/UserDto"}}}}}}},"/api/user/phone-number/{phone_number}":{"get":{"tags":["user-controller"],"operationId":"getUserByPhoneNumber","parameters":[{"name":"phone_number","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/UserDto"}}}}}}},"/api/user/email/{email}":{"get":{"tags":["user-controller"],"operationId":"getUserByEmail","parameters":[{"name":"email","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/UserDto"}}}}}}},"/api/roles/hierarchy":{"get":{"tags":["role-controller"],"operationId":"getRolesHierarchy","responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}}}}}},"components":{"schemas":{"UpdateRoleRequest":{"required":["name"],"type":"object","properties":{"name":{"type":"string"},"description":{"maxLength":255,"minLength":0,"type":"string"}}},"RoleDto":{"required":["name"],"type":"object","properties":{"id":{"type":"string","format":"uuid","readOnly":true},"name":{"type":"string"},"description":{"type":"string"}}},"UpdatePermissionRequest":{"required":["name","operation_id","resource_id"],"type":"object","properties":{"resource_id":{"type":"string","format":"uuid"},"operation_id":{"type":"string","format":"uuid"},"name":{"type":"string"},"description":{"maxLength":255,"minLength":0,"type":"string"}}},"PermissionDto":{"type":"object","properties":{"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"},"deleted_at":{"type":"string","format":"date-time"},"created_by":{"type":"string","format":"uuid"},"updated_by":{"type":"string","format":"uuid"},"id":{"type":"string","format":"uuid"},"resource_id":{"type":"string","format":"uuid"},"operation":{"type":"string","format":"uuid"},"name":{"type":"string"},"description":{"type":"string"}}},"CreateRoleRequest":{"required":["name"],"type":"object","properties":{"name":{"type":"string"},"description":{"maxLength":255,"minLength":0,"type":"string"}}},"RolePermissionDto":{"type":"object","properties":{"role_id":{"type":"string","format":"uuid"},"permission_id":{"type":"string","format":"uuid"}}},"RbacResource":{"type":"object","properties":{"name":{"type":"string"},"value":{"type":"string"},"service":{"type":"string"},"description":{"type":"string"},"roles":{"type":"array","items":{"type":"string"}},"permissions":{"type":"array","items":{"type":"string"}},"publicAccess":{"type":"boolean"}}},"ApiResponseBoolean":{"type":"object","properties":{"status":{"type":"string","enum":["SUCCESS","FAILED","UNKNOWN"]},"message":{"type":"string"},"data":{"type":"boolean"},"errors":{"type":"object","additionalProperties":{"type":"string"}},"ok":{"type":"boolean"}}},"AuthorityDto":{"type":"object","properties":{"name":{"type":"string"}}},"CreateUserRequest":{"required":["first_name","password","username"],"type":"object","properties":{"username":{"type":"string"},"email":{"type":"string"},"password":{"maxLength":2147483647,"minLength":6,"type":"string"},"first_name":{"maxLength":50,"minLength":3,"type":"string"},"last_name":{"maxLength":50,"minLength":0,"type":"string"},"phone_number":{"type":"string"},"authorities":{"uniqueItems":true,"type":"array","items":{"$ref":"#/components/schemas/AuthorityDto"}}}},"UserDto":{"type":"object","properties":{"created_at":{"type":"string","format":"date-time"},"updated_at":{"type":"string","format":"date-time"},"deleted_at":{"type":"string","format":"date-time"},"created_by":{"type":"string","format":"uuid"},"updated_by":{"type":"string","format":"uuid"},"id":{"type":"string","format":"uuid"},"name":{"type":"string"},"first_name":{"type":"string"},"last_name":{"type":"string"},"email":{"type":"string"},"phone_number":{"type":"string"},"password_reset_token":{"type":"string"},"password_reset_expiration":{"type":"string","format":"date-time"},"username":{"type":"string"},"email_verified":{"type":"boolean"},"phone_number_verified":{"type":"boolean"},"is_enabled":{"type":"boolean"}}},"CreatePermissionRequest":{"required":["name","operation_id","resource_id"],"type":"object","properties":{"resource_id":{"type":"string","format":"uuid"},"operation_id":{"type":"string","format":"uuid"},"name":{"type":"string"},"description":{"maxLength":255,"minLength":0,"type":"string"}}},"AuthRequest":{"required":["password","username"],"type":"object","properties":{"username":{"type":"string"},"password":{"type":"string"}}},"AccessToken":{"type":"object","properties":{"token":{"type":"string"},"type":{"type":"string"},"expire_in":{"type":"integer","format":"int64"}}},"LoginResponse":{"type":"object","properties":{"access_token":{"$ref":"#/components/schemas/AccessToken"},"user":{"$ref":"#/components/schemas/UserInfo"},"roles":{"type":"array","items":{"type":"string"}},"permissions":{"type":"array","items":{"type":"string"}}}},"UserInfo":{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"first_name":{"type":"string"},"last_name":{"type":"string"},"username":{"type":"string"},"email":{"type":"string"},"phone_number":{"type":"string"},"email_verified":{"type":"boolean"},"phone_number_verified":{"type":"boolean"}}}},"securitySchemes":{"basicAuth":{"type":"http","scheme":"basic"},"bearerAuth":{"type":"http","scheme":"bearer"},"Public-Key":{"type":"apiKey","name":"Public-Key","in":"header","scheme":"Public-Key"}}}}
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OneID",
+    "description": "Yowyob OneId",
+    "license": {
+      "name": "Unlicense",
+      "url": "https://unlicense.org/"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://gateway.yowyob.com/auth-service"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "bearerAuth": []
+    },
+    {
+      "Public-Key": []
+    }
+  ],
+  "paths": {
+    "/api/roles/{role_id}": {
+      "put": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "updateRole",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "deleteRole",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/permissions/{permission_id}": {
+      "get": {
+        "tags": [
+          "permission-controller"
+        ],
+        "operationId": "getPermissionById",
+        "parameters": [
+          {
+            "name": "permission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "permission-controller"
+        ],
+        "operationId": "updatePermission",
+        "parameters": [
+          {
+            "name": "permission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePermissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "permission-controller"
+        ],
+        "operationId": "deletePermission",
+        "parameters": [
+          {
+            "name": "permission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/roles": {
+      "get": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "getRoles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "createRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/{role_id}/permissions": {
+      "post": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "assignPermissions",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RolePermissionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "removePermissions",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/roles/{role_id}/permissions/{permission_id}": {
+      "post": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "assignPermission",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "permission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RolePermissionDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "removePermission",
+        "parameters": [
+          {
+            "name": "role_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "permission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/resources/save": {
+      "post": {
+        "tags": [
+          "resource-controller"
+        ],
+        "operationId": "createRbacResource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RbacResource"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBoolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/permissions": {
+      "get": {
+        "tags": [
+          "permission-controller"
+        ],
+        "operationId": "getAllPermissions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PermissionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "permission-controller"
+        ],
+        "operationId": "createPermission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePermissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": [
+          "login-controller"
+        ],
+        "operationId": "login",
+        "parameters": [
+          {
+            "name": "X-Environment",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user": {
+      "get": {
+        "tags": [
+          "login-controller"
+        ],
+        "operationId": "getCurrentUser",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/username/{username}": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getUserByUsername",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/phone-number/{phone_number}": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getUserByPhoneNumber",
+        "parameters": [
+          {
+            "name": "phone_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/email/{email}": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getUserByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/hierarchy": {
+      "get": {
+        "tags": [
+          "role-controller"
+        ],
+        "operationId": "getRolesHierarchy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateRoleRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "RoleDto": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePermissionRequest": {
+        "required": [
+          "name",
+          "operation_id",
+          "resource_id"
+        ],
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PermissionDto": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updated_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateRoleRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "RolePermissionDto": {
+        "type": "object",
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "permission_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "RbacResource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "publicAccess": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseBoolean": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "FAILED",
+              "UNKNOWN"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AuthorityDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "required": [
+          "first_name",
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 2147483647,
+            "minLength": 6,
+            "type": "string"
+          },
+          "first_name": {
+            "maxLength": 50,
+            "minLength": 3,
+            "type": "string"
+          },
+          "last_name": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "authorities": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorityDto"
+            }
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updated_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "password_reset_token": {
+            "type": "string"
+          },
+          "password_reset_expiration": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email_verified": {
+            "type": "boolean"
+          },
+          "phone_number_verified": {
+            "type": "boolean"
+          },
+          "is_enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreatePermissionRequest": {
+        "required": [
+          "name",
+          "operation_id",
+          "resource_id"
+        ],
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "AuthRequest": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AccessToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "expire_in": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "$ref": "#/components/schemas/AccessToken"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserInfo"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "email_verified": {
+            "type": "boolean"
+          },
+          "phone_number_verified": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "Public-Key": {
+        "type": "apiKey",
+        "name": "Public-Key",
+        "in": "header",
+        "scheme": "Public-Key"
+      }
+    }
+  }
+}

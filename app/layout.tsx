@@ -10,11 +10,11 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 
 // Initialize Montserrat font (adjust subsets and weights as needed)
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  display: "swap", // Optional but recommended
-  variable: "--font-montserrat", // Optional: if using CSS variable
-});
+// const montserrat = Montserrat({
+//   subsets: ["latin"],
+//   display: "swap", 
+//   variable: "--font-montserrat", 
+// });
 
 export const metadata = {
   title: "YowYob Dashboard",
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${montserrat.className} antialiased min-h-screen flex flex-col`}
+        className={` antialiased min-h-screen flex flex-col`}
       >
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

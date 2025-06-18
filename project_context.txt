@@ -1,5 +1,518 @@
+
+├── api-docs
+│   ├── auth-service-docs.json
+│   ├── organization-service-docs.json
+│   └── resource-management-service-docs.json
+├── app
+│   ├── api
+│   │   ├── auth
+│   │   │   └── [...nextauth]
+│   │   │       └── route.ts
+│   │   └── mock
+│   │       ├── addresses
+│   │       │   ├── [addressId]
+│   │       │   │   ├── favorite
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── route.ts
+│   │       │   └── route.ts
+│   │       ├── applications
+│   │       │   ├── [applicationId]
+│   │       │   │   └── keys
+│   │       │   │       ├── create
+│   │       │   │       │   └── route.ts
+│   │       │   │       └── route.ts
+│   │       │   └── route.ts
+│   │       ├── auth
+│   │       │   ├── login
+│   │       │   │   └── route.ts
+│   │       │   ├── permissions
+│   │       │   │   ├── [permission_id]
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── route.ts
+│   │       │   ├── register
+│   │       │   │   └── route.ts
+│   │       │   ├── resources
+│   │       │   │   └── save
+│   │       │   │       └── route.ts
+│   │       │   ├── roles
+│   │       │   │   ├── hierarchy
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── [role_id]
+│   │       │   │   │   ├── permissions
+│   │       │   │   │   │   ├── [permission_id]
+│   │       │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── route.ts
+│   │       │   ├── user
+│   │       │   │   └── route.ts
+│   │       │   └── users
+│   │       │       ├── email
+│   │       │       │   └── [email]
+│   │       │       │       └── route.ts
+│   │       │       ├── phone
+│   │       │       │   └── [phone_number]
+│   │       │       │       └── route.ts
+│   │       │       ├── route.ts
+│   │       │       └── username
+│   │       │           └── [username]
+│   │       │               └── route.ts
+│   │       ├── business-actors
+│   │       │   ├── [baId]
+│   │       │   │   └── route.ts
+│   │       │   ├── route.ts
+│   │       │   └── type
+│   │       │       └── [type]
+│   │       │           └── route.ts
+│   │       ├── business-domains
+│   │       │   ├── create
+│   │       │   │   └── route.ts
+│   │       │   ├── [domainId]
+│   │       │   │   └── route.ts
+│   │       │   ├── list
+│   │       │   │   └── route.ts
+│   │       │   └── route.ts
+│   │       ├── contacts
+│   │       │   ├── [contactId]
+│   │       │   │   ├── favorite
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── route.ts
+│   │       │   └── route.ts
+│   │       ├── images
+│   │       │   ├── details
+│   │       │   │   └── [imageId]
+│   │       │   │       └── route.ts
+│   │       │   ├── [imageId]
+│   │       │   └── [orgId]
+│   │       │       └── add
+│   │       │           └── route.ts
+│   │       ├── organization
+│   │       │   ├── all
+│   │       │   │   └── route.ts
+│   │       │   ├── create
+│   │       │   │   └── route.ts
+│   │       │   ├── domain
+│   │       │   │   └── [domainId]
+│   │       │   │       └── route.ts
+│   │       │   ├── [orgId]
+│   │       │   │   ├── agencies
+│   │       │   │   │   ├── [agencyId]
+│   │       │   │   │   │   ├── customers
+│   │       │   │   │   │   │   ├── add
+│   │       │   │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   │   └── [customerId]
+│   │       │   │   │   │   │       └── route.ts
+│   │       │   │   │   │   ├── employees
+│   │       │   │   │   │   │   ├── add
+│   │       │   │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   │   ├── create
+│   │       │   │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   │   ├── [employeeId]
+│   │       │   │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   │   ├── list
+│   │       │   │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   ├── prospects
+│   │       │   │   │   │   │   └── [prospectId]
+│   │       │   │   │   │   │       └── route.ts
+│   │       │   │   │   │   ├── route.ts
+│   │       │   │   │   │   ├── sales-people
+│   │       │   │   │   │   │   ├── route.ts
+│   │       │   │   │   │   │   └── [salesPersonId]
+│   │       │   │   │   │   │       └── route.ts
+│   │       │   │   │   │   ├── status
+│   │       │   │   │   │   │   └── route.ts
+│   │       │   │   │   │   └── suppliers
+│   │       │   │   │   │       ├── add
+│   │       │   │   │   │       │   └── route.ts
+│   │       │   │   │   │       └── [providerId]
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── certifications
+│   │       │   │   │   ├── [certId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   ├── create
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── list
+│   │       │   │   │       └── route.ts
+│   │       │   │   ├── customers
+│   │       │   │   │   ├── [customerId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── delete
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── details
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── domains
+│   │       │   │   │   └── [businessDomainId]
+│   │       │   │   │       ├── add
+│   │       │   │   │       │   └── route.ts
+│   │       │   │   │       └── remove
+│   │       │   │   │           └── route.ts
+│   │       │   │   ├── employees
+│   │       │   │   │   ├── create
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   ├── [employeeId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   ├── list
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── practical-infos
+│   │       │   │   │   ├── create
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   ├── [infoId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── list
+│   │       │   │   │       └── route.ts
+│   │       │   │   ├── proposed-activities
+│   │       │   │   │   ├── [activityId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── prospects
+│   │       │   │   │   ├── [prospectId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── sales-people
+│   │       │   │   │   ├── route.ts
+│   │       │   │   │   └── [salesPersonId]
+│   │       │   │   │       └── route.ts
+│   │       │   │   ├── status
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── suppliers
+│   │       │   │   │   ├── [providerId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── third-parties
+│   │       │   │   │   ├── details
+│   │       │   │   │   │   └── [thirdPartyId]
+│   │       │   │   │   │       ├── route.ts
+│   │       │   │   │   │       └── status
+│   │       │   │   │   │           └── route.ts
+│   │       │   │   │   ├── route.ts
+│   │       │   │   │   └── [type]
+│   │       │   │   │       └── route.ts
+│   │       │   │   └── update
+│   │       │   │       └── route.ts
+│   │       │   └── user-orgs
+│   │       │       └── route.ts
+│   │       └── user-preferences
+│   │           └── [userId]
+│   │               └── route.ts
+│   ├── (auth)
+│   │   ├── forgot-password
+│   │   │   └── page.tsx
+│   │   ├── login
+│   │   │   └── page.tsx
+│   │   └── signup
+│   │       └── page.tsx
+│   ├── (dashboard)
+│   │   ├── business-actor
+│   │   │   ├── bonus
+│   │   │   │   └── page.tsx
+│   │   │   ├── business
+│   │   │   │   └── page.tsx
+│   │   │   ├── chat
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── invoices
+│   │   │   │   └── page.tsx
+│   │   │   ├── payments
+│   │   │   │   └── page.tsx
+│   │   │   ├── planning
+│   │   │   │   └── page.tsx
+│   │   │   ├── posts
+│   │   │   │   └── page.tsx
+│   │   │   ├── products
+│   │   │   │   └── page.tsx
+│   │   │   ├── referrals
+│   │   │   │   └── page.tsx
+│   │   │   ├── reservations
+│   │   │   │   └── page.tsx
+│   │   │   ├── reviews
+│   │   │   │   └── page.tsx
+│   │   │   ├── subscription
+│   │   │   │   └── page.tsx
+│   │   │   ├── transactions
+│   │   │   │   └── page.tsx
+│   │   │   ├── wallet
+│   │   │   │   └── page.tsx
+│   │   │   ├── webhooks
+│   │   │   │   └── page.tsx
+│   │   │   └── wishlist
+│   │   │       └── page.tsx
+│   │   ├── customer
+│   │   │   ├── bonus
+│   │   │   │   └── page.tsx
+│   │   │   ├── chat
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard
+│   │   │   │   └── page.tsx
+│   │   │   ├── favorites
+│   │   │   │   └── page.tsx
+│   │   │   ├── invite
+│   │   │   │   └── page.tsx
+│   │   │   └── invoices
+│   │   │       └── page.tsx
+│   │   ├── help
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── settings
+│   │   │   └── page.tsx
+│   │   └── super-admin
+│   │       ├── bonus
+│   │       │   └── page.tsx
+│   │       ├── business-actors
+│   │       │   └── page.tsx
+│   │       ├── chat
+│   │       │   └── page.tsx
+│   │       ├── customers
+│   │       │   └── page.tsx
+│   │       ├── dashboard
+│   │       │   └── page.tsx
+│   │       ├── platforms
+│   │       │   └── page.tsx
+│   │       ├── profile
+│   │       │   └── page.tsx
+│   │       └── webhooks
+│   │           └── page.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── globals.old.css
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   └── page.tsx
+├── components
+│   ├── auth
+│   │   ├── auth-card-wrapper.tsx
+│   │   ├── forgot-password-form.tsx
+│   │   ├── login-form.tsx
+│   │   └── signup-form.tsx
+│   ├── customer
+│   │   ├── columns.tsx
+│   │   ├── CustomerProductCard.tsx
+│   │   ├── CustomerProductDataTableToolbar.tsx
+│   │   └── ReservationModal.tsx
+│   ├── date-range-picker.tsx
+│   ├── dev
+│   │   └── role-switcher.tsx
+│   ├── mode-toggle.tsx
+│   ├── not-found-buttons.tsx
+│   ├── notifications.tsx
+│   ├── organization
+│   │   ├── address-form.tsx
+│   │   ├── address-list.tsx
+│   │   ├── contact-form.tsx
+│   │   ├── contact-list.tsx
+│   │   ├── organization-detail-view.tsx
+│   │   ├── organization-form.tsx
+│   │   └── organization-switcher.tsx
+│   ├── products
+│   │   ├── columns.tsx
+│   │   ├── data-table-toolbar.tsx
+│   │   ├── ProductCard.tsx
+│   │   ├── ProductDetailView.tsx
+│   │   ├── ProductForm.tsx
+│   │   ├── ProductGridView.tsx
+│   │   └── ProductList.tsx
+│   ├── providers
+│   │   └── session-provider.tsx
+│   ├── shared
+│   ├── sidebar.old.tsx.txt
+│   ├── sidebar.tsx
+│   ├── theme-toggle.tsx
+│   ├── top-nav.tsx
+│   ├── ui
+│   │   ├── accordion.tsx
+│   │   ├── alert.tsx
+│   │   ├── avatar.tsx
+│   │   ├── badge.tsx
+│   │   ├── button.tsx
+│   │   ├── calendar.tsx
+│   │   ├── card.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── command.tsx
+│   │   ├── data-table-column-header.tsx
+│   │   ├── data-table-faceted-filter.tsx
+│   │   ├── data-table-pagination.tsx
+│   │   ├── data-table.tsx
+│   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── form.tsx
+│   │   ├── image-placeholder.tsx
+│   │   ├── image-uploader.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── popover.tsx
+│   │   ├── progress.tsx
+│   │   ├── radio-group.tsx
+│   │   ├── scroll-area.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   ├── skeleton.tsx
+│   │   ├── slider.tsx
+│   │   ├── sonner.tsx
+│   │   ├── switch.tsx
+│   │   ├── table.tsx
+│   │   ├── tabs.tsx
+│   │   ├── textarea.tsx
+│   │   └── tooltip.tsx
+│   └── user-nav.tsx
+├── components.json
+├── contexts
+│   ├── active-organization-context.tsx
+│   └── settings-context.tsx
+├── eslint.config.mjs
+├── file tree.txt
+├── hooks
+│   └── use-mouse-position.ts
+├── lib
+│   ├── apiClient.ts
+│   ├── data-repo
+│   │   ├── auth
+│   │   │   ├── auth-local-repository.ts
+│   │   │   ├── auth-remote-repository.ts
+│   │   │   ├── auth-repository-interface.ts
+│   │   │   └── index.ts
+│   │   ├── common
+│   │   ├── local-store
+│   │   │   ├── json-data
+│   │   │   │   ├── addresses.json
+│   │   │   │   ├── agencies.json
+│   │   │   │   ├── application-keys.json
+│   │   │   │   ├── applications-data.json
+│   │   │   │   ├── auth-permissions.json
+│   │   │   │   ├── auth-rbac-resources.json
+│   │   │   │   ├── auth-role-permissions.json
+│   │   │   │   ├── auth-roles.json
+│   │   │   │   ├── auth-users.json
+│   │   │   │   ├── business-actors.json
+│   │   │   │   ├── business-domains.json
+│   │   │   │   ├── certifications.json
+│   │   │   │   ├── contacts.json
+│   │   │   │   ├── employees.json
+│   │   │   │   ├── organization-images.json
+│   │   │   │   ├── organizations-details.json
+│   │   │   │   ├── organizations-table.json
+│   │   │   │   ├── organizations-table-rows.json
+│   │   │   │   ├── org-customers.json
+│   │   │   │   ├── practical-information.json
+│   │   │   │   ├── proposed-activities.json
+│   │   │   │   ├── prospects.json
+│   │   │   │   ├── providers.json
+│   │   │   │   ├── resources.json
+│   │   │   │   ├── sales-persons.json
+│   │   │   │   ├── services.json
+│   │   │   │   ├── third-parties.json
+│   │   │   │   ├── user-preferences
+│   │   │   │   └── user-preferences.json
+│   │   │   └── json-db-manager.ts
+│   │   ├── organization
+│   │   │   ├── index.ts
+│   │   │   ├── organization-local-repository.ts
+│   │   │   ├── organization-remote-repository.ts
+│   │   │   └── organization-repository-interface.ts
+│   │   ├── product-state
+│   │   ├── resource-management
+│   │   └── user-preferences
+│   │       ├── index.ts
+│   │       ├── user-preferences-local-repository.ts
+│   │       ├── user-preferences-remote-repository.ts
+│   │       └── user-preferences-repository-interface.ts
+│   ├── mock-data
+│   │   └── organization-mocks.ts
+│   ├── utils.ts
+│   └── validators
+│       └── productValidator.ts
+├── middleware.ts
+├── next.config.ts
+├── next-env.d.ts
+├── node_modules
+│   ├── bcrypt -> .pnpm/bcrypt@5.1.1/node_modules/bcrypt
+│   ├── bcryptjs -> .pnpm/bcryptjs@3.0.2/node_modules/bcryptjs
+│   ├── class-variance-authority -> .pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority
+│   ├── clsx -> .pnpm/clsx@2.1.1/node_modules/clsx
+│   ├── cmdk -> .pnpm/cmdk@1.1.1_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react@19.0.12_react-dom_f2bd6f31f9e7d8ed0a03199b3a675a74/node_modules/cmdk
+│   ├── date-fns -> .pnpm/date-fns@4.1.0/node_modules/date-fns
+│   ├── @eslint
+│   │   └── eslintrc -> ../.pnpm/@eslint+eslintrc@3.3.1/node_modules/@eslint/eslintrc
+│   ├── eslint -> .pnpm/eslint@9.23.0_jiti@2.4.2/node_modules/eslint
+│   ├── eslint-config-next -> .pnpm/eslint-config-next@15.2.4_eslint@9.23.0_jiti@2.4.2__typescript@5.8.2/node_modules/eslint-config-next
+│   ├── @hookform
+│   │   └── resolvers -> ../.pnpm/@hookform+resolvers@4.1.3_react-hook-form@7.55.0_react@19.0.0_/node_modules/@hookform/resolvers
+│   ├── lucide-react -> .pnpm/lucide-react@0.484.0_react@19.0.0/node_modules/lucide-react
+│   ├── next -> .pnpm/next@15.2.4_react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/next
+│   ├── next-auth -> .pnpm/next-auth@4.24.11_next@15.2.4_react-dom@19.0.0_react@19.0.0__react@19.0.0__react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/next-auth
+│   ├── next-themes -> .pnpm/next-themes@0.4.6_react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/next-themes
+│   ├── @radix-ui
+│   │   ├── react-accordion -> ../.pnpm/@radix-ui+react-accordion@1.2.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+re_a0be7d8bf4eff6ecaf4121c52ada33ff/node_modules/@radix-ui/react-accordion
+│   │   ├── react-avatar -> ../.pnpm/@radix-ui+react-avatar@1.1.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react_0ea66eaca7204572e02909375dfe65d6/node_modules/@radix-ui/react-avatar
+│   │   ├── react-checkbox -> ../.pnpm/@radix-ui+react-checkbox@1.1.4_@types+react-dom@19.0.4_@types+react@19.0.12__@types+rea_7e643a9f2e19ffc5ee74cdb4bd0ebf87/node_modules/@radix-ui/react-checkbox
+│   │   ├── react-dialog -> ../.pnpm/@radix-ui+react-dialog@1.1.6_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react_3c8a508962676683213ca0cbc07397c6/node_modules/@radix-ui/react-dialog
+│   │   ├── react-dropdown-menu -> ../.pnpm/@radix-ui+react-dropdown-menu@2.1.6_@types+react-dom@19.0.4_@types+react@19.0.12__@type_b9d303515da3f902903d7a5494247554/node_modules/@radix-ui/react-dropdown-menu
+│   │   ├── react-icons -> ../.pnpm/@radix-ui+react-icons@1.3.2_react@19.0.0/node_modules/@radix-ui/react-icons
+│   │   ├── react-label -> ../.pnpm/@radix-ui+react-label@2.1.2_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react@_4c5bad486260a3adc37b4ee565d40b7b/node_modules/@radix-ui/react-label
+│   │   ├── react-popover -> ../.pnpm/@radix-ui+react-popover@1.1.6_@types+react-dom@19.0.4_@types+react@19.0.12__@types+reac_64f4c9e4757d5a444f5f4e3c4e05b39a/node_modules/@radix-ui/react-popover
+│   │   ├── react-progress -> ../.pnpm/@radix-ui+react-progress@1.1.2_@types+react-dom@19.0.4_@types+react@19.0.12__@types+rea_602f7a6c341a93b170e71a986edc4200/node_modules/@radix-ui/react-progress
+│   │   ├── react-radio-group -> ../.pnpm/@radix-ui+react-radio-group@1.2.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+_9fd188d6b299beb452c907c59d60a08b/node_modules/@radix-ui/react-radio-group
+│   │   ├── react-scroll-area -> ../.pnpm/@radix-ui+react-scroll-area@1.2.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+_42257b8aeb9e434b09f45502b24b3ec5/node_modules/@radix-ui/react-scroll-area
+│   │   ├── react-select -> ../.pnpm/@radix-ui+react-select@2.1.6_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react_071413ecf6c24b21982eaae01b17b359/node_modules/@radix-ui/react-select
+│   │   ├── react-separator -> ../.pnpm/@radix-ui+react-separator@1.1.2_@types+react-dom@19.0.4_@types+react@19.0.12__@types+re_b0cdbc55be7f7bcc89778be0bfabb128/node_modules/@radix-ui/react-separator
+│   │   ├── react-slider -> ../.pnpm/@radix-ui+react-slider@1.2.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react_314809c6ffb5693f3092d0e301797626/node_modules/@radix-ui/react-slider
+│   │   ├── react-slot -> ../.pnpm/@radix-ui+react-slot@1.1.2_@types+react@19.0.12_react@19.0.0/node_modules/@radix-ui/react-slot
+│   │   ├── react-switch -> ../.pnpm/@radix-ui+react-switch@1.1.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react_b3d17f368928826f8dfb5afe4b2ff156/node_modules/@radix-ui/react-switch
+│   │   ├── react-tabs -> ../.pnpm/@radix-ui+react-tabs@1.1.3_@types+react-dom@19.0.4_@types+react@19.0.12__@types+react@1_cab092d033a22914d1547bdf00977d3f/node_modules/@radix-ui/react-tabs
+│   │   └── react-tooltip -> ../.pnpm/@radix-ui+react-tooltip@1.1.8_@types+react-dom@19.0.4_@types+react@19.0.12__@types+reac_1680e4f776f1ecb08afef3da848db097/node_modules/@radix-ui/react-tooltip
+│   ├── react -> .pnpm/react@19.0.0/node_modules/react
+│   ├── react-day-picker -> .pnpm/react-day-picker@8.10.1_date-fns@4.1.0_react@19.0.0/node_modules/react-day-picker
+│   ├── react-dom -> .pnpm/react-dom@19.0.0_react@19.0.0/node_modules/react-dom
+│   ├── react-hook-form -> .pnpm/react-hook-form@7.55.0_react@19.0.0/node_modules/react-hook-form
+│   ├── recharts -> .pnpm/recharts@2.15.1_react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/recharts
+│   ├── sonner -> .pnpm/sonner@2.0.2_react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/sonner
+│   ├── @tailwindcss
+│   │   └── postcss -> ../.pnpm/@tailwindcss+postcss@4.0.17/node_modules/@tailwindcss/postcss
+│   ├── tailwindcss -> .pnpm/tailwindcss@4.0.17/node_modules/tailwindcss
+│   ├── tailwind-merge -> .pnpm/tailwind-merge@3.0.2/node_modules/tailwind-merge
+│   ├── @tanstack
+│   │   ├── match-sorter-utils -> ../.pnpm/@tanstack+match-sorter-utils@8.19.4/node_modules/@tanstack/match-sorter-utils
+│   │   └── react-table -> ../.pnpm/@tanstack+react-table@8.21.3_react-dom@19.0.0_react@19.0.0__react@19.0.0/node_modules/@tanstack/react-table
+│   ├── tw-animate-css -> .pnpm/tw-animate-css@1.2.4/node_modules/tw-animate-css
+│   ├── @types
+│   │   ├── bcrypt -> ../.pnpm/@types+bcrypt@5.0.2/node_modules/@types/bcrypt
+│   │   ├── node -> ../.pnpm/@types+node@20.17.28/node_modules/@types/node
+│   │   ├── react -> ../.pnpm/@types+react@19.0.12/node_modules/@types/react
+│   │   └── react-dom -> ../.pnpm/@types+react-dom@19.0.4_@types+react@19.0.12/node_modules/@types/react-dom
+│   ├── typescript -> .pnpm/typescript@5.8.2/node_modules/typescript
+│   └── zod -> .pnpm/zod@3.24.2/node_modules/zod
+├── package.json
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── project_context.txt
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── logo.svg
+│   ├── next.svg
+│   ├── placeholder.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── tailwind.config.js
+├── tsconfig.json
+└── types
+    ├── auth.ts
+    ├── common.ts
+    ├── next-auth.d.ts
+    ├── organization.ts
+    ├── product.ts
+    ├── resourceManagement.ts
+    ├── table.ts
+    └── user-preferences.ts
+
+236 directories, 273 files
+
+
 Project Context From: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template
-Generated On: Tue Jun 17 10:39:21 PM WAT 2025
+Generated On: Wed Jun 18 03:13:52 PM WAT 2025
 ===============================================
 Ignored Directory Patterns: .* node_modules vendor build dist target __pycache__ .next cache target venv svgs fontawesome scss fonts webfonts images storage
 Ignored File Patterns: *.log *.jar *.pdf *.png *.jpg *.class *.sqlite *.csv project_context.txt package-lock.json yarn.lock *.json composer.lock *.ico pnpm-lock.yaml
@@ -838,7 +1351,9 @@ import { UserDto } from '@/types/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const users = dbManager.getCollection {
+    const allUsers = dbManager.getCollection('authUsers');
+    // Corrected mapping to exclude password hash
+    const users = allUsers.map(user => {
       const { password_hash, ...userWithoutPassword } = user; // Exclude password hash
       return userWithoutPassword;
     });
@@ -3336,8 +3851,7 @@ export default function BusinessActorDashboardPage() {
       )}
     </div>
   );
-}
-// END OF FILE: app/(dashboard)/business-actor/dashboard/page.tsx
+}// END OF FILE: app/(dashboard)/business-actor/dashboard/page.tsx
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/invoices/page.tsx
 
@@ -3360,1435 +3874,6 @@ export default function BusinessActorInvoicesPage() {
     </div>
   );
 }// END OF FILE: app/(dashboard)/business-actor/invoices/page.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/layout.tsx
-
-"use client"; // Provider needs to be a client component
-
-import React from "react";
-import { ActiveOrganizationProvider } from "@/contexts/active-organization-context"; // Corrected filename
-
-interface BusinessActorLayoutProps {
-  children: React.ReactNode;
-}
-
-export default function BusinessActorLayout({
-  children,
-}: BusinessActorLayoutProps) {
-  // This layout wraps all content specific to the Business Actor role.
-  // The ActiveOrganizationProvider will make the organization context
-  // available to all child pages and components.
-  return (
-    <ActiveOrganizationProvider>
-      {/*
-        The actual visual layout (Sidebar, TopNav) is likely handled by
-        app/(dashboard)/layout.tsx. This layout.tsx is primarily for
-        providing context specific to the /business-actor/* routes.
-        If you need a distinct visual layout here (e.g. a secondary sidebar for org management),
-        you would add it here. For now, it just provides context.
-      */}
-      {children}
-    </ActiveOrganizationProvider>
-  );
-}
-// END OF FILE: app/(dashboard)/business-actor/layout.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/organization/create/page.tsx
-
-"use client";
-
-import React from "react";
-import { OrganizationForm } from "@/components/organization/organization-form";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { useRouter } from "next/navigation";
-import { OrganizationDto } from "@/types/organization"; // For the callback
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-
-export default function CreateOrganizationPage() {
-  const { setActiveOrganization, refreshUserOrganizations } =
-    useActiveOrganization();
-  const router = useRouter();
-
-  const handleCreateSuccess = async (createdOrg: OrganizationDto) => {
-    if (createdOrg.organization_id) {
-      await refreshUserOrganizations(); // Refresh the list of orgs in context
-      setActiveOrganization(createdOrg.organization_id, createdOrg);
-      router.push(
-        `/business-actor/organization/${createdOrg.organization_id}/profile`
-      );
-    }
-  };
-
-  return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/business-actor/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-      </div>
-      <OrganizationForm
-        mode="create"
-        onFormSubmitSuccess={handleCreateSuccess}
-      />
-    </div>
-  );
-}
-// END OF FILE: app/(dashboard)/business-actor/organization/create/page.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/organization/[orgId]/layout.tsx
-
-"use client";
-
-import React, { useEffect, ReactNode } from "react";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Building,
-  LayoutDashboard,
-  Package,
-  Users,
-  Briefcase,
-  Settings,
-  BarChart2,
-  ShieldCheckIcon,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-
-interface OrgLayoutProps {
-  children: ReactNode;
-  params: { orgId: string }; // Next.js 13+ passes params directly
-}
-
-const orgNavItems = [
-  { name: "Profile & Details", href: "profile", icon: Building },
-  { name: "Products & Services", href: "products", icon: Package },
-  { name: "Agencies", href: "agencies", icon: Briefcase },
-  { name: "Personnel", href: "personnel", icon: Users },
-  { name: "Partners (CRM)", href: "partners", icon: Users }, // Placeholder icon
-  { name: "Settings", href: "settings", icon: Settings }, // Org-specific settings
-  { name: "Analytics", href: "analytics", icon: BarChart2 },
-];
-
-export default function OrganizationManagementLayout({
-  children,
-  params,
-}: OrgLayoutProps) {
-  const { orgId } = params;
-  // Note: In a Client Component, you cannot "await" params directly.
-  // If you need to fetch data based on params asynchronously, you should do it in a Server Component or useEffect.
-  // Here, we keep using the hook as before:
-  const {
-    activeOrganizationId,
-    activeOrganizationDetails,
-    fetchActiveOrganizationDetails,
-    isLoadingOrgDetails,
-    setActiveOrganization,
-    userOrganizations,
-  } = useActiveOrganization();
-  const router = useRouter();
-  const currentPathname = usePathname();
-
-  useEffect(() => {
-    if (orgId && orgId !== activeOrganizationId) {
-      setActiveOrganization(orgId);
-    } else if (orgId && !activeOrganizationDetails && !isLoadingOrgDetails) {
-      // If activeOrganizationId is set from URL but details are not loaded yet
-      fetchActiveOrganizationDetails(orgId);
-    }
-  }, [
-    orgId,
-    activeOrganizationId,
-    setActiveOrganization,
-    activeOrganizationDetails,
-    isLoadingOrgDetails,
-    fetchActiveOrganizationDetails,
-  ]);
-
-  // Redirect if orgId is invalid or not found after loading attempt
-  useEffect(() => {
-    if (
-      !isLoadingOrgDetails &&
-      orgId &&
-      !activeOrganizationDetails &&
-      userOrganizations.length > 0
-    ) {
-      const orgExists = userOrganizations.some(
-        (org) => org.organization_id === orgId
-      );
-      if (!orgExists) {
-        // console.warn(`Organization ID ${orgId} not found or not accessible. Redirecting.`);
-        // router.replace('/business-actor/dashboard'); // Or show a "not found" specific to org
-      }
-    }
-  }, [
-    isLoadingOrgDetails,
-    orgId,
-    activeOrganizationDetails,
-    router,
-    userOrganizations,
-  ]);
-
-  if (isLoadingOrgDetails && !activeOrganizationDetails) {
-    return (
-      <div className="container mx-auto py-8">
-        <Skeleton className="h-10 w-1/3 mb-4" />
-        <Skeleton className="h-8 w-full mb-6" />
-        <div className="p-6 border rounded-lg">
-          <Skeleton className="h-[300px] w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!activeOrganizationDetails && !isLoadingOrgDetails && orgId) {
-    return (
-      <div className="container mx-auto py-8 text-center">
-        <p className="text-destructive mb-4">
-          Organization (ID: {orgId}) not found or you do not have access.
-        </p>
-        <Button onClick={() => router.push("/business-actor/dashboard")}>
-          Back to Dashboard
-        </Button>
-      </div>
-    );
-  }
-
-  const baseOrgPath = `/business-actor/organization/${orgId}`;
-
-  return (
-    <div className="container mx-auto py-6 sm:py-8">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <div>
-          <Button variant="outline" size="sm" asChild className="mb-3 sm:mb-4">
-            <Link href="/business-actor/dashboard">
-              <ArrowLeft className="mr-3 h-4 w-4" />
-              Back to Organizations
-            </Link>
-          </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center mt-1">
-            <Building className="mr-3 h-7 w-7 text-primary flex-shrink-0" />
-            {activeOrganizationDetails?.long_name ||
-              activeOrganizationDetails?.short_name ||
-              "Organization"}
-          </h1>
-          <p className="text-sm text-muted-foreground ml-10">
-            {activeOrganizationDetails?.description
-              ? activeOrganizationDetails.description.substring(0, 70) + "..."
-              : "Manage your organization details and operations."}
-          </p>
-        </div>
-        {activeOrganizationDetails?.status && (
-          <Badge
-            variant={
-              activeOrganizationDetails.status === "ACTIVE"
-                ? "default"
-                : "secondary"
-            }
-            className="capitalize text-sm px-3 py-1 self-start sm:self-center"
-          >
-            {activeOrganizationDetails.status.toLowerCase().replace("_", " ")}
-          </Badge>
-        )}
-      </div>
-
-      {/* Secondary Navigation (Tabs for now) */}
-      <div className="mb-6 sm:mb-8 border-b">
-        <nav
-          className="-mb-px flex space-x-4 sm:space-x-6 overflow-x-auto pb-0.5 scrollbar-hide"
-          aria-label="Tabs"
-        >
-          {orgNavItems.map((item) => {
-            const itemPath = `${baseOrgPath}/${item.href}`;
-            const isActive =
-              currentPathname === itemPath ||
-              (item.href === "profile" && currentPathname === baseOrgPath); // Handle base path as profile
-            return (
-              <Link
-                key={item.name}
-                href={itemPath}
-                className={cn(
-                  "group inline-flex items-center whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm",
-                  isActive
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300 dark:hover:border-gray-700"
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground group-hover:text-foreground"
-                  )}
-                />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div>{children}</div>
-    </div>
-  );
-}
-// END OF FILE: app/(dashboard)/business-actor/organization/[orgId]/layout.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/organization/[orgId]/products/page.tsx
-
-"use client";
-
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation"; // Use for orgId from URL
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { ProductListItemData } from "@/types/product"; // Assuming this type is suitable for ResourceDto/ServiceDto list items
-import {
-  ProductFormData,
-  fullProductFormSchema,
-} from "@/lib/validators/productValidator"; // Re-use or adapt
-import {
-  resourceManagementApi, // For creating/fetching Resources/Services
-  productStateApi, // For changing state of existing products (if separate from Resource Mgmt update)
-} from "@/lib/apiClient";
-
-import { ProductForm } from "@/components/products/ProductForm";
-// ProductList and ProductGridView will now be primarily for display, data fetching in parent
-import { ProductDataTableToolbar } from "@/components/products/data-table-toolbar";
-import { DataTable } from "@/components/ui/data-table";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { ProductGridView } from "@/components/products/ProductGridView"; // For grid display
-import { ProductDetailView } from "@/components/products/ProductDetailView"; // For detail modal
-
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  PlusCircle,
-  ArrowLeft,
-  LayoutList,
-  LayoutGrid,
-  Loader2,
-  AlertTriangle,
-  Inbox,
-  PackageSearch,
-  Search,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  PaginationState,
-  RowSelectionState,
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  FilterFn,
-  Row,
-} from "@tanstack/react-table";
-import { rankItem } from "@tanstack/match-sorter-utils";
-import { cn } from "@/lib/utils";
-import { getProductColumns } from "@/components/products/columns"; // Re-use or adapt BA product columns
-
-// DTOs from Resource Management Service (assuming they map to ProductListItemData for now)
-import {
-  ResourceDto,
-  ServiceDto,
-  CreateResourceRequest,
-  CreateServiceRequest,
-  UpdateResourceRequest,
-  UpdateServiceRequest,
-} from "@/types/resourceManagement";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import Link from "next/link";
-
-type PageMode = "list" | "create" | "edit" | "detail";
-type ViewMode = "list" | "grid";
-
-// State transitions (from original Product Management Service spec)
-// These might need to be adapted if Resource Management Service handles state differently
-const resourceStateTransitions: Record<string, string[]> = {
-  FREE: ["AFFECTED"],
-  AFFECTED: ["FREE", "IN_USE"],
-  IN_USE: ["FREE"],
-};
-const serviceStateTransitions: Record<string, string[]> = {
-  PLANNED: ["PUBLISHED", "CANCELLED"],
-  PUBLISHED: ["PLANNED", "ONGOING", "CANCELLED"],
-  ONGOING: ["FINISHED"],
-  FINISHED: [],
-  CANCELLED: [],
-};
-
-const fuzzyGlobalFilterFn: FilterFn<ProductListItemData> = (
-  row,
-  columnId,
-  value,
-  addMeta
-) => {
-  const itemRank = rankItem(row.getValue(columnId), value);
-  addMeta({ itemRank } as any);
-  return itemRank.passed;
-};
-
-export default function OrganizationProductsPage() {
-  const params = useParams();
-  const orgId = params.orgId as string;
-  const router = useRouter();
-  const {
-    activeOrganizationDetails,
-    isLoadingOrgDetails: isLoadingActiveOrg,
-    fetchActiveOrganizationDetails,
-  } = useActiveOrganization();
-
-  const [pageMode, setPageMode] = useState<PageMode>("list");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
-
-  const [activeProductForForm, setActiveProductForForm] = useState<
-    | Partial<ProductFormData & { id?: string; currentState?: string }>
-    | undefined
-  >(undefined);
-  const [activeProductForDetail, setActiveProductForDetail] = useState<
-    ProductListItemData | undefined
-  >(undefined);
-
-  const [allOrgProducts, setAllOrgProducts] = useState<ProductListItemData[]>(
-    []
-  );
-  const [isProductsLoading, setIsProductsLoading] = useState(true);
-  const [productsError, setProductsError] = useState<string | null>(null);
-  const [itemActionLoading, setItemActionLoading] = useState<{
-    [productId: string]: boolean;
-  }>({});
-  const [dataVersion, setDataVersion] = useState(0); // For triggering refetch
-
-  // TanStack Table State
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState<string>("");
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  // Ensure active org details are loaded if not already
-  useEffect(() => {
-    if (orgId && !activeOrganizationDetails && !isLoadingActiveOrg) {
-      fetchActiveOrganizationDetails(orgId);
-    }
-  }, [
-    orgId,
-    activeOrganizationDetails,
-    isLoadingActiveOrg,
-    fetchActiveOrganizationDetails,
-  ]);
-
-  const fetchOrganizationProducts = useCallback(async () => {
-    if (!orgId) {
-      setProductsError("Organization ID is missing.");
-      setIsProductsLoading(false);
-      return;
-    }
-    setIsProductsLoading(true);
-    setProductsError(null);
-    try {
-      // MOCK API CALLS - Replace with actual resourceManagementApi calls
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      const now = Date.now();
-      const dayMs = 24 * 60 * 60 * 1000;
-
-      const mockResources: ProductListItemData[] = [
-        {
-          id: `res-${orgId}-1`,
-          name: `Chair for ${activeOrganizationDetails?.short_name || orgId}`,
-          productType: "RESOURCE",
-          currentState: "FREE",
-          basePrice: 199,
-          createdAt: new Date(now - 5 * dayMs).toISOString(),
-          updatedAt: new Date(now - 1 * dayMs).toISOString(),
-          description: "Ergonomic chair available at this org.",
-          baInfo: {
-            id: orgId,
-            name: activeOrganizationDetails?.short_name || "Org",
-          },
-        },
-        {
-          id: `res-${orgId}-2`,
-          name: `Desk for ${activeOrganizationDetails?.short_name || orgId}`,
-          productType: "RESOURCE",
-          currentState: "AFFECTED",
-          basePrice: 350,
-          createdAt: new Date(now - 10 * dayMs).toISOString(),
-          updatedAt: new Date(now - 2 * dayMs).toISOString(),
-          description: "Spacious desk for this org.",
-          baInfo: {
-            id: orgId,
-            name: activeOrganizationDetails?.short_name || "Org",
-          },
-        },
-      ];
-      const mockServices: ProductListItemData[] = [
-        {
-          id: `srv-${orgId}-1`,
-          name: `Consulting by ${
-            activeOrganizationDetails?.short_name || orgId
-          }`,
-          productType: "SERVICE",
-          currentState: "PUBLISHED",
-          basePrice: 250,
-          createdAt: new Date(now - 20 * dayMs).toISOString(),
-          updatedAt: new Date(now - 3 * dayMs).toISOString(),
-          description: "Expert consulting services.",
-          baInfo: {
-            id: orgId,
-            name: activeOrganizationDetails?.short_name || "Org",
-          },
-        },
-      ];
-      // In reality, you'd call:
-      // const resources = await resourceManagementApi.getResources(orgId);
-      // const services = await resourceManagementApi.getServices(orgId);
-      // Then map DTOs to ProductListItemData if necessary
-      setAllOrgProducts([...mockResources, ...mockServices]);
-    } catch (err: any) {
-      setProductsError(
-        err.message || "Could not load products for this organization."
-      );
-      toast.error(err.message || "Could not load products.");
-      setAllOrgProducts([]);
-    } finally {
-      setIsProductsLoading(false);
-    }
-  }, [orgId, activeOrganizationDetails?.short_name]); // Dependency on orgId ensures refetch if it changes
-
-  useEffect(() => {
-    if (orgId) {
-      // Only fetch if orgId is available
-      fetchOrganizationProducts();
-    }
-  }, [fetchOrganizationProducts, dataVersion, orgId]); // Re-fetch if orgId or dataVersion changes
-
-  const refreshProducts = useCallback(() => setDataVersion((v) => v + 1), []);
-
-  const handleFormSuccess = useCallback(() => {
-    setPageMode("list");
-    setActiveProductForForm(undefined);
-    refreshProducts();
-  }, [refreshProducts]);
-
-  const handleSwitchToCreateMode = useCallback(() => {
-    setActiveProductForForm({}); // Start with empty form for create
-    setPageMode("create");
-  }, []);
-
-  const handleSwitchToListMode = useCallback(() => {
-    setActiveProductForForm(undefined);
-    setActiveProductForDetail(undefined);
-    setPageMode("list");
-  }, []);
-
-  const handleViewProductDetails = useCallback(
-    (product: ProductListItemData) => {
-      setActiveProductForDetail(product);
-      setPageMode("detail");
-    },
-    []
-  );
-
-  const handleCloseDetailView = useCallback(() => {
-    setPageMode("list");
-    setActiveProductForDetail(undefined);
-  }, []);
-
-  const handleInitiateEdit = useCallback((product: ProductListItemData) => {
-    // Map ProductListItemData to ProductFormData. This might need adjustments.
-    const formData: Partial<
-      ProductFormData & { id?: string; currentState?: string }
-    > = {
-      id: product.id,
-      productType: product.productType,
-      name: product.name,
-      description: product.description,
-      basePrice: product.basePrice,
-      currentState: product.currentState, // Pass current state for context in form if needed
-      isScheduled: product.isScheduled,
-      scheduledAt: product.scheduledAt
-        ? new Date(product.scheduledAt)
-        : undefined,
-      // ... map other fields if your ProductForm expects them from ProductListItemData
-    };
-    setActiveProductForForm(formData);
-    setPageMode("edit");
-  }, []);
-
-  const handleDeleteProduct = useCallback(
-    async (product: ProductListItemData) => {
-      if (
-        !orgId ||
-        !product.id ||
-        !confirm(`Are you sure you want to delete "${product.name}"?`)
-      )
-        return;
-      setItemActionLoading((prev) => ({ ...prev, [product.id!]: true }));
-      try {
-        if (product.productType === "RESOURCE") {
-          // await resourceManagementApi.deleteResource(orgId, product.id); // REAL API
-        } else {
-          // await resourceManagementApi.deleteService(orgId, product.id); // REAL API
-        }
-        await new Promise((r) => setTimeout(r, 500)); // MOCK
-        toast.success(`"${product.name}" deleted successfully.`);
-        refreshProducts();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to delete product.");
-      } finally {
-        setItemActionLoading((prev) => ({ ...prev, [product.id!]: false }));
-      }
-    },
-    [orgId, refreshProducts]
-  );
-
-  const handleChangeProductState = useCallback(
-    async (product: ProductListItemData, newState: string) => {
-      if (
-        !product.id ||
-        !confirm(
-          `Change state of "${product.name}" to ${newState.toUpperCase()}?`
-        )
-      )
-        return;
-      setItemActionLoading((prev) => ({ ...prev, [product.id!]: true }));
-      try {
-        const payload = { currentState: newState.toUpperCase() };
-        // Use productStateApi or resourceManagementApi update endpoint if state is part of its DTO
-        if (product.productType === "RESOURCE") {
-          // await productStateApi.updateResourceState(product.id, payload); // REAL API
-        } else {
-          // await productStateApi.updateServiceState(product.id, payload); // REAL API
-        }
-        await new Promise((r) => setTimeout(r, 500)); // MOCK
-        toast.success(
-          `State for "${product.name}" changed to ${newState.toUpperCase()}.`
-        );
-        refreshProducts();
-      } catch (error: any) {
-        const errorMessage =
-          (error as any).status === 409
-            ? "State transition not allowed."
-            : error.message || "Failed to change product state.";
-        toast.error(errorMessage);
-      } finally {
-        setItemActionLoading((prev) => ({ ...prev, [product.id!]: false }));
-      }
-    },
-    [refreshProducts]
-  );
-
-  const columns = useMemo<ColumnDef<ProductListItemData>[]>(
-    () =>
-      getProductColumns({
-        onEdit: handleInitiateEdit,
-        onDelete: handleDeleteProduct,
-        onChangeState: handleChangeProductState,
-        onViewDetails: handleViewProductDetails,
-        resourceStateTransitions,
-        serviceStateTransitions,
-        getIsItemActionLoading: (productId: string) =>
-          !!itemActionLoading[productId],
-      }),
-    [
-      handleInitiateEdit,
-      handleDeleteProduct,
-      handleChangeProductState,
-      handleViewProductDetails,
-      itemActionLoading,
-    ]
-  );
-
-  const table = useReactTable({
-    data: allOrgProducts,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      columnVisibility,
-      rowSelection,
-      pagination,
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    globalFilterFn: fuzzyGlobalFilterFn,
-    manualPagination: false,
-    manualSorting: false,
-    manualFiltering: false,
-    enableRowSelection: true,
-  });
-
-  useEffect(() => {
-    const newPageSize = viewMode === "grid" ? 12 : 10;
-    if (table.getState().pagination.pageSize !== newPageSize) {
-      table.setPageSize(newPageSize);
-    }
-  }, [viewMode, table]);
-
-  const currentTablePageRows: Row<ProductListItemData>[] =
-    table.getRowModel().rows;
-
-  if (isLoadingActiveOrg && !activeOrganizationDetails) {
-    return (
-      <div className="container mx-auto py-8">
-        <Skeleton className="h-12 w-1/2 mb-6" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-  if (!orgId || (!isLoadingActiveOrg && !activeOrganizationDetails)) {
-    return (
-      <div className="container mx-auto py-8 text-center">
-        <AlertTriangle className="mx-auto h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-xl font-semibold mb-2">
-          Organization Not Selected
-        </h2>
-        <p className="text-muted-foreground mb-4">
-          Please select an active organization from the dashboard to manage its
-          products.
-        </p>
-        <Button asChild>
-          <Link href="/business-actor/dashboard">Go to Dashboard</Link>
-        </Button>
-      </div>
-    );
-  }
-
-  const renderMainContent = () => {
-    if (
-      pageMode === "create" ||
-      (pageMode === "edit" && activeProductForForm)
-    ) {
-      return (
-        <ProductForm
-          mode={pageMode as "create" | "edit"}
-          initialData={activeProductForForm}
-          onFormSubmitSuccess={handleFormSuccess}
-          // Pass organizationId for API calls within ProductForm
-          // organizationId={orgId}
-        />
-      );
-    }
-
-    if (isProductsLoading && allOrgProducts.length === 0) {
-      return viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {Array.from({ length: table.getState().pagination.pageSize }).map(
-            (_, i) => (
-              <Card key={i}>
-                <Skeleton className="aspect-[16/10] w-full rounded-t-lg" />
-                <CardHeader className="pb-2 pt-3">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-3 w-1/2 mt-1.5" />
-                </CardHeader>
-                <CardContent className="space-y-2 py-2">
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-5/6" />
-                </CardContent>
-                <CardFooter className="pt-2 pb-3">
-                  <Skeleton className="h-8 w-full" />
-                </CardFooter>
-              </Card>
-            )
-          )}
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <div className="p-4 border-b">
-            <Skeleton className="h-6 w-1/3" />
-          </div>
-          <div className="divide-y">
-            {Array.from({ length: table.getState().pagination.pageSize }).map(
-              (_, i) => (
-                <div key={i} className="flex items-center gap-3 p-4">
-                  <Skeleton className="h-12 w-12 rounded-md flex-shrink-0" />
-                  <div className="space-y-1.5 flex-1">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                  <Skeleton className="h-8 w-20 rounded-md" />
-                  <Skeleton className="h-8 w-24 rounded-md ml-auto" />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      );
-    }
-    if (productsError) {
-      return (
-        <div className="mt-4 p-10 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
-          {" "}
-          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />{" "}
-          <p className="text-destructive-foreground font-semibold">
-            {productsError}
-          </p>{" "}
-          <Button
-            onClick={refreshProducts}
-            variant="destructive"
-            className="mt-6"
-          >
-            Try Again
-          </Button>{" "}
-        </div>
-      );
-    }
-    if (table.getRowModel().rows.length === 0 && allOrgProducts.length > 0) {
-      // Filtered to empty
-      return (
-        <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-md p-6 mt-4">
-          <Search className="h-16 w-16 text-muted-foreground/70 mb-6" />
-          <h3 className="text-lg font-semibold">
-            No Products Match Your Filters
-          </h3>
-          <p className="text-sm">
-            Try adjusting your search or filter criteria.
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setGlobalFilter("");
-              table.resetColumnFilters();
-            }}
-            className="mt-4"
-          >
-            Clear Filters
-          </Button>
-        </div>
-      );
-    }
-    if (allOrgProducts.length === 0) {
-      // Truly no products
-      return (
-        <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-md p-6 mt-4">
-          <PackageSearch className="h-16 w-16 text-muted-foreground/70 mb-6" />
-          <h3 className="text-lg font-semibold">No Products Yet</h3>
-          <p className="text-sm">
-            This organization hasn't added any products or services.
-          </p>
-          <Button onClick={handleSwitchToCreateMode} className="mt-4">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add First Product
-          </Button>
-        </div>
-      );
-    }
-
-    // Display logic
-    if (viewMode === "grid") {
-      return (
-        <ProductGridView
-          products={currentTablePageRows.map((row) => row.original)}
-          isLoading={isProductsLoading && allOrgProducts.length > 0} // Pass refined loading
-          error={null}
-          getActionLoadingState={(productId) => !!itemActionLoading[productId]}
-          onEdit={handleInitiateEdit}
-          onDelete={handleDeleteProduct}
-          onChangeState={handleChangeProductState}
-          onViewDetails={handleViewProductDetails}
-          resourceStateTransitions={resourceStateTransitions}
-          serviceStateTransitions={serviceStateTransitions}
-        />
-      );
-    }
-    return (
-      <DataTable
-        columns={columns}
-        data={allOrgProducts}
-        pageCount={table.getPageCount()}
-        sorting={sorting}
-        onSortingChange={setSorting}
-        columnFilters={columnFilters}
-        onColumnFiltersChange={setColumnFilters}
-        globalFilter={globalFilter}
-        onGlobalFilterChange={setGlobalFilter}
-        columnVisibility={columnVisibility}
-        onColumnVisibilityChange={setColumnVisibility}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        manualPagination={false}
-        manualSorting={false}
-        manualFiltering={false}
-      />
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      <header>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Manage Products & Services
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Create, view, and manage resources and services for{" "}
-              {activeOrganizationDetails?.short_name || "this organization"}.
-            </p>
-          </div>
-          <div className="flex items-center gap-x-2 flex-shrink-0">
-            {pageMode === "list" && (
-              <>
-                <div className="flex items-center p-0.5 bg-muted rounded-md">
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className={cn(
-                      "h-9 px-3",
-                      viewMode === "list" &&
-                        "bg-background text-foreground shadow-sm"
-                    )}
-                    data-state={viewMode === "list" ? "active" : "inactive"}
-                  >
-                    <LayoutList className="h-4 w-4" />
-                    <span className="ml-1.5 hidden sm:inline">List</span>
-                  </Button>
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className={cn(
-                      "h-9 px-3",
-                      viewMode === "grid" &&
-                        "bg-background text-foreground shadow-sm"
-                    )}
-                    data-state={viewMode === "grid" ? "active" : "inactive"}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                    <span className="ml-1.5 hidden sm:inline">Grid</span>
-                  </Button>
-                </div>
-                <Button
-                  onClick={handleSwitchToCreateMode}
-                  size="sm"
-                  className="h-10"
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" /> New Product
-                </Button>
-              </>
-            )}
-            {(pageMode === "create" ||
-              pageMode === "edit" ||
-              pageMode === "detail") && (
-              <Button
-                variant="outline"
-                onClick={handleSwitchToListMode}
-                size="sm"
-                className="h-10"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Products
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
-      {/* Toolbar only for list mode or when not creating/editing */}
-      {pageMode === "list" && (
-        <ProductDataTableToolbar
-          table={table} // Pass the table instance here
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-        />
-      )}
-      <main>
-        {renderMainContent()}
-        {/* Pagination outside renderMainContent, controlled by pageMode and data availability */}
-        {viewMode === "list" &&
-          !isProductsLoading &&
-          !productsError &&
-          allOrgProducts.length > 0 &&
-          table.getPageCount() > 0 && <DataTablePagination table={table} />}
-        {viewMode === "grid" &&
-          !isProductsLoading &&
-          !productsError &&
-          allOrgProducts.length > 0 &&
-          table.getPageCount() > 0 && (
-            <div className="mt-6">
-              <DataTablePagination table={table} />
-            </div>
-          )}
-      </main>
-      {/* Detail View Modal (remains the same) */}
-      {pageMode === "detail" && activeProductForDetail && (
-        <Dialog
-          open={pageMode === "detail"}
-          onOpenChange={(open) => !open && handleCloseDetailView()}
-        >
-          <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
-            <ProductDetailView
-              product={activeProductForDetail}
-              onClose={handleCloseDetailView}
-              onEdit={() =>
-                activeProductForDetail &&
-                handleInitiateEdit(activeProductForDetail)
-              }
-              isBAView={true} // This is the BA's view of their own product
-            />
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
-}
-// END OF FILE: app/(dashboard)/business-actor/organization/[orgId]/products/page.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/organization/[orgId]/profile/page.tsx
-
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { OrganizationForm } from "@/components/organization/organization-form";
-import { OrganizationDetailView } from "@/components/organization/organization-detail-view";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Edit3,
-  PlusCircle,
-  MapPin,
-  Phone,
-  Info,
-  Award,
-  Users,
-  Image as ImageIcon,
-} from "lucide-react";
-import { AddressList } from "@/components/organization/address-list"; // To be created
-import { ContactList } from "@/components/organization/contact-list"; // To be created
-import {
-  OrganizationDto,
-  UpdateOrganizationStatusRequest,
-} from "@/types/organization";
-import { toast } from "sonner";
-// import { organizationApi } from "@/lib/apiClient";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-
-// Placeholder components until they are fully implemented
-const PracticalInfoSection = () => (
-  <Card className="mt-6">
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <Info className="mr-2" />
-        Practical Information
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-muted-foreground">
-        Management UI for practical info coming soon.
-      </p>
-    </CardContent>
-  </Card>
-);
-const CertificationsSection = () => (
-  <Card className="mt-6">
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <Award className="mr-2" />
-        Certifications
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-muted-foreground">
-        Management UI for certifications coming soon.
-      </p>
-    </CardContent>
-  </Card>
-);
-const BusinessDomainsSection = () => (
-  <Card className="mt-6">
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <Users className="mr-2" />
-        Business Domains
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-muted-foreground">
-        Management UI for business domains coming soon.
-      </p>
-    </CardContent>
-  </Card>
-);
-const ImagesSection = () => (
-  <Card className="mt-6">
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <ImageIcon className="mr-2" />
-        Image Gallery
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-muted-foreground">
-        Management UI for image gallery coming soon.
-      </p>
-    </CardContent>
-  </Card>
-);
-
-export default function OrganizationProfilePage() {
-  const params = useParams();
-  const orgId = params.orgId as string;
-  const {
-    activeOrganizationDetails,
-    fetchActiveOrganizationDetails,
-    isLoadingOrgDetails,
-    refreshUserOrganizations,
-    setActiveOrganization,
-  } = useActiveOrganization();
-  const router = useRouter();
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<
-    OrganizationDto["status"] | undefined
-  >(activeOrganizationDetails?.status);
-
-  useEffect(() => {
-    if (orgId && !activeOrganizationDetails && !isLoadingOrgDetails) {
-      fetchActiveOrganizationDetails(orgId);
-    }
-    if (
-      activeOrganizationDetails &&
-      activeOrganizationDetails.status !== selectedStatus
-    ) {
-      setSelectedStatus(activeOrganizationDetails.status);
-    }
-  }, [
-    orgId,
-    fetchActiveOrganizationDetails,
-    activeOrganizationDetails,
-    isLoadingOrgDetails,
-  ]);
-
-  const handleUpdateSuccess = (updatedOrg: OrganizationDto) => {
-    fetchActiveOrganizationDetails(orgId); // Re-fetch to get latest details
-    refreshUserOrganizations(); // Refresh list in dashboard/context
-    setIsEditModalOpen(false);
-  };
-
-  const handleStatusUpdate = async () => {
-    if (!orgId || !selectedStatus) {
-      toast.error("Organization ID or status missing.");
-      return;
-    }
-    try {
-      const payload: UpdateOrganizationStatusRequest = {
-        status: selectedStatus,
-      };
-      const updatedOrg = await organizationApi.updateOrganizationStatus(
-        orgId,
-        payload
-      );
-      toast.success(`Organization status updated to ${selectedStatus}.`);
-      setActiveOrganization(orgId, updatedOrg); // Update context with full new DTO
-      setIsStatusModalOpen(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update organization status.");
-    }
-  };
-
-  if (isLoadingOrgDetails && !activeOrganizationDetails) {
-    return <div>Loading organization details...</div>; // Add Skeleton later
-  }
-
-  if (!activeOrganizationDetails) {
-    return (
-      <div className="text-center py-10">
-        <p>
-          Organization not found or not loaded. Please select an organization
-          from the dashboard.
-        </p>
-        <Button
-          onClick={() => router.push("/business-actor/dashboard")}
-          className="mt-4"
-        >
-          Go to Dashboard
-        </Button>
-      </div>
-    );
-  }
-
-  const organizationStatusOptions: {
-    value: OrganizationDto["status"];
-    label: string;
-  }[] = [
-    { value: "ACTIVE", label: "Active" },
-    { value: "INACTIVE", label: "Inactive" },
-    { value: "SUSPENDED", label: "Suspended" },
-    { value: "PENDING_APPROVAL", label: "Pending Approval" },
-    { value: "UNDER_REVIEW", label: "Under Review" }, // Add others as needed
-  ];
-
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Organization Overview</h2>
-        <div className="flex gap-2">
-          <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                Change Status
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Update Organization Status</DialogTitle>
-                <DialogDescription>
-                  Select the new status for{" "}
-                  {activeOrganizationDetails.short_name}.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Select
-                  value={selectedStatus}
-                  onValueChange={(value) =>
-                    setSelectedStatus(value as OrganizationDto["status"])
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {organizationStatusOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value!}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsStatusModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleStatusUpdate}>Update Status</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Edit3 className="mr-2 h-4 w-4" /> Edit Details
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Edit Organization</DialogTitle>
-                <DialogDescription>
-                  Make changes to your organization's details below.
-                </DialogDescription>
-              </DialogHeader>
-              <OrganizationForm
-                mode="edit"
-                initialData={activeOrganizationDetails}
-                organizationId={orgId}
-                onFormSubmitSuccess={handleUpdateSuccess}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      <OrganizationDetailView organization={activeOrganizationDetails} />
-
-      <Separator className="my-8" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center">
-              <MapPin className="mr-2" />
-              Addresses
-            </CardTitle>
-            <Button size="sm" variant="outline"><PlusCircle className="mr-2 h-4 w-4"/>Add Address</Button>
-          </CardHeader>
-          <CardContent>
-            <AddressList
-              organizationId={orgId}
-              contactableType="ORGANIZATION"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center">
-              <Phone className="mr-2" />
-              Contacts
-            </CardTitle>
-            <Button size="sm" variant="outline"><PlusCircle className="mr-2 h-4 w-4"/>Add Contact</Button>
-          </CardHeader>
-          <CardContent>
-            <ContactList
-              organizationId={orgId}
-              contactableType="ORGANIZATION"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      <PracticalInfoSection />
-      <CertificationsSection />
-      <BusinessDomainsSection />
-      <ImagesSection />
-    </div>
-  );
-}
-// END OF FILE: app/(dashboard)/business-actor/organization/[orgId]/profile/page.tsx
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/organization/page.tsx
-
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-export default function BusinessActorOrganizationPage() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Organization Management</h1>
-
-      <Tabs defaultValue="analytics" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="analytics">Analytics/Statistics</TabsTrigger>
-          <TabsTrigger value="headquarter">Headquarter</TabsTrigger>
-          <TabsTrigger value="personnel">Personnel & Roles</TabsTrigger>
-          <TabsTrigger value="agencies">Agencies</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          {/* Add more tabs for advanced features if needed */}
-        </TabsList>
-
-        <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Organization-wide statistics and analytics will be displayed here.</p>
-              {/* TODO: Implement Analytics/Statistics components */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="headquarter">
-          <Card>
-            <CardHeader>
-              <CardTitle>Headquarter Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>View and manage headquarter information.</p>
-              {/* TODO: Implement Headquarter form/details */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="personnel">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personnel & Roles</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Manage organization staff, roles, and permissions.</p>
-              {/* TODO: Implement Personnel/User table, role management */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="agencies">
-          <Card>
-            <CardHeader>
-              <CardTitle>Agencies</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Manage and view performance of different agencies/branches.</p>
-              {/* TODO: Implement Agency list/management */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="products">
-          <Card>
-            <CardHeader>
-              <CardTitle>Products</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Manage the products or services offered by the organization.</p>
-              {/* TODO: Implement Product list/management, inventory (advanced) */}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-      </Tabs>
-    </div>
-  );
-}// END OF FILE: app/(dashboard)/business-actor/organization/page.tsx
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/business-actor/payments/page.tsx
 
@@ -6273,303 +5358,6 @@ export default function CustomerInvoicesPage() {
   );
 }// END OF FILE: app/(dashboard)/customer/invoices/page.tsx
 
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/customer/services/page.tsx
-
-"use client";
-
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { ProductListItemData } from "@/types/product";
-import { CustomerProductCard } from "@/components/customer/CustomerProductCard";
-import { getCustomerProductColumns } from "@/components/customer/columns";
-import { CustomerProductDataTableToolbar } from "@/components/customer/CustomerProductDataTableToolbar";
-import { DataTable } from "@/components/ui/data-table";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, LayoutGrid, LayoutList, Frown, ShoppingBag, Search } from "lucide-react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import {
-  ColumnDef, SortingState, ColumnFiltersState, VisibilityState, PaginationState, RowSelectionState,
-  useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
-  getSortedRowModel, getFacetedRowModel, getFacetedUniqueValues, FilterFn, Table, Row
-} from "@tanstack/react-table";
-import { rankItem } from '@tanstack/match-sorter-utils';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ProductDetailView } from "@/components/products/ProductDetailView";
-import { ReservationModal } from "@/components/customer/ReservationModal"; // Import ReservationModal
-
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-type ViewMode = "grid" | "list";
-
-// Mock API call (Keep your existing mock data and fetch function here)
-const fetchCustomerProducts = async (): Promise<ProductListItemData[]> => {
-  console.log("Simulating API: Fetching ALL customer products for client-side filtering.");
-  await new Promise(resolve => setTimeout(resolve, 600));
-  const placeholderImageUrl = "";
-  const mockData: ProductListItemData[] = [
-    { id: "srv1", name: "Zen Garden Yoga Class (Single Session)", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 25, description: "Find your inner peace with our guided yoga session. Suitable for all levels.", imageUrl: placeholderImageUrl, baInfo: { id: "ba1", name: "Zenith Wellness", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 2).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 1).toISOString() },
-    { id: "res1", name: "Artisan Handcrafted Coffee Mug", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 35, description: "Beautifully handcrafted ceramic mug, perfect for your morning brew. Limited stock!", imageUrl: placeholderImageUrl, baInfo: { id: "ba2", name: "Crafty Corner", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 2).toISOString() },
-    { id: "srv2", name: "Pro Photography Session (1 Hour)", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 150, description: "Capture your special moments with a professional 1-hour photo shoot. Includes 20 edited digital images.", imageUrl: placeholderImageUrl, baInfo: { id: "ba3", name: "Shutter Speed Inc.", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 3).toISOString() },
-    { id: "res2", name: "Organic Fruit Basket - Weekly", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 45, description: "Weekly subscription for a basket of fresh, seasonal organic fruits delivered to your doorstep.", imageUrl: placeholderImageUrl, baInfo: { id: "ba4", name: "FarmFresh Goods", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 15).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 4).toISOString() },
-    { id: "srv4", name: "Online Coding Bootcamp", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 499, description: "Intensive 12-week online coding bootcamp covering full-stack development.", imageUrl: placeholderImageUrl, baInfo: { id: "ba5", name: "CodeAcademy Plus", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 20).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 5).toISOString() },
-    { id: "res3", name: "Premium Bluetooth Headphones", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 120, description: "High-fidelity sound with noise cancellation and long battery life.", imageUrl: placeholderImageUrl, baInfo: { id: "ba6", name: "AudioPhile Gear", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 8).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 2).toISOString() },
-    { id: "srv5", name: "Home Cleaning Service (3 hours)", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 90, description: "Professional home cleaning service for up to 3 hours. All supplies included.", imageUrl: placeholderImageUrl, baInfo: { id: "ba7", name: "Sparkle Clean Co.", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 12).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 3).toISOString() },
-    { id: "res4", name: "Smart Home Security Camera", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 75, description: "1080p HD security camera with night vision and two-way audio.", imageUrl: placeholderImageUrl, baInfo: { id: "ba6", name: "AudioPhile Gear" }, createdAt: new Date(Date.now() - 86400000 * 18).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 6).toISOString() },
-    { id: "srv6", name: "Graphic Design: Logo Package", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 250, description: "Custom logo design package with multiple concepts and revisions.", imageUrl: placeholderImageUrl, baInfo: { id: "ba8", name: "Creative Canvas Studio", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 25).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 7).toISOString() },
-    { id: "res5", name: "Portable Power Bank 20000mAh", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 40, description: "High-capacity power bank to keep your devices charged on the go.", imageUrl: placeholderImageUrl, baInfo: { id: "ba6", name: "AudioPhile Gear" }, createdAt: new Date(Date.now() - 86400000 * 4).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 1).toISOString() },
-    { id: "srv7", name: "Personalized Nutrition Plan", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 60, description: "Diet plan created by a certified nutritionist based on your needs.", imageUrl: placeholderImageUrl, baInfo: { id: "ba1", name: "Zenith Wellness" }, createdAt: new Date(Date.now() - 86400000 * 30).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 10).toISOString() },
-    { id: "res6", name: "Indoor Herb Garden Kit", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 30, description: "Grow your own fresh herbs indoors with this easy-to-use kit.", imageUrl: placeholderImageUrl, baInfo: { id: "ba4", name: "FarmFresh Goods" }, createdAt: new Date(Date.now() - 86400000 * 7).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 2).toISOString() },
-    { id: "srv8", name: "Virtual Assistant Services (10hr block)", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 200, description: "Delegate your tasks to a professional virtual assistant. 10 hours per month.", imageUrl: placeholderImageUrl, baInfo: { id: "ba9", name: "TaskMasters VA", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 40).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 10).toISOString() },
-    { id: "res7", name: "Adjustable Dumbbell Set", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 180, description: "Space-saving adjustable dumbbell set, perfect for home workouts.", imageUrl: placeholderImageUrl, baInfo: { id: "ba10", name: "HomeFit Gear", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 3).toISOString() },
-    { id: "srv9", name: "Language Tutoring: Spanish (1hr)", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 30, description: "Personalized Spanish language tutoring with a native speaker.", imageUrl: placeholderImageUrl, baInfo: { id: "ba11", name: "LinguaLearn", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 22).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 5).toISOString() },
-    { id: "res8", name: "Professional Artist Paint Set", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 65, description: "High-quality acrylic paint set with a variety of brushes for artists.", imageUrl: placeholderImageUrl, baInfo: { id: "ba2", name: "Crafty Corner" }, createdAt: new Date(Date.now() - 86400000 * 6).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 1).toISOString() },
-    { id: "srv10", name: "Career Coaching Session", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 120, description: "Guidance and strategies to advance your career and achieve professional goals.", imageUrl: placeholderImageUrl, baInfo: { id: "ba12", name: "Career Path Pro", logoUrl: "" }, createdAt: new Date(Date.now() - 86400000 * 35).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 8).toISOString() },
-    { id: "res9", name: "Electric Gooseneck Kettle", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 50, description: "Precision pour electric kettle, ideal for coffee and tea enthusiasts.", imageUrl: placeholderImageUrl, baInfo: { id: "ba2", name: "Crafty Corner" }, createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 1).toISOString() },
-    { id: "srv11", name: "Custom Web Component Development", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 350, description: "Development of a bespoke web component tailored to your specific requirements.", imageUrl: placeholderImageUrl, baInfo: { id: "ba5", name: "CodeAcademy Plus" }, createdAt: new Date(Date.now() - 86400000 * 28).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 9).toISOString() },
-    { id: "res10", name: "Yoga Mat - Eco Friendly", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 40, description: "Durable and eco-friendly yoga mat with excellent grip.", imageUrl: placeholderImageUrl, baInfo: { id: "ba1", name: "Zenith Wellness" }, createdAt: new Date(Date.now() - 86400000 * 11).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 4).toISOString() },
-    { id: "srv12", name: "Mobile App UI/UX Review", productType: "SERVICE", currentState: "PUBLISHED", basePrice: 180, description: "Expert review of your mobile app's UI/UX with actionable feedback.", imageUrl: placeholderImageUrl, baInfo: { id: "ba8", name: "Creative Canvas Studio" }, createdAt: new Date(Date.now() - 86400000 * 16).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 6).toISOString() },
-    { id: "res11", name: "French Press Coffee Maker", productType: "RESOURCE", currentState: "AVAILABLE", basePrice: 28, description: "Classic French press for a rich and flavorful coffee experience.", imageUrl: placeholderImageUrl, baInfo: { id: "ba2", name: "Crafty Corner" }, createdAt: new Date(Date.now() - 86400000 * 9).toISOString(), updatedAt: new Date(Date.now() - 86400000 * 2).toISOString() },
-  ];
-  return mockData;
-};
-
-const fuzzyGlobalFilterFn: FilterFn<ProductListItemData> = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(row.getValue(columnId), value);
-  addMeta({ itemRank } as any);
-  return itemRank.passed;
-};
-
-export default function CustomerServicesPage() {
-  const [allProducts, setAllProducts] = useState<ProductListItemData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState<string>("");
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 12 });
-
-  const [selectedProductForDetail, setSelectedProductForDetail] = useState<ProductListItemData | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-
-  const [selectedProductForReservation, setSelectedProductForReservation] = useState<ProductListItemData | null>(null);
-  const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
-
-  const loadProducts = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const fetchedProducts = await fetchCustomerProducts();
-      setAllProducts(fetchedProducts);
-    } catch (err: any) {
-      const errorMessage = err.message || "Failed to load products. Please try again.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
-
-  const handleViewDetails = useCallback((product: ProductListItemData) => {
-    setSelectedProductForDetail(product);
-    setIsDetailModalOpen(true);
-  }, []);
-
-  // This function will now open the ReservationModal
-  const handleReserveOrEnquire = useCallback((product: ProductListItemData) => {
-    setSelectedProductForReservation(product);
-    setIsReservationModalOpen(true);
-  }, []);
-
-  const handleReservationSuccess = () => {
-    // Potentially refresh data or show a more persistent success message
-    // For now, ReservationModal handles its own toast.
-    console.log("Reservation successful callback received.");
-  };
-
-  const columns = useMemo<ColumnDef<ProductListItemData>[]>(
-    () => getCustomerProductColumns({ onViewDetails: handleViewDetails, onReserve: handleReserveOrEnquire }),
-    [handleViewDetails, handleReserveOrEnquire] // Updated handler
-  );
-
-  const table = useReactTable({
-    data: allProducts,
-    columns,
-    state: { sorting, columnFilters, globalFilter, columnVisibility, rowSelection, pagination },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    globalFilterFn: fuzzyGlobalFilterFn,
-    manualPagination: false,
-    manualSorting: false,
-    manualFiltering: false,
-    enableRowSelection: true,
-  });
-
-  useEffect(() => {
-    const newPageSize = viewMode === 'grid' ? 12 : 10;
-    if (table.getState().pagination.pageSize !== newPageSize) {
-      table.setPageSize(newPageSize);
-    }
-  }, [viewMode, table]);
-
-  const currentTablePageRows: Row<ProductListItemData>[] = table.getRowModel().rows;
-
-  return (
-    <div className="container mx-auto py-6 sm:py-8">
-      <header className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center">
-              <ShoppingBag className="mr-3 h-7 w-7 text-primary flex-shrink-0" />
-              Discover Services & Products
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">Browse offerings from our trusted Business Actors.</p>
-          </div>
-          <div className="flex items-center gap-x-2 flex-shrink-0">
-            <div className="flex items-center p-0.5 bg-muted rounded-md">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'} size="sm"
-                onClick={() => setViewMode('list')} aria-label="List view"
-                className={cn("h-9 px-3 rounded-sm data-[state=active]:shadow-sm", viewMode === 'list' ? "bg-background text-foreground" : "text-muted-foreground hover:bg-background/50 hover:text-foreground")}
-                data-state={viewMode === 'list' ? 'active' : 'inactive'}
-              ><LayoutList className="h-4 w-4" /><span className="ml-1.5 hidden sm:inline">List</span></Button>
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'} size="sm"
-                onClick={() => setViewMode('grid')} aria-label="Grid view"
-                className={cn("h-9 px-3 rounded-sm data-[state=active]:shadow-sm", viewMode === 'grid' ? "bg-background text-foreground" : "text-muted-foreground hover:bg-background/50 hover:text-foreground")}
-                data-state={viewMode === 'grid' ? 'active' : 'inactive'}
-              ><LayoutGrid className="h-4 w-4" /><span className="ml-1.5 hidden sm:inline">Grid</span></Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <CustomerProductDataTableToolbar
-        table={table}
-        globalFilter={globalFilter}
-        setGlobalFilter={setGlobalFilter}
-      />
-
-      <main className="mt-2">
-        {/* ... Skeletons and Error/NoData states remain the same ... */}
-        {isLoading && ( /* Skeletons Logic */
-          viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {Array.from({ length: table.getState().pagination.pageSize }).map((_, i) => (
-                <Card key={i}><Skeleton className="aspect-[16/10] w-full rounded-t-lg" /><CardHeader className="pb-2 pt-3"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-3 w-1/2 mt-1.5" /></CardHeader><CardContent className="space-y-2 py-2"><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-5/6" /></CardContent><CardFooter className="pt-2 pb-3"><Skeleton className="h-8 w-full" /></CardFooter></Card>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <div className="p-4 border-b"><Skeleton className="h-6 w-1/3" /></div>
-              <div className="divide-y">
-                {Array.from({ length: table.getState().pagination.pageSize }).map((_, i) =>
-                  <div key={i} className="flex items-center gap-3 p-4">
-                    <Skeleton className="h-12 w-12 rounded-md flex-shrink-0" />
-                    <div className="space-y-1.5 flex-1"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /></div>
-                    <Skeleton className="h-8 w-20 rounded-md" />
-                    <Skeleton className="h-8 w-24 rounded-md ml-auto" />
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        )}
-
-        {!isLoading && error && ( /* Error Display */
-          <div className="min-h-[300px] flex flex-col justify-center items-center p-10 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
-            <AlertTriangle className="h-12 w-12 text-destructive mb-4" /><p className="text-destructive-foreground font-semibold">{error}</p>
-            <Button onClick={loadProducts} variant="destructive" className="mt-6">Try Again</Button>
-          </div>
-        )}
-
-        {!isLoading && !error && table.getRowModel().rows.length === 0 && allProducts.length > 0 && (
-          <div className="min-h-[300px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-10">
-            <Search className="h-16 w-16 text-muted-foreground/70 mb-6" />
-            <h3 className="text-xl font-semibold">No Products Match Your Filters</h3>
-            <p className="text-sm mt-1">Try adjusting your search or filter criteria.</p>
-            <Button variant="outline" onClick={() => { setGlobalFilter(""); table.resetColumnFilters(); }} className="mt-4">Clear Filters</Button>
-          </div>
-        )}
-        {!isLoading && !error && allProducts.length === 0 && ( /* No products at all */
-          <div className="min-h-[300px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-10">
-            <Frown className="h-16 w-16 text-muted-foreground/70 mb-6" /><h3 className="text-xl font-semibold">No Products Available</h3>
-            <p className="text-sm mt-1">Please check back later, or try a broader search.</p>
-          </div>
-        )}
-
-        {!isLoading && !error && table.getRowModel().rows.length > 0 && (
-          viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {currentTablePageRows.map((row) => (
-                <CustomerProductCard key={row.original.id} product={row.original} onViewDetailsClick={handleViewDetails} onReserveClick={handleReserveOrEnquire} />
-              ))}
-            </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={allProducts}
-              pageCount={table.getPageCount()}
-              sorting={sorting} onSortingChange={setSorting}
-              columnFilters={columnFilters} onColumnFiltersChange={setColumnFilters}
-              globalFilter={globalFilter} onGlobalFilterChange={setGlobalFilter}
-              columnVisibility={columnVisibility} onColumnVisibilityChange={setColumnVisibility}
-              rowSelection={rowSelection} onRowSelectionChange={setRowSelection}
-              pagination={pagination} onPaginationChange={setPagination}
-              manualPagination={false} manualSorting={false} manualFiltering={false}
-            />
-          )
-        )}
-
-        {!isLoading && !error && table.getPageCount() > 0 && (
-          <div className="mt-6">
-            <DataTablePagination table={table} />
-          </div>
-        )}
-      </main>
-
-      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
-          {selectedProductForDetail && (
-            <ProductDetailView
-              product={selectedProductForDetail}
-              onClose={() => setIsDetailModalOpen(false)}
-              showReserveButton={true} // Show reserve button in detail view
-              onReserve={handleReserveOrEnquire} // Pass the handler
-            // isBAView is false by default, so Edit button won't show
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <ReservationModal
-        product={selectedProductForReservation}
-        isOpen={isReservationModalOpen}
-        onOpenChange={setIsReservationModalOpen}
-        onReservationSuccess={handleReservationSuccess}
-      />
-    </div>
-  );
-}// END OF FILE: app/(dashboard)/customer/services/page.tsx
-
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/help/page.tsx
 
 "use client"; // Needed for interactive elements like search input state
@@ -6761,31 +5549,35 @@ export default function HelpPage() {
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/layout.tsx
 
-// FILE: app/(dashboard)/layout.tsx
-import { Sidebar } from "@/components/sidebar"; // Check this import path
-import { TopNav } from "@/components/top-nav";   // Check this import path
+"use client"; // If providers are client-side, this layout might need to be too
+
+import { Sidebar } from "@/components/sidebar";
+import { TopNav } from "@/components/top-nav";
 import React from "react";
+import { ActiveOrganizationProvider } from "@/contexts/active-organization-context"; // Import the provider
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  // Ensure this structure is correct
   return (
-    <div className="flex min-h-screen">
-      <Sidebar /> {/* Is Sidebar component okay? */}
-      <div className="flex flex-1 flex-col overflow-auto">
-        <TopNav /> {/* Is TopNav component okay? */}
-        <main className="flex-1 p-4 pt-20 sm:p-6 md:p-8">
-          <div className="container mx-auto">
-            {children}
-          </div>
-        </main>
+    // ActiveOrganizationProvider now wraps the entire dashboard content
+    // This makes the context available to Sidebar, TopNav, and all dashboard pages.
+    <ActiveOrganizationProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-auto">
+          <TopNav />
+          <main className="flex-1 p-4 pt-20 sm:p-6 md:p-8">
+            <div className="container mx-auto">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </ActiveOrganizationProvider>
   );
-}// END OF FILE: app/(dashboard)/layout.tsx
+}
+// END OF FILE: app/(dashboard)/layout.tsx
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(dashboard)/settings/page.tsx
 
@@ -8680,11 +7472,11 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { ModeToggle } from "@/components/mode-toggle";
 
 // Initialize Montserrat font (adjust subsets and weights as needed)
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  display: "swap", // Optional but recommended
-  variable: "--font-montserrat", // Optional: if using CSS variable
-});
+// const montserrat = Montserrat({
+//   subsets: ["latin"],
+//   display: "swap", 
+//   variable: "--font-montserrat", 
+// });
 
 export const metadata = {
   title: "YowYob Dashboard",
@@ -8699,7 +7491,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${montserrat.className} antialiased min-h-screen flex flex-col`}
+        className={` antialiased min-h-screen flex flex-col`}
       >
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -14551,20 +13343,20 @@ import {
   Webhook,
   MessagesSquare,
   Share2,
-  Star, // BA Icons
+  Star,
   Briefcase,
   FileText,
-  FolderHeart, // Customer Icons
+  FolderHeart,
   Server,
   Building2 as SuperAdminOrgIcon,
-  Users as SuperAdminUsersIcon, // Super Admin Icons
+  Users as SuperAdminUsersIcon,
   LifeBuoy,
   Settings,
   LogOut,
   Menu,
   SidebarClose,
   Building,
-} from "lucide-react";
+} from "lucide-react"; // Ensured Building is imported if used
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14574,15 +13366,14 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { OrganizationSwitcher } from "@/components/organization/organization-switcher"; // NEW IMPORT
-import { useActiveOrganization } from "@/contexts/active-organization-context"; // For BA to check orgs
+import { OrganizationSwitcher } from "@/components/organization/organization-switcher";
+import { useActiveOrganization } from "@/contexts/active-organization-context"; // Call hook unconditionally
+import { OrganizationDto } from "@/types/organization"; // For casting in NavItem
 
-// Navigation Arrays (keep your existing definitions)
+// Navigation Arrays
 const baNavigation = [
   { name: "Dashboard", href: "/business-actor/dashboard", icon: LayoutGrid },
-  // Org-specific items will be in a sub-nav within /organization/[orgId]/layout.tsx
-  // This top-level "My Organization(s)" could link to where they select/create, which is the dashboard
-  { name: "Manage Active Org", href: "#", icon: Landmark, isOrgLink: true }, // Placeholder, actual link set dynamically
+  { name: "Manage Active Org.", href: "#", icon: Landmark, isOrgLink: true }, // Actual href set dynamically
   { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
   { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
   { name: "Webhooks", href: "/business-actor/webhooks", icon: Webhook },
@@ -14590,7 +13381,6 @@ const baNavigation = [
   { name: "Referrals", href: "/business-actor/referrals", icon: Share2 },
 ];
 const customerNavigation = [
-  /* ... */
   { name: "Dashboard", href: "/customer/dashboard", icon: LayoutGrid },
   { name: "Services", href: "/customer/services", icon: Briefcase },
   { name: "Invoices", href: "/customer/invoices", icon: FileText },
@@ -14600,7 +13390,6 @@ const customerNavigation = [
   { name: "Chat", href: "/customer/chat", icon: MessagesSquare },
 ];
 const superAdminNavigation = [
-  /* ... */
   { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
   { name: "Platforms", href: "/super-admin/platforms", icon: Server },
   {
@@ -14622,48 +13411,62 @@ const bottomNavigation = [
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-let lastKnownRolePrefix = "/business-actor";
+// This should be outside the component if it's meant to persist across renders without being state
+// However, for a client component, if it needs to be reactive to pathname, it should be derived inside or be state.
+// For now, to fix the hook order, we derive the rolePrefix inside based on pathname.
+// let lastKnownRolePrefix = "/business-actor"; // This module-level let is problematic for React's rendering model
 
 export function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Get active org context only if potentially a BA
-  // This conditional hook usage is an anti-pattern. Instead, call hook always and use its data conditionally.
-  // For simplicity here, we will use a flag based on pathname for now.
-  const isBaPath = pathname.startsWith("/business-actor");
-  const activeOrgContext = isBaPath ? useActiveOrganization() : null;
-  const activeOrganizationId = activeOrgContext?.activeOrganizationId;
+  // Call ALL hooks at the top level, unconditionally
+  const activeOrgContext = useActiveOrganization();
+  const { activeOrganizationId, activeOrganizationDetails } = activeOrgContext; // Destructure after ensuring context is available
 
-  useEffect(() => {
-    if (pathname.startsWith("/business-actor"))
-      lastKnownRolePrefix = "/business-actor";
-    else if (pathname.startsWith("/customer"))
-      lastKnownRolePrefix = "/customer";
-    else if (pathname.startsWith("/super-admin"))
-      lastKnownRolePrefix = "/super-admin";
-  }, [pathname]);
+  // Derive rolePrefix based on pathname for this render cycle
+  let currentRolePrefixBasedOnPath = "/business-actor"; // Default
+
+  if (pathname.startsWith("/customer")) {
+    currentRolePrefixBasedOnPath = "/customer";
+  } else if (pathname.startsWith("/super-admin")) {
+    currentRolePrefixBasedOnPath = "/super-admin";
+  } else if (pathname.startsWith("/business-actor")) {
+    currentRolePrefixBasedOnPath = "/business-actor";
+  }
+
+  const isBaPath = currentRolePrefixBasedOnPath === "/business-actor" 
+  // For shared pages like /settings, /help, lastKnownRolePrefix logic might be needed,
+  // but it should not involve conditional hook calls.
+  // We can use a state to remember the last role if needed, or simply default.
 
   let sidebarTitle = "Dashboard";
   let logoSrc = "/logo.svg";
-  let currentNavigation = customerNavigation;
-  let activeRoleDashboardLink = "/customer/dashboard";
+  let currentNavigation = baNavigation; // Default to BA
+  let activeRoleDashboardLink = "/business-actor/dashboard";
 
-  if (lastKnownRolePrefix === "/business-actor") {
-    sidebarTitle = "BA Workspace";
-    currentNavigation = baNavigation;
-    activeRoleDashboardLink = "/business-actor/dashboard";
-  } else if (lastKnownRolePrefix === "/customer") {
+  if (currentRolePrefixBasedOnPath === "/customer") {
     sidebarTitle = "My Account";
     currentNavigation = customerNavigation;
     activeRoleDashboardLink = "/customer/dashboard";
-  } else if (lastKnownRolePrefix === "/super-admin") {
+  } else if (currentRolePrefixBasedOnPath === "/super-admin") {
     sidebarTitle = "Platform Admin";
     currentNavigation = superAdminNavigation;
     activeRoleDashboardLink = "/super-admin/dashboard";
+  } else {
+    // Defaults to BA
+    sidebarTitle = "BA Workspace";
+    currentNavigation = baNavigation;
+    activeRoleDashboardLink = "/business-actor/dashboard";
   }
-  if (pathname === "/settings" || pathname === "/help") sidebarTitle = "Menu";
+
+  // Adjust title for truly generic shared pages if not using the role-based title
+  if (pathname === "/settings" || pathname === "/help") {
+    sidebarTitle = "Menu";
+    // Optionally clear currentNavigation for truly generic pages, or show the last known role's nav
+    // currentNavigation = [];
+  }
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
@@ -14681,20 +13484,21 @@ export function Sidebar() {
   const NavItem = ({ item }: NavItemProps) => {
     let href = item.href;
     if (item.isOrgLink) {
-      // Dynamically set href for "Manage Active Org"
-      href = activeOrganizationId
-        ? `/business-actor/organization/${activeOrganizationId}/profile`
+      // Try to use activeOrganizationId from context first if available
+      const targetOrgId =
+        activeOrganizationId || activeOrganizationDetails?.organization_id;
+      href = targetOrgId
+        ? `/business-actor/organization/${targetOrgId}/profile`
         : "/business-actor/dashboard";
     }
     const isActive =
       pathname === href ||
       pathname.startsWith(href + "/") ||
-      (href !== "/" &&
-        href !== "/settings" &&
-        href !== "/help" &&
+      (item.href !== "/" &&
+        item.href !== "/settings" &&
+        item.href !== "/help" &&
         pathname.startsWith(href + "?"));
     return (
-      /* ... NavItem JSX as before ... */
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Link
@@ -14724,11 +13528,12 @@ export function Sidebar() {
     );
   };
 
+  // Determine if the current path is within the business-actor section
+  const isBaContext = pathname.startsWith("/business-actor");
+
   return (
     <TooltipProvider>
       <>
-        {" "}
-        {/* Mobile Menu Toggle & Sidebar Container ... as before ... */}
         <Button
           variant="outline"
           size="icon"
@@ -14802,43 +13607,42 @@ export function Sidebar() {
             )}
           </div>
 
-          {/* Organization Switcher for BA */}
-          {isBaPath &&
-            !isCollapsed && ( // Show only for BA and when sidebar is expanded
+          {/* Organization Switcher for BA: Call hook unconditionally, use data conditionally */}
+          {isBaContext &&
+            !isCollapsed &&
+            activeOrgContext && ( // Check if activeOrgContext is not null
               <OrganizationSwitcher />
             )}
-          {isBaPath &&
-            isCollapsed && ( // Show simplified org indicator when collapsed
-              <div className="px-2 py-3 text-center border-b border-sidebar-border">
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9"
-                      onClick={() => setIsCollapsed(false)}
-                    >
-                      <Building className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    {activeOrgContext?.activeOrganizationDetails?.short_name ||
-                      "Select Org"}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
+          {isBaContext && isCollapsed && activeOrgContext && (
+            <div className="px-2 py-3 text-center border-b border-sidebar-border">
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => setIsCollapsed(false)}
+                  >
+                    <Building className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {activeOrganizationDetails?.short_name || "Select Org"}
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
 
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             <nav
               className={cn(
                 "flex-1 space-y-1 py-4",
                 isCollapsed ? "px-2" : "px-4",
-                isBaPath && "pt-0"
+                isBaPath && !isCollapsed && "pt-0"
               )}
             >
               {" "}
-              {/* Adjust padding if switcher is present */}
+              {/* Adjusted isBaPath here */}
               {currentNavigation.map((item) => (
                 <NavItem key={item.name} item={item} />
               ))}
@@ -14853,7 +13657,6 @@ export function Sidebar() {
                 {bottomNavigation.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
-                {/* Logout Button ... as before ... */}
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <Button
@@ -18216,6 +17019,8 @@ import { organizationRepository } from "@/lib/data-repo/organization";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
+// Assuming mock data is handled by the local repository and its mock API routes
+import { mockUserOrganizations as defaultMockOrgs, mockOrganizationDetails as defaultMockDetails } from '@/lib/mock-data/organization-mocks';
 
 interface ActiveOrganizationContextType {
   activeOrganizationId: string | null;
@@ -18224,58 +17029,22 @@ interface ActiveOrganizationContextType {
     orgDetails?: OrganizationDto
   ) => Promise<void>;
   activeOrganizationDetails: OrganizationDto | null;
-  // This function fetches details for a *specific* org and sets it as active detail
-  fetchAndSetActiveOrganizationDetails: (
+  // This is the function to fetch and set details for a *specific* org ID
+  fetchAndSetOrganizationDetails: (
     id: string
-  ) => Promise<OrganizationDto | null>;
+  ) => Promise<OrganizationDto | null>; // Renamed for clarity from previous versions
   isLoadingOrgDetails: boolean;
   userOrganizations: OrganizationTableRow[];
   // This function fetches the *list* of all orgs for the current user
   fetchUserOrganizationsList: () => Promise<void>;
   isLoadingUserOrgs: boolean;
   clearActiveOrganization: () => void;
-  // refreshUserOrganizations was perhaps a misnomer for fetchUserOrganizationsList
+  isOrgContextInitialized: boolean;
 }
 
 const ActiveOrganizationContext = createContext<
   ActiveOrganizationContextType | undefined
 >(undefined);
-
-// Mock data (should be removed once local JSON files are populated via API routes)
-const defaultMockOrgs: OrganizationTableRow[] = [
-  {
-    organization_id: "org-a1b2c3d4-main",
-    short_name: "Innovate Sol.",
-    long_name: "Innovate Solutions Global LLC",
-    status: "ACTIVE",
-    email: "contact@innovate.com",
-    logo_url: "/placeholder.svg",
-  },
-  {
-    organization_id: "org-e5f6g7h8-side",
-    short_name: "GreenFuture",
-    long_name: "GreenTech Future Inc.",
-    status: "PENDING_APPROVAL",
-    email: "info@greentech.io",
-    logo_url: "/placeholder.svg",
-  },
-];
-const defaultMockDetails: Record<string, OrganizationDto> = {
-  "org-a1b2c3d4-main": {
-    ...defaultMockOrgs[0],
-    description: "Main org detail",
-    website_url: "https://innovate.com",
-    is_active: true,
-    legal_form: "31",
-  },
-  "org-e5f6g7h8-side": {
-    ...defaultMockOrgs[1],
-    description: "Side org detail",
-    website_url: "https://green.io",
-    is_active: false,
-    legal_form: "32",
-  },
-};
 
 export const ActiveOrganizationProvider = ({
   children,
@@ -18298,85 +17067,80 @@ export const ActiveOrganizationProvider = ({
     OrganizationTableRow[]
   >([]);
   const [isLoadingUserOrgs, setIsLoadingUserOrgs] = useState<boolean>(true);
+  const [isOrgContextInitialized, setIsOrgContextInitialized] =
+    useState<boolean>(false);
 
-  const fetchAndSetActiveOrganizationDetails = useCallback(
+  // Renamed internal function to avoid confusion with the one exposed in context
+  const internalFetchAndSetOrgDetails = useCallback(
     async (id: string): Promise<OrganizationDto | null> => {
       if (!id) {
         setActiveOrganizationDetailsState(null);
-        setActiveOrganizationIdState(null); // Also clear ID if fetching for null/invalid ID
+        // Do not clear activeOrganizationIdState here if we want to preserve it while details are null
         return null;
       }
       setIsLoadingOrgDetails(true);
       console.log(`CONTEXT: Fetching details for active org: ${id}`);
       try {
         const details = await organizationRepository.getOrganizationById(id);
-        setActiveOrganizationDetailsState(details);
+        setActiveOrganizationDetailsState(details); // Can be null if not found
         if (details) {
-          setActiveOrganizationIdState(id); // Ensure active ID is set if details are found
+          setActiveOrganizationIdState(id); // If details found, confirm this ID is active
         } else {
           toast.error(`Organization (ID: ${id}) not found or inaccessible.`);
-          setActiveOrganizationIdState(null); // Clear if not found
+          // If details are not found for an ID that was attempted to be set active, clear it.
+          if (activeOrganizationId === id) {
+            setActiveOrganizationIdState(null);
+          }
         }
         return details;
       } catch (error) {
-        console.error(
-          `CONTEXT: Failed to fetch details for organization ${id}:`,
-          error
-        );
+        console.error(`CONTEXT: Failed to fetch details for org ${id}:`, error);
         toast.error("Could not load organization details.");
         setActiveOrganizationDetailsState(null);
-        setActiveOrganizationIdState(null);
+        if (activeOrganizationId === id) {
+          // Only clear active ID if it was the one failing
+          setActiveOrganizationIdState(null);
+        }
         return null;
       } finally {
         setIsLoadingOrgDetails(false);
       }
     },
-    []
-  );
+    [activeOrganizationId]
+  ); // Added activeOrganizationId to dependencies
 
   const setActiveOrganization = useCallback(
     async (orgId: string | null, orgDetails?: OrganizationDto) => {
-      console.log("CONTEXT: setActiveOrganization called with orgId:", orgId);
-      if (orgId) {
-        setActiveOrganizationIdState(orgId); // Set ID first
-        if (orgDetails && orgDetails.organization_id === orgId) {
-          // Check if details match orgId
-          console.log(
-            "CONTEXT: Setting details directly from provided orgDetails"
-          );
-          setActiveOrganizationDetailsState(orgDetails);
-        } else {
-          console.log(
-            "CONTEXT: orgId provided, fetching details via fetchAndSetActiveOrganizationDetails..."
-          );
-          await fetchAndSetActiveOrganizationDetails(orgId); // This will also set activeOrganizationIdState
-        }
+      setActiveOrganizationIdState(orgId); // Set the ID immediately
+      if (orgDetails && orgId === orgDetails.organization_id) {
+        setActiveOrganizationDetailsState(orgDetails);
+      } else if (orgId) {
+        await internalFetchAndSetOrgDetails(orgId); // This will also set details
       } else {
-        console.log("CONTEXT: orgId is null, clearing details and ID.");
-        setActiveOrganizationIdState(null);
-        setActiveOrganizationDetailsState(null);
+        setActiveOrganizationDetailsState(null); // Clear details if orgId is null
       }
     },
-    [fetchAndSetActiveOrganizationDetails]
-  ); // fetchAndSetActiveOrganizationDetails is stable
+    [internalFetchAndSetOrgDetails]
+  );
 
   const fetchUserOrganizationsList = useCallback(async () => {
     if (sessionStatus !== "authenticated") {
       setUserOrganizations([]);
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
       return;
     }
     setIsLoadingUserOrgs(true);
     try {
       const orgs = await organizationRepository.getMyOrganizations();
       setUserOrganizations(orgs || []);
-      console.log("CONTEXT: User organizations fetched:", orgs);
     } catch (error) {
       console.error("CONTEXT: Failed to fetch user organizations:", error);
       toast.error("Could not load your organizations.");
       setUserOrganizations([]);
     } finally {
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
     }
   }, [sessionStatus]);
 
@@ -18386,33 +17150,52 @@ export const ActiveOrganizationProvider = ({
   }, []);
 
   useEffect(() => {
-    if (sessionStatus === "authenticated") {
+    if (sessionStatus === "authenticated" && !isOrgContextInitialized) {
       fetchUserOrganizationsList();
     } else if (sessionStatus === "unauthenticated") {
       setUserOrganizations([]);
       clearActiveOrganization();
       setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(false);
     }
-  }, [sessionStatus, fetchUserOrganizationsList, clearActiveOrganization]);
+  }, [
+    sessionStatus,
+    fetchUserOrganizationsList,
+    clearActiveOrganization,
+    isOrgContextInitialized,
+  ]);
 
   useEffect(() => {
+    if (!isOrgContextInitialized || !session?.user?.id) return;
+
     const pathParts = pathname.split("/");
-    const isOrgManagementPath =
+    const isOrgSpecificPath =
       pathParts[1] === "business-actor" &&
       pathParts[2] === "organization" &&
       pathParts[3] &&
       pathParts[3] !== "create";
 
-    if (isOrgManagementPath) {
+    if (isOrgSpecificPath) {
       const orgIdFromUrl = pathParts[3];
-      if (orgIdFromUrl !== activeOrganizationId || !activeOrganizationDetails) {
-        // Also fetch if details are missing for current ID
-        if (orgIdFromUrl) {
-          // Ensure orgIdFromUrl is not undefined
-          console.log(
-            `CONTEXT: URL sync - Path has orgId ${orgIdFromUrl}. Current activeId: ${activeOrganizationId}. Fetching details.`
-          );
-          fetchAndSetActiveOrganizationDetails(orgIdFromUrl); // This sets both ID and details
+      if (
+        orgIdFromUrl !== activeOrganizationId ||
+        (orgIdFromUrl && !activeOrganizationDetails)
+      ) {
+        // If user has orgs, check if URL orgId is valid before fetching
+        if (
+          userOrganizations.length > 0 &&
+          !userOrganizations.find((o) => o.organization_id === orgIdFromUrl)
+        ) {
+          toast.error("Invalid organization in URL or no access.");
+          router.replace("/business-actor/dashboard");
+          clearActiveOrganization();
+        } else if (userOrganizations.length === 0 && !isLoadingUserOrgs) {
+          // User has no orgs loaded, but URL suggests one - likely invalid state or direct nav to bad URL
+          toast.error("No organizations found for your account.");
+          router.replace("/business-actor/dashboard");
+          clearActiveOrganization();
+        } else {
+          internalFetchAndSetOrgDetails(orgIdFromUrl);
         }
       }
     }
@@ -18420,7 +17203,13 @@ export const ActiveOrganizationProvider = ({
     pathname,
     activeOrganizationId,
     activeOrganizationDetails,
-    fetchAndSetActiveOrganizationDetails,
+    internalFetchAndSetOrgDetails,
+    isOrgContextInitialized,
+    userOrganizations,
+    isLoadingUserOrgs,
+    router,
+    session?.user?.id,
+    clearActiveOrganization,
   ]);
 
   return (
@@ -18429,13 +17218,13 @@ export const ActiveOrganizationProvider = ({
         activeOrganizationId,
         setActiveOrganization,
         activeOrganizationDetails,
-        fetchAndSetActiveOrganizationDetails, // Name in context matches the function name
+        fetchAndSetOrganizationDetails: internalFetchAndSetOrgDetails, // Ensure this matches the interface
         isLoadingOrgDetails,
         userOrganizations,
-        fetchUserOrganizationsList, // Correctly named function for fetching the list
+        fetchUserOrganizationsList,
         isLoadingUserOrgs,
         clearActiveOrganization,
-        // refreshUserOrganizations: fetchUserOrganizationsList, // Alias if needed, but direct use is clearer
+        isOrgContextInitialized,
       }}
     >
       {children}
@@ -19279,46 +18068,46 @@ export default eslintConfig;
 
 # dependencies
 /node_modules
-# /.pnp
-# .pnp.*
-# .yarn/*
-# !.yarn/patches
-# !.yarn/plugins
-# !.yarn/releases
-# !.yarn/versions
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# # testing
-# /coverage
+# testing
+/coverage
 
-# # next.js
-# /.next/
-# /out/
+# next.js
+/.next/
+/out/
 
-# # production
-# /build
+# production
+/build
 
-# # misc
-# .DS_Store
-# *.pem
+# misc
+.DS_Store
+*.pem
 
-# # debug
-# npm-debug.log*
-# yarn-debug.log*
-# yarn-error.log*
-# .pnpm-debug.log*
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# # env files (can opt-in for committing if needed)
-# .env*
+# env files (can opt-in for committing if needed)
+.env*
 
-# # vercel
-# .vercel
+# vercel
+.vercel
 
-# # typescript
-# *.tsbuildinfo
-# next-env.d.ts
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
-# # Local JSON database files
-# lib/data-repo/local-store/json-data/// END OF FILE: .gitignore
+# Local JSON database files
+lib/data-repo/local-store/json-data/// END OF FILE: .gitignore
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/hooks/use-mouse-position.ts
 
@@ -19995,6 +18784,42 @@ if (dataSource === 'local') {
 
 export const authRepository = authRepositoryInstance;// END OF FILE: lib/data-repo/auth/index.ts
 
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/lib/data-repo/local-store/json-data/user-preferences
+
+[
+  {
+    "user_id": "mock-auth-1750034426505-75",
+    "display": {
+      "language": "en",
+      "currency": "USD",
+      "dateFormat": "mm-dd-yyyy",
+      "fontSize": 16,
+      "theme": "system",
+      "layout": "default",
+      "timezone": "utc-8",
+      "profilePhotoUrl": ""
+    },
+    "notifications": {
+      "email": true,
+      "push": true,
+      "sms": false,
+      "accountActivity": true,
+      "newFeatures": true,
+      "marketing": false,
+      "frequency": "daily",
+      "quietHoursStart": "22:00",
+      "quietHoursEnd": "07:00"
+    },
+    "privacy": {
+      "analyticsSharing": true,
+      "personalizedAds": false,
+      "visibility": "private",
+      "dataRetention": "1-year"
+    },
+    "updated_at": "2025-06-18T12:46:22.464Z"
+  }
+]// END OF FILE: lib/data-repo/local-store/json-data/user-preferences
+
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/lib/data-repo/local-store/json-db-manager.ts
 
 // lib/data-repositories/local-store/json-db-manager.ts
@@ -20029,6 +18854,7 @@ import {
   BusinessActorDto,
 } from "@/types/organization";
 import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
+import { UserPreferencesDto } from "@/types/user-preferences";
 
 export type CollectionName =
   | "authUsers"
@@ -20054,6 +18880,7 @@ export type CollectionName =
   | "proposedActivities"
   | "businessActors"
   | "applicationsData"
+  | "userPreferences"
   | "applicationKeysData"
   | "resources"
   | "services";
@@ -20068,6 +18895,7 @@ export interface LocalJsonDBCollections {
   organizationsDetails: OrganizationDto[];
   contacts: ContactDto[];
   addresses: AddressDto[];
+  userPreferences: UserPreferencesDto[]; // Assuming user preferences are stored in the same format as UserDto
   agencies: AgencyDto[];
   employees: EmployeeDto[];
   salesPersons: SalesPersonDto[];
@@ -20102,6 +18930,7 @@ const collectionFileMap: Record<CollectionName, string> = {
   salesPersons: "sales-persons.json",
   orgCustomers: "org-customers.json",
   providers: "providers.json",
+  userPreferences: "user-preferences",
   prospects: "prospects.json",
   practicalInformation: "practical-information.json",
   certifications: "certifications.json",
@@ -22945,5 +21774,4 @@ export interface UpdateUserPreferencesRequest {
   display?: Partial<UserDisplayPreferences>;
   notifications?: Partial<UserNotificationPreferences>;
   privacy?: Partial<UserPrivacyPreferences>;
-}// END OF FILE: types/user-preferences.ts
-
+}// END OF FILE: types/user-preferences.ts.
