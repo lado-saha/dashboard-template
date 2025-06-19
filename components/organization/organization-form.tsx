@@ -18,6 +18,7 @@ import {
   BusinessDomainDto,
   OrganizationLegalForm,
   CreateAddressRequest,
+  AddressDto,
 } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { toast } from "sonner";
@@ -51,6 +52,7 @@ interface OrganizationFormProps {
   mode: "create" | "edit";
   onFormSubmitSuccessAction: (data: OrganizationDto) => void;
   organizationId?: string;
+  defaultAddress?: AddressDto | null;
 }
 
 const formSteps = [
@@ -93,6 +95,7 @@ export function OrganizationForm({
   mode,
   onFormSubmitSuccessAction,
   organizationId,
+  defaultAddress, // THE FIX: Destructure new prop
 }: OrganizationFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -156,6 +159,43 @@ export function OrganizationForm({
       .getAllBusinessDomains()
       .then(setAvailableBusinessDomains);
   }, []);
+
+  useEffect(() => {
+    if (initialData) {
+      const combinedData = {
+        ...initialData,
+        keywords: Array.isArray(initialData.keywords)
+          ? initialData.keywords.join(", ")
+          : initialData.keywords || "",
+        social_networks: initialData.social_network
+          ? initialData.social_network
+              .split(",")
+              .filter(Boolean)
+              .map((url) => ({ url }))
+          : [{ url: "" }],
+        registration_date:
+          initialData.registration_date &&
+          isValid(new Date(initialData.registration_date))
+            ? new Date(initialData.registration_date)
+            : undefined,
+        year_founded:
+          initialData.year_founded &&
+          isValid(new Date(initialData.year_founded))
+            ? new Date(initialData.year_founded)
+            : undefined,
+        // Now, merge the default address if it exists
+        address_line_1: defaultAddress?.address_line_1 || "",
+        address_line_2: defaultAddress?.address_line_2 || "",
+        city: defaultAddress?.city || "",
+        state: defaultAddress?.state || "",
+        zip_code: defaultAddress?.zip_code || "",
+        country: defaultAddress?.country_id || "", // Map country_id to country field
+        latitude: defaultAddress?.latitude,
+        longitude: defaultAddress?.longitude,
+      };
+      form.reset(combinedData);
+    }
+  }, [initialData, defaultAddress, form]);
 
   const handleHashChange = useCallback(() => {
     if (mode === "edit") {
@@ -281,11 +321,12 @@ export function OrganizationForm({
       country_id: data.country,
       latitude: data.latitude,
       longitude: data.longitude,
-      default: true, // Assuming we want to set this as the primary address
     };
 
     try {
       if (mode === "create") {
+        addressPayload.default = true;
+
         // Step 1: Create the organization
         const orgResponse = await organizationRepository.createOrganization(
           orgPayload

@@ -12,9 +12,12 @@ import {
 import { ContactList } from "@/components/organization/contact-list";
 import { AddressList } from "@/components/organization/address-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OrganizationDto } from "@/types/organization";
+import { AddressDto, OrganizationDto } from "@/types/organization";
 import { useSearchParams } from "next/navigation";
 import { ProfileNav } from "@/components/organization/profile-nav";
+import { useEffect, useState } from "react";
+import { organizationRepository } from "@/lib/data-repo/organization";
+import { toast } from "sonner";
 
 export default function OrganizationProfilePage() {
   const {
@@ -26,6 +29,34 @@ export default function OrganizationProfilePage() {
 
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "edit_profile";
+  const [defaultAddress, setDefaultAddress] = useState<AddressDto | null>(null);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  // THE FIX: useEffect to fetch addresses when org details are available
+  useEffect(() => {
+    if (
+      activeOrganizationDetails &&
+      activeOrganizationDetails.organization_id
+    ) {
+      const fetchDefaultAddress = async () => {
+        setIsLoadingAddress(true);
+        try {
+          const addresses = await organizationRepository.getAddresses(
+            "ORGANIZATION",
+            activeOrganizationDetails.organization_id!
+          );
+          const defaultAddr =
+            addresses.find((addr) => addr.is_default) ||
+            (addresses.length > 0 ? addresses[0] : null);
+          setDefaultAddress(defaultAddr);
+        } catch (error) {
+          toast.error("Could not load organization's default address.");
+        } finally {
+          setIsLoadingAddress(false);
+        }
+      };
+      fetchDefaultAddress();
+    }
+  }, [activeOrganizationDetails]);
 
   const handleUpdateSuccess = async (updatedData: OrganizationDto) => {
     if (activeOrganizationId) {
@@ -89,6 +120,7 @@ export default function OrganizationProfilePage() {
                 initialData={activeOrganizationDetails}
                 organizationId={activeOrganizationDetails.organization_id}
                 onFormSubmitSuccessAction={handleUpdateSuccess}
+                defaultAddress={defaultAddress}
               />
             </CardContent>
           </Card>
@@ -96,7 +128,7 @@ export default function OrganizationProfilePage() {
     }
   };
 
-  if (isLoadingOrgDetails) {
+  if (isLoadingOrgDetails || isLoadingAddress) {
     return (
       <div className="grid lg:grid-cols-6 gap-8">
         <div className="lg:col-span-5">
