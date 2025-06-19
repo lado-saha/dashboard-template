@@ -4,7 +4,7 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 
 export async function DELETE(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const deletedDetails = dbManager.deleteItem('organizationsDetails', orgId);
     const deletedTableRow = dbManager.deleteItem('organizationsTableRows', orgId);
 

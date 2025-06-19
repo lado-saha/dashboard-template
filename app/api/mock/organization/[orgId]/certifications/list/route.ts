@@ -5,7 +5,7 @@ import { CertificationDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allCerts = dbManager.getCollection('certifications');
     const filteredCerts = allCerts.filter(cert => cert.organization_id === orgId);
     return NextResponse.json(filteredCerts);

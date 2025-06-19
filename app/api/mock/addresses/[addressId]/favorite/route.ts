@@ -6,7 +6,7 @@ import { AddressDto } from '@/types/organization';
 // Spec says GET for favorite, using PUT for mock update consistency
 export async function PUT(request: NextRequest, { params }: { params: { addressId: string } }) {
   try {
-    const { addressId } = params;
+    const { addressId } = await params;
     const address = dbManager.getItemById('addresses', addressId);
     if (!address) {
       return NextResponse.json({ message: `Address with ID ${addressId} not found.` }, { status: 404 });

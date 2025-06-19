@@ -5,7 +5,7 @@ import { ApplicationKeyDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { applicationId: string } }) {
   try {
-    const { applicationId } = params;
+    const { applicationId } = await params;
     const allKeys = dbManager.getCollection('applicationKeysData');
     const appKeys = allKeys.filter(key => key.application_id === applicationId);
     return NextResponse.json(appKeys);

@@ -5,7 +5,7 @@ import { OrganizationDto } from '@/types/organization';
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, businessDomainId: string } }) {
   try {
-    const { orgId, businessDomainId } = params;
+    const { orgId, businessDomainId } = await params;
     const org = dbManager.getItemById('organizationsDetails', orgId);
 
     if (!org || !org.business_domains) {

@@ -5,7 +5,7 @@ import { AgencyDto, UpdateAgencyRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const agency = dbManager.getItemById('agencies', agencyId);
     if (!agency || agency.organization_id !== orgId) {
       return NextResponse.json({ message: `Agency with ID ${agencyId} not found for organization ${orgId}.` }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const body = await request.json() as UpdateAgencyRequest;
     const existingAgency = dbManager.getItemById('agencies', agencyId);
     if (!existingAgency || existingAgency.organization_id !== orgId) {
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const existingAgency = dbManager.getItemById('agencies', agencyId);
     if (!existingAgency || existingAgency.organization_id !== orgId) {
       return NextResponse.json({ message: `Agency with ID ${agencyId} not found for organization ${orgId}.` }, { status: 404 });

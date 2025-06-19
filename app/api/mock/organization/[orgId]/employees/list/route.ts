@@ -5,7 +5,7 @@ import { EmployeeDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allEmployees = dbManager.getCollection('employees');
     // Filter for employees directly under the organization (agency_id is null or matches orgId if that's the convention)
     const orgEmployees = allEmployees.filter(emp => emp.organisation_id === orgId && (!emp.agency_id || emp.agency_id === orgId));

@@ -5,7 +5,7 @@ import { UpdateOrganizationStatusRequest, OrganizationDto, OrganizationTableRow 
 
 export async function PUT(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as UpdateOrganizationStatusRequest;
 
     const updatedOrg = dbManager.updateItem('organizationsDetails', orgId, { status: body.status, is_active: body.status === "ACTIVE" });

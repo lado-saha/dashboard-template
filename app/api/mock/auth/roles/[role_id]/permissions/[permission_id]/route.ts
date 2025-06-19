@@ -4,7 +4,7 @@ import { RolePermissionDto } from '@/types/auth';
 
 export async function POST(request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
   try {
-    const { role_id, permission_id } = params;
+    const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
       return NextResponse.json({ message: "Role ID and Permission ID are required." }, { status: 400 });
     }
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: { role_id
 
 export async function DELETE(request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
   try {
-    const { role_id, permission_id } = params;
+    const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
       return NextResponse.json({ message: "Role ID and Permission ID are required." }, { status: 400 });
     }

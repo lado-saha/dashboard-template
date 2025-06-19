@@ -5,7 +5,7 @@ import { BusinessDomainDto, UpdateBusinessDomainRequest } from '@/types/organiza
 
 export async function GET(request: NextRequest, { params }: { params: { domainId: string } }) {
   try {
-    const { domainId } = params;
+    const { domainId } = await params;
     const domain = dbManager.getItemById('businessDomains', domainId);
     if (!domain) {
       return NextResponse.json({ message: `Business domain with ID ${domainId} not found.` }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { domainId
 
 export async function PUT(request: NextRequest, { params }: { params: { domainId: string } }) {
   try {
-    const { domainId } = params;
+    const { domainId } = await params;
     const body = await request.json() as UpdateBusinessDomainRequest;
     const updatedDomain = dbManager.updateItem('businessDomains', domainId, body);
     if (!updatedDomain) {
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest, { params }: { params: { domainId
 
 export async function DELETE(request: NextRequest, { params }: { params: { domainId: string } }) {
   try {
-    const { domainId } = params;
+    const { domainId } = await params;
     // Check if any organization uses this domain before deleting (optional for mock)
     const deleted = dbManager.deleteItem('businessDomains', domainId);
     if (!deleted) {

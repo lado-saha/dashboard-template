@@ -5,7 +5,7 @@ import { ContactDto, UpdateContactRequest, ContactableType } from '@/types/organ
 
 export async function GET(request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
-    const { contactId } = params;
+    const { contactId } = await params;
     // Note: For GET by ID, contactable_type and contactable_id might also be needed for security/scoping in a real API.
     // For mock, we'll assume contactId is unique enough.
     const contact = dbManager.getItemById('contacts', contactId);
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: { contactI
 
 export async function PUT(request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
-    const { contactId } = params;
+    const { contactId } = await params;
     const body = await request.json() as UpdateContactRequest;
     const updatedContact = dbManager.updateItem('contacts', contactId, body);
     if (!updatedContact) {
@@ -34,7 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: { contactI
 
 export async function DELETE(request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
-    const { contactId } = params;
+    const { contactId } = await params;
     const deleted = dbManager.deleteItem('contacts', contactId);
     if (!deleted) {
       return NextResponse.json({ message: `Contact with ID ${contactId} not found.` }, { status: 404 });

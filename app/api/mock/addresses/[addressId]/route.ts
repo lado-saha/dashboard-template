@@ -5,7 +5,7 @@ import { AddressDto, UpdateAddressRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { addressId: string } }) {
   try {
-    const { addressId } = params;
+    const { addressId } = await params;
     const address = dbManager.getItemById('addresses', addressId);
     if (!address) {
       return NextResponse.json({ message: `Address with ID ${addressId} not found.` }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { addressI
 
 export async function PUT(request: NextRequest, { params }: { params: { addressId: string } }) {
   try {
-    const { addressId } = params;
+    const { addressId } = await params;
     const body = await request.json() as UpdateAddressRequest;
     const updatedAddress = dbManager.updateItem('addresses', addressId, body);
     if (!updatedAddress) {
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest, { params }: { params: { addressI
 
 export async function DELETE(request: NextRequest, { params }: { params: { addressId: string } }) {
   try {
-    const { addressId } = params;
+    const { addressId } = await params;
     const deleted = dbManager.deleteItem('addresses', addressId);
     if (!deleted) {
       return NextResponse.json({ message: `Address with ID ${addressId} not found.` }, { status: 404 });

@@ -5,7 +5,7 @@ import { EmployeeDto, UpdateEmployeeRequest, EmployeeResponse } from '@/types/or
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, employeeId: string } }) {
   try {
-    const { orgId, employeeId } = params;
+    const { orgId, employeeId } = await params;
     const employee = dbManager.getItemById('employees', employeeId);
     if (!employee || employee.organisation_id !== orgId) { // Also check orgId match
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, employeeId: string } }) {
   try {
-    const { orgId, employeeId } = params;
+    const { orgId, employeeId } = await params;
     const body = await request.json() as UpdateEmployeeRequest;
     const existingEmployee = dbManager.getItemById('employees', employeeId);
     if (!existingEmployee || existingEmployee.organisation_id !== orgId) {
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, employeeId: string } }) {
   try {
-    const { orgId, employeeId } = params;
+    const { orgId, employeeId } = await params;
     const existingEmployee = dbManager.getItemById('employees', employeeId);
     if (!existingEmployee || existingEmployee.organisation_id !== orgId) {
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });

@@ -5,7 +5,7 @@ import { AgencyDto, CreateAgencyRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const { searchParams } = new URL(request.url);
     const activeFilter = searchParams.get('active'); // boolean as string or null
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateAgencyRequest;
 
     if (!body.short_name || !body.long_name || !body.location || !body.business_domains || body.business_domains.length === 0) {

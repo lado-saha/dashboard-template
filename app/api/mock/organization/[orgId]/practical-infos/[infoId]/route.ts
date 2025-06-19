@@ -4,7 +4,7 @@ import { PracticalInformationDto, UpdatePracticalInformationRequest } from '@/ty
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { infoId } = params;
+    const { infoId } = await params;
     const info = dbManager.getItemById('practicalInformation', infoId);
     if (!info || info.organization_id !== params.orgId) {
       return NextResponse.json({ message: `Practical information with ID ${infoId} not found for this organization.` }, { status: 404 });
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { orgId, infoId } = params;
+    const { orgId, infoId } = await params;
     const body = await request.json() as UpdatePracticalInformationRequest;
     const existingInfo = dbManager.getItemById('practicalInformation', infoId);
     if (!existingInfo || existingInfo.organization_id !== orgId) {
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { orgId, infoId } = params;
+    const { orgId, infoId } = await params;
     const existingInfo = dbManager.getItemById('practicalInformation', infoId);
     if (!existingInfo || existingInfo.organization_id !== orgId) {
       return NextResponse.json({ message: `Practical Information with ID ${infoId} not found for this organization.` }, { status: 404 });

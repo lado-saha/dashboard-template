@@ -5,7 +5,7 @@ import { UpdateOrganizationRequest, OrganizationDto, OrganizationTableRow } from
 
 export async function PUT(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as UpdateOrganizationRequest;
 
     const updatedOrg = dbManager.updateItem('organizationsDetails', orgId, body);

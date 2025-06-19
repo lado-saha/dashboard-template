@@ -6,8 +6,8 @@ import { ContactDto, CreateContactRequest, ContactableType } from '@/types/organ
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const contactableType = searchParams.get('contactableType') as ContactableType | null;
-    const contactableId = searchParams.get('contactableId');
+    const contactableType = searchParams.get('entityType') as ContactableType | null;
+    const contactableId = searchParams.get('entityId');
 
     if (!contactableType || !contactableId) {
       return NextResponse.json({ message: "contactableType and contactableId query params are required." }, { status: 400 });
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const contactableType = searchParams.get('contactableType') as ContactableType | null;
-    const contactableId = searchParams.get('contactableId');
+    const contactableType = searchParams.get('entityType') as ContactableType | null;
+    const contactableId = searchParams.get('entityId');
     const body = await request.json() as CreateContactRequest;
 
     if (!contactableType || !contactableId) {

@@ -5,7 +5,7 @@ import { ImageDto } from '@/types/organization';
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     // Actual FormData parsing is complex in Next.js Edge/Node runtime for API routes.
     // This mock will just assume success and return some dummy ImageDto objects.
     // In a real scenario, you'd parse formData, save files, and generate URLs.

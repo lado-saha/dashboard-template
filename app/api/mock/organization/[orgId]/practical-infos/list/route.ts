@@ -5,7 +5,7 @@ import { PracticalInformationDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const { searchParams } = new URL(request.url);
     const organizationIdQueryParam = searchParams.get('organizationId'); // As per spec for GET all
     if (orgId !== organizationIdQueryParam) {

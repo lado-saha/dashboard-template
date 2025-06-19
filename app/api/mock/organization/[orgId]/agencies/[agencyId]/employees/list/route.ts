@@ -5,7 +5,7 @@ import { EmployeeDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const allEmployees = dbManager.getCollection('employees');
     const agencyEmployees = allEmployees.filter(emp => emp.organisation_id === orgId && emp.agency_id === agencyId);
     return NextResponse.json(agencyEmployees);

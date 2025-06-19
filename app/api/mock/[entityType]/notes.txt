@@ -1,0 +1,5 @@
+entityType = addressableType | contactableType
+entityId =  addressId | contactId
+
+Did it like this to abide to NExt.JS slug rules
+Error: You cannot use different slug names for the same dynamic path ('addressableType' !== 'contactableType').

@@ -6,7 +6,7 @@ import { EmployeeResponse, AffectEmployeeRequest, EmployeeDto } from '@/types/or
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const body = await request.json() as AffectEmployeeRequest;
 
     if (!body.employee_id) {

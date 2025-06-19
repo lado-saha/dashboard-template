@@ -5,7 +5,7 @@ import { ProviderDto, UpdateProviderRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, providerId: string } }) {
   try {
-    const { orgId, agencyId, providerId } = params;
+    const { orgId, agencyId, providerId } = await params;
     const provider = dbManager.getItemById('providers', providerId);
     if (!provider || provider.organization_id !== orgId || provider.agency_id !== agencyId) {
       return NextResponse.json({ message: `Supplier ${providerId} not found for agency ${agencyId}.` }, { status: 404 });
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, providerId: string } }) {
   try {
-    const { orgId, agencyId, providerId } = params;
+    const { orgId, agencyId, providerId } = await params;
     const body = await request.json() as UpdateProviderRequest;
     const existing = dbManager.getItemById('providers', providerId);
     if (!existing || existing.organization_id !== orgId || existing.agency_id !== agencyId) {
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, providerId: string } }) {
   try {
-    const { orgId, agencyId, providerId } = params;
+    const { orgId, agencyId, providerId } = await params;
     const existing = dbManager.getItemById('providers', providerId);
     if (!existing || existing.organization_id !== orgId || existing.agency_id !== agencyId) {
       return NextResponse.json({ message: `Supplier ${providerId} not found for agency ${agencyId}.` }, { status: 404 });

@@ -6,8 +6,8 @@ import { AddressDto, CreateAddressRequest, AddressableType } from '@/types/organ
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const addressableType = searchParams.get('addressableType') as AddressableType | null;
-    const addressableId = searchParams.get('addressableId');
+    const addressableType = searchParams.get('entityType') as AddressableType | null;
+    const addressableId = searchParams.get('entityId');
 
     if (!addressableType || !addressableId) {
       return NextResponse.json({ message: "addressableType and addressableId query params are required." }, { status: 400 });
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const addressableType = searchParams.get('addressableType') as AddressableType | null;
-    const addressableId = searchParams.get('addressableId');
+    const addressableType = searchParams.get('entityType') as AddressableType | null;
+    const addressableId = searchParams.get('entityId');
     const body = await request.json() as CreateAddressRequest;
 
      if (!addressableType || !addressableId) {

@@ -5,7 +5,7 @@ import { OrganizationDto } from '@/types/organization';
 
 export async function GET(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     // For details, we use the 'organizationsDetails' collection
     const org = dbManager.getItemById('organizationsDetails', orgId);
     if (!org) {

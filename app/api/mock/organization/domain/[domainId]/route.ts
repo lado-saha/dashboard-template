@@ -4,7 +4,7 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 
 export async function GET(request: Request, { params }: { params: { domainId: string } }) {
   try {
-    const { domainId } = params;
+    const { domainId } = await params;
     const allOrgs = dbManager.getCollection('organizationsTableRows');
     const orgsInDomain = allOrgs.filter(org => org.business_domains?.includes(domainId));
     return NextResponse.json(orgsInDomain);

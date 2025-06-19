@@ -379,7 +379,7 @@ export default function UnifiedSettingsPage() {
             <CardContent className="space-y-6">
               <ImageUploader
                 currentImageUrl={settings.avatar}
-                onImageSelectedActionAction={handleProfilePhotoSelected}
+                onImageSelectedAction={handleProfilePhotoSelected}
                 label="Profile Photo"
                 fallbackName={settings.fullName}
               />

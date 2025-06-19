@@ -5,7 +5,7 @@ import { ProposedActivityDto, CreateProposedActivityRequest } from '@/types/orga
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     // const { searchParams } = new URL(request.url); // For query params if any
     const allActivities = dbManager.getCollection('proposedActivities');
     const orgActivities = allActivities.filter(act => act.organization_id === orgId);
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateProposedActivityRequest;
     if (!body.name || !body.type) {
         return NextResponse.json({ message: "Name and type are required." }, { status: 400 });

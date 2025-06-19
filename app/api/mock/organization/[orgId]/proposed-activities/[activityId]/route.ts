@@ -5,7 +5,7 @@ import { ProposedActivityDto, UpdateProposedActivityRequest } from '@/types/orga
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, activityId: string } }) {
   try {
-    const { orgId, activityId } = params;
+    const { orgId, activityId } = await params;
     const activity = dbManager.getItemById('proposedActivities', activityId);
     if (!activity || activity.organization_id !== orgId) {
       return NextResponse.json({ message: `Activity ${activityId} not found for org ${orgId}.` }, { status: 404 });
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, activityId: string } }) {
   try {
-    const { orgId, activityId } = params;
+    const { orgId, activityId } = await params;
     const body = await request.json() as UpdateProposedActivityRequest;
     const existing = dbManager.getItemById('proposedActivities', activityId);
      if (!existing || existing.organization_id !== orgId) {
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, activityId: string } }) {
  try {
-    const { orgId, activityId } = params;
+    const { orgId, activityId } = await params;
     const existing = dbManager.getItemById('proposedActivities', activityId);
      if (!existing || existing.organization_id !== orgId) {
       return NextResponse.json({ message: `Activity ${activityId} not found for org ${orgId}.` }, { status: 404 });

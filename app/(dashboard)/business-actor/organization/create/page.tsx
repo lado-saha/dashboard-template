@@ -28,7 +28,7 @@ export default function CreateOrganizationPage() {
     <div className="space-y-6">
       <OrganizationForm
         mode="create"
-        onFormSubmitSuccess={handleCreateSuccess}
+        onFormSubmitSuccessAction={handleCreateSuccess}
       />
     </div>
   );

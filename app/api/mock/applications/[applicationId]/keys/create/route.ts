@@ -5,7 +5,7 @@ import { ApplicationKeyDto } from '@/types/organization';
 
 export async function POST(request: NextRequest, { params }: { params: { applicationId: string } }) {
   try {
-    const { applicationId } = params;
+    const { applicationId } = await params;
     // Check if application exists
     const app = dbManager.getItemById('applicationsData', applicationId);
     if (!app) return NextResponse.json({ message: "Application not found" }, { status: 404 });

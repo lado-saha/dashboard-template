@@ -52,7 +52,7 @@ interface ProductFormProps {
       scheduledAt?: string | Date;
     }
   >;
-  onFormSubmitSuccess?: (data: any) => void;
+  onFormSubmitSuccessAction?: (data: any) => void;
   mode?: "create" | "edit";
 }
 
@@ -70,7 +70,7 @@ const parseInitialScheduledAt = (
 
 export function ProductForm({
   initialData,
-  onFormSubmitSuccess,
+  onFormSubmitSuccessAction,
   mode = "create",
 }: ProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -199,7 +199,7 @@ export function ProductForm({
       toast.success(
         `Product ${mode === "create" ? "created" : "updated"} successfully!`
       );
-      if (onFormSubmitSuccess) onFormSubmitSuccess(response);
+      if (onFormSubmitSuccessAction) onFormSubmitSuccessAction(response);
       if (mode === "create") {
         form.reset({
           // Reset to a truly blank state for create mode

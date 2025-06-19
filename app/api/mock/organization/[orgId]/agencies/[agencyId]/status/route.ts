@@ -5,7 +5,7 @@ import { AgencyDto, UpdateAgencyStatusRequest } from '@/types/organization';
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const body = await request.json() as UpdateAgencyStatusRequest;
 
     if (typeof body.active !== 'boolean') {

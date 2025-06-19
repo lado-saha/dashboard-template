@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const params: GetBusinessDomainRequest = {
-        organization_id: searchParams.get('organization_id') || undefined,
-        parent_domain_id: searchParams.get('parent_domain_id') || undefined,
-        name: searchParams.get('name') || undefined,
-        page: searchParams.get('page') ? parseInt(searchParams.get('page')!, 10) : undefined,
-        size: searchParams.get('size') ? parseInt(searchParams.get('size')!, 10) : undefined,
+      organization_id: searchParams.get('organization_id') || undefined,
+      parent_domain_id: searchParams.get('parent_domain_id') || undefined,
+      name: searchParams.get('name') || undefined,
+      page: searchParams.get('page') ? parseInt(searchParams.get('page')!, 10) : undefined,
+      size: searchParams.get('size') ? parseInt(searchParams.get('size')!, 10) : undefined,
     };
 
     let domains = dbManager.getCollection('businessDomains');
@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
 
     // Mock pagination (basic)
     if (params.page && params.size) {
-        const start = (params.page - 1) * params.size;
-        const end = start + params.size;
-        domains = domains.slice(start, end);
+      const start = (params.page - 1) * params.size;
+      const end = start + params.size;
+      domains = domains.slice(start, end);
     }
     return NextResponse.json(domains);
   } catch (error: any) {

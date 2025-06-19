@@ -5,7 +5,7 @@ import { ThirdPartyDto, GetThirdPartyRequest, ThirdPartyType } from '@/types/org
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const { searchParams } = new URL(request.url);
     const queryParams: GetThirdPartyRequest = {
         status: searchParams.get('status') === 'true' ? true : searchParams.get('status') === 'false' ? false : undefined,

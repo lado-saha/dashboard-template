@@ -5,7 +5,7 @@ import { ImageDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { imageId: string } }) {
   try {
-    const { imageId } = params;
+    const { imageId } = await params;
     const imageInfo = dbManager.getItemById('organizationImages', imageId); // Assumes 'id' is the key
     if (!imageInfo) {
       return NextResponse.json({ message: `Image with ID ${imageId} not found.` }, { status: 404 });

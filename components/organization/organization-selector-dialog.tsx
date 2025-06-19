@@ -137,10 +137,10 @@ export function OrganizationSelectorDialog({
         </div>
       </div>
 
-      <ScrollArea className="flex-grow">
+      <ScrollArea className="flex-grow overflow-auto">
         <div className="p-6">
           {isLoadingUserOrgs ? (
-            <div className="flex items-center justify-center h-48">
+            <div className="flex items-center justify-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : filteredOrganizations.length === 0 && !searchQuery ? (

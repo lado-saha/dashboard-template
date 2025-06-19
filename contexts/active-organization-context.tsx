@@ -13,8 +13,6 @@ import { organizationRepository } from "@/lib/data-repo/organization";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
-// Assuming mock data is handled by the local repository and its mock API routes
-import { mockUserOrganizations as defaultMockOrgs, mockOrganizationDetails as defaultMockDetails } from '@/lib/mock-data/organization-mocks';
 
 interface ActiveOrganizationContextType {
   activeOrganizationId: string | null;

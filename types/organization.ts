@@ -154,6 +154,7 @@ export interface CreateAddressRequest {
   neighbor_hood?: string;
   latitude?: number; // format: double
   longitude?: number; // format: double
+  default?: boolean; // Whether this is the default address for the entity
 }
 export interface UpdateAddressRequest extends Partial<CreateAddressRequest> { }
 

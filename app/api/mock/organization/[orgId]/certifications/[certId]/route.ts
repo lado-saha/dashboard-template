@@ -5,7 +5,7 @@ import { CertificationDto, UpdateCertificationRequest } from '@/types/organizati
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
   try {
-    const { certId } = params;
+    const { certId } = await params;
     const cert = dbManager.getItemById('certifications', certId);
     if (!cert || cert.organization_id !== params.orgId) {
       return NextResponse.json({ message: `Certification with ID ${certId} not found for this organization.` }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
   try {
-    const { orgId, certId } = params;
+    const { orgId, certId } = await params;
     const body = await request.json() as UpdateCertificationRequest;
      const existingCert = dbManager.getItemById('certifications', certId);
     if (!existingCert || existingCert.organization_id !== orgId) {
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
   try {
-    const { orgId, certId } = params;
+    const { orgId, certId } = await params;
     const existingCert = dbManager.getItemById('certifications', certId);
     if (!existingCert || existingCert.organization_id !== orgId) {
          return NextResponse.json({ message: `Certification with ID ${certId} not found for this organization.` }, { status: 404 });

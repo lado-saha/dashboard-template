@@ -5,7 +5,7 @@ import { EmployeeResponse, CreateEmployeeRequest, EmployeeDto } from '@/types/or
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateEmployeeRequest;
 
     // Add validation for required fields in CreateEmployeeRequest

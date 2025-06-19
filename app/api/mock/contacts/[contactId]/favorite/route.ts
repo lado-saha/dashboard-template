@@ -7,7 +7,7 @@ import { ContactDto } from '@/types/organization';
 // Implementing as PUT for the mock as it's more conventional for updates.
 export async function PUT(request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
-    const { contactId } = params;
+    const { contactId } = await params;
     const contact = dbManager.getItemById('contacts', contactId);
     if (!contact) {
       return NextResponse.json({ message: `Contact with ID ${contactId} not found.` }, { status: 404 });

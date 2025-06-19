@@ -5,7 +5,7 @@ import { CustomerOrgDto, CreateCustomerRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allCustomers = dbManager.getCollection('orgCustomers');
     // Filter for customers directly under the organization (no agency_id or agency_id matches orgId if that's the convention)
     const orgCustomers = allCustomers.filter(c => c.organization_id === orgId && (!c.agency_id || c.agency_id === orgId));
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateCustomerRequest;
     // Add validation as needed
     const newCustomerData: Omit<CustomerOrgDto, 'customer_id' | 'created_at' | 'updated_at' | 'partner_details'> = {

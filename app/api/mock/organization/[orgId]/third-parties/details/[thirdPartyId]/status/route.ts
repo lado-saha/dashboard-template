@@ -5,7 +5,7 @@ import { ThirdPartyDto, UpdateThirdPartyStatusRequest } from '@/types/organizati
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, thirdPartyId: string } }) {
   try {
-    const { orgId, thirdPartyId } = params;
+    const { orgId, thirdPartyId } = await params;
     const body = await request.json() as UpdateThirdPartyStatusRequest;
     if (typeof body.active !== 'boolean') {
         return NextResponse.json({ message: "Field 'active' (boolean) is required." }, { status: 400 });

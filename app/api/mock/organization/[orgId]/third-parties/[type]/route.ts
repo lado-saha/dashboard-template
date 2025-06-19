@@ -5,7 +5,7 @@ import { ThirdPartyDto, CreateThirdPartyRequest, ThirdPartyType } from '@/types/
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string, type: string } }) {
   try {
-    const { orgId, type } = params;
+    const { orgId, type } = await params;
     const body = await request.json() as CreateThirdPartyRequest;
 
     if (!body.name) {

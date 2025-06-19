@@ -5,7 +5,7 @@ import { CertificationDto, CreateCertificationRequest } from '@/types/organizati
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateCertificationRequest;
 
     if (!body.name || !body.type) {
