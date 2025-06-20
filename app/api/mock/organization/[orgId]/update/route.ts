@@ -5,7 +5,7 @@ import { UpdateOrganizationRequest, OrganizationDto, OrganizationTableRow } from
 
 export async function PUT(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as UpdateOrganizationRequest;
 
     // THE FIX: Ensure we merge with existing data, not just overwrite.

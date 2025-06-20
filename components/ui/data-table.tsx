@@ -42,7 +42,7 @@ export interface DataTableProps<TData, TValue> {
     React.SetStateAction<ColumnFiltersState>
   >;
   globalFilter?: string;
-  onGlobalFilterChange?: React.Dispatch<React.SetStateAction<string>>;
+  onGlobalFilterChangeAction?: React.Dispatch<React.SetStateAction<string>>;
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: React.Dispatch<
     React.SetStateAction<VisibilityState>
@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
   columnFilters: controlledColumnFilters,
   onColumnFiltersChange,
   globalFilter: controlledGlobalFilter,
-  onGlobalFilterChange,
+  onGlobalFilterChangeAction,
   columnVisibility: controlledColumnVisibility,
   onColumnVisibilityChange,
   rowSelection: controlledRowSelection,
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: onRowSelectionChange,
     onSortingChange: onSortingChange,
     onColumnFiltersChange: onColumnFiltersChange,
-    onGlobalFilterChange: onGlobalFilterChange,
+    onGlobalFilterChangeAction: onGlobalFilterChangeAction,
     onColumnVisibilityChange: onColumnVisibilityChange,
     onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),

@@ -8,3 +8,5 @@ export interface Auditable extends Timestamps {
   created_by?: string; // format: uuid
   updated_by?: string; // format: uuid
 }
+
+export type ViewMode = "list" | "grid";

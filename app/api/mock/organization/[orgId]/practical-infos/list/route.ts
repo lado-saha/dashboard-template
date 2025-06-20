@@ -5,7 +5,7 @@ import { PracticalInformationDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allInfos = dbManager.getCollection('practicalInformation');
     const orgInfos = allInfos.filter(info => info.organization_id === orgId);
     return NextResponse.json(orgInfos);

@@ -3105,7 +3105,7 @@ import { UpdateOrganizationRequest, OrganizationDto, OrganizationTableRow } from
 
 export async function PUT(request: Request, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as UpdateOrganizationRequest;
 
     // THE FIX: Ensure we merge with existing data, not just overwrite.
@@ -12309,7 +12309,7 @@ export default function ManageProductsPage() {
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChangeAction: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
@@ -13686,7 +13686,7 @@ export function ProductList({
       columnFilters={columnFilters}
       onColumnFiltersChange={setColumnFilters}
       globalFilter={globalFilter}
-      onGlobalFilterChange={setGlobalFilter}
+      onGlobalFilterChangeAction={setGlobalFilter}
       columnVisibility={columnVisibility}
       onColumnVisibilityChange={setColumnVisibility}
       rowSelection={rowSelection}
@@ -15735,7 +15735,7 @@ export interface DataTableProps<TData, TValue> {
     React.SetStateAction<ColumnFiltersState>
   >;
   globalFilter?: string; // Add globalFilter prop
-  onGlobalFilterChange?: React.Dispatch<React.SetStateAction<string>>; // Add globalFilter setter
+  onGlobalFilterChangeAction?: React.Dispatch<React.SetStateAction<string>>; // Add globalFilter setter
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: React.Dispatch<
     React.SetStateAction<VisibilityState>
@@ -15762,7 +15762,7 @@ export function DataTable<TData, TValue>({
   columnFilters: controlledColumnFilters,
   onColumnFiltersChange,
   globalFilter: controlledGlobalFilter,
-  onGlobalFilterChange, // Destructure global filter
+  onGlobalFilterChangeAction, // Destructure global filter
   columnVisibility: controlledColumnVisibility,
   onColumnVisibilityChange,
   rowSelection: controlledRowSelection,
@@ -15793,7 +15793,7 @@ export function DataTable<TData, TValue>({
   const columnFilters = controlledColumnFilters ?? internalColumnFilters;
   const setColumnFilters = onColumnFiltersChange ?? setInternalColumnFilters;
   const globalFilter = controlledGlobalFilter ?? internalGlobalFilter; // Use controlled or internal global filter
-  const setGlobalFilter = onGlobalFilterChange ?? setInternalGlobalFilter; // Use controlled or internal setter
+  const setGlobalFilter = onGlobalFilterChangeAction ?? setInternalGlobalFilter; // Use controlled or internal setter
   const columnVisibility =
     controlledColumnVisibility ?? internalColumnVisibility;
   const setColumnVisibility =
@@ -15819,7 +15819,7 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter, // Handle global filter changes
+    onGlobalFilterChangeAction: setGlobalFilter, // Handle global filter changes
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),

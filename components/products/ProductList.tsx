@@ -111,7 +111,7 @@ export function ProductList({
       columnFilters={columnFilters}
       onColumnFiltersChange={setColumnFilters}
       globalFilter={globalFilter}
-      onGlobalFilterChange={setGlobalFilterAction}
+      onGlobalFilterChangeAction={setGlobalFilterAction}
       columnVisibility={columnVisibility}
       onColumnVisibilityChange={setColumnVisibility}
       rowSelection={rowSelection}

@@ -1,11 +1,11 @@
 // app/api/mock/organization/[orgId]/practical-infos/[infoId]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { PracticalInformationDto, UpdatePracticalInformationRequest } from '@/types/organization';
+import { UpdatePracticalInformationRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { orgId, infoId } = params;
+    const { orgId, infoId } = await params;
     const info = dbManager.getItemById('practicalInformation', infoId);
     if (!info || info.organization_id !== orgId) {
       return NextResponse.json({ message: "Practical information not found for this organization." }, { status: 404 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { orgId, infoId } = params;
+    const { orgId, infoId } = await params;
     const body = await request.json() as UpdatePracticalInformationRequest;
     const existing = dbManager.getItemById('practicalInformation', infoId);
     if (!existing || existing.organization_id !== orgId) {
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
   try {
-    const { orgId, infoId } = params;
+    const { orgId, infoId } = await params;
     const existing = dbManager.getItemById('practicalInformation', infoId);
     if (!existing || existing.organization_id !== orgId) {
       return NextResponse.json({ message: "Practical information not found for deletion." }, { status: 404 });

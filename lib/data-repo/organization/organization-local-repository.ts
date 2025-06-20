@@ -334,7 +334,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdatePracticalInformationRequest
   ): Promise<PracticalInformationDto> {
     return this.fetchMockApi<PracticalInformationDto>(
-      `/${orgId}/practical-infos/${infoId}/update`,
+      `/${orgId}/practical-infos/${infoId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -343,7 +343,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     infoId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/practical-infos/${infoId}/delete`,
+      `/${orgId}/practical-infos/${infoId}`,
       { method: "DELETE" }
     );
   }

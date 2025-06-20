@@ -1,7 +1,7 @@
 "use client";
 
+import { DataGrid } from "@/components/ui/data-grid";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation"; // No need for useRouter here for navigation
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import {
   PracticalInformationDto,
@@ -11,7 +11,6 @@ import {
 import { organizationRepository } from "@/lib/data-repo/organization";
 
 import { PracticalInfoForm } from "@/components/organization/practical-info/practical-info-form";
-import { PracticalInfoTableToolbar } from "@/components/organization/practical-info/data-table-toolbar";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { PracticalInfoCard } from "@/components/organization/practical-info/practical-info-card";
@@ -27,6 +26,7 @@ import {
   Inbox,
   FileText,
   Search,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -62,8 +62,26 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { DataTableFilterOption } from "@/types/table";
+import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
+import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
+import { ViewMode } from "@/types/common";
 
-type ViewMode = "list" | "grid";
+const getPracticalInfoTypeOptions = (
+  items: PracticalInformationDto[]
+): DataTableFilterOption[] => {
+  const allTypes = items.map((item) => item.type);
+  // 2. Use a Set to get unique values, then filter out any falsy values (null, undefined, "")
+  const uniqueValidTypes = [...new Set(allTypes)].filter(Boolean);
+
+  // 3. Map the guaranteed strings to the required format and sort
+  return uniqueValidTypes
+    .map((type) => ({
+      label: String(type),
+      value: String(type),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+};
 
 const fuzzyGlobalFilterFn: FilterFn<PracticalInformationDto> = (
   row,
@@ -103,6 +121,12 @@ export default function ManagePracticalInfoPage() {
     pageIndex: 0,
     pageSize: 10,
   });
+
+  const derivedTypeOptions = useMemo(
+    () => getPracticalInfoTypeOptions(allItems),
+    [allItems]
+  );
+
   const fetchData = useCallback(async () => {
     // We must have an organization ID to fetch data.
     if (!activeOrganizationId) {
@@ -374,157 +398,181 @@ export default function ManagePracticalInfoPage() {
           </div>
         </div>
       </header>
-
-      <PracticalInfoTableToolbar
-        table={table}
-        globalFilter={globalFilter}
-        setGlobalFilterAction={setGlobalFilterAction}
-        allItemsForFilterOptions={allItems}
-        onDeleteSelected={handleDeleteSelected} // Pass the new function
-      />
-
-      <main>
-        {isItemsLoading /* Skeletons */ &&
-          (viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="h-[180px]">
-                  <CardHeader>
-                    <Skeleton className="h-5 w-3/5" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5 mt-2" />
-                  </CardContent>
-                  <CardFooter>
-                    <Skeleton className="h-6 w-16 ml-auto" />
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <div className="p-4 border-b">
-                <Skeleton className="h-6 w-1/3" />
-              </div>
-              <div className="divide-y">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4">
-                    <Skeleton className="h-8 w-8" />
-                    <div className="space-y-1.5 flex-1">
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-3 w-3/4" />
-                    </div>
-                    <Skeleton className="h-8 w-20" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        {!isItemsLoading && itemsError /* Error Display */ && (
-          <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
-            <AlertTriangle className="h-10 w-10 text-destructive mb-3" />
-            <p className="text-destructive-foreground font-medium">
-              {itemsError}
-            </p>
-            <Button
-              onClick={refreshData}
-              variant="destructive"
-              className="mt-4"
-            >
-              Try Again
-            </Button>
-          </div>
-        )}
-        {!isItemsLoading &&
-          !itemsError &&
-          table.getRowModel().rows.length === 0 &&
-          (allItems.length > 0 ||
-            globalFilter ||
-            columnFilters.length > 0) /* Filtered to empty */ && (
-            <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
-              <Search className="h-12 w-12 text-muted-foreground/70 mb-4" />
-              <h3 className="text-lg font-semibold">
-                No Information Matches Filters
-              </h3>
-              <p className="text-sm">
-                Try adjusting your search or filter criteria.
-              </p>
+      <Card>
+        <CardContent className="space-y-6">
+          <DataTableToolbar<PracticalInformationDto>
+            table={table}
+            viewMode={viewMode}
+            globalFilter={globalFilter}
+            onGlobalFilterChangeAction={setGlobalFilterAction}
+            searchPlaceholder="Search by type, value, notes..."
+            filterControls={
+              table.getColumn("type") && derivedTypeOptions.length > 0 ? (
+                <DataTableFacetedFilter
+                  column={table.getColumn("type")}
+                  title="Type"
+                  options={derivedTypeOptions}
+                />
+              ) : null
+            }
+            bulkActions={
               <Button
-                variant="outline"
-                onClick={() => {
-                  setGlobalFilterAction("");
-                  table.resetColumnFilters();
-                }}
-                className="mt-3"
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                className="h-9"
               >
-                Clear Filters
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Selected
               </Button>
-            </div>
-          )}
-        {!isItemsLoading &&
-          !itemsError &&
-          allItems.length === 0 &&
-          !globalFilter &&
-          columnFilters.length === 0 /* Truly no items */ && (
-            <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
-              <Inbox className="h-12 w-12 text-muted-foreground/70 mb-4" />
-              <h3 className="text-lg font-semibold">
-                No Practical Information Added Yet
-              </h3>
-              <p className="text-sm">
-                Add important operational details for your organization.
-              </p>
-              <Button onClick={() => handleOpenFormModal()} className="mt-3">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Information
-              </Button>
-            </div>
-          )}
+            }
+          />
+          <main>
+            {isItemsLoading &&
+              (viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Card key={i} className="h-[180px]">
+                      <CardHeader>
+                        <Skeleton className="h-5 w-3/5" />
+                      </CardHeader>
+                      <CardContent>
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-4/5 mt-2" />
+                      </CardContent>
+                      <CardFooter>
+                        <Skeleton className="h-6 w-16 ml-auto" />
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <div className="p-4 border-b">
+                    <Skeleton className="h-6 w-1/3" />
+                  </div>
+                  <div className="divide-y">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 p-4">
+                        <Skeleton className="h-8 w-8" />
+                        <div className="space-y-1.5 flex-1">
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-3 w-3/4" />
+                        </div>
+                        <Skeleton className="h-8 w-20" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            {!isItemsLoading && itemsError /* Error Display */ && (
+              <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
+                <AlertTriangle className="h-10 w-10 text-destructive mb-3" />
+                <p className="text-destructive-foreground font-medium">
+                  {itemsError}
+                </p>
+                <Button
+                  onClick={refreshData}
+                  variant="destructive"
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
+            {!isItemsLoading &&
+              !itemsError &&
+              table.getRowModel().rows.length === 0 &&
+              (allItems.length > 0 ||
+                globalFilter ||
+                columnFilters.length > 0) /* Filtered to empty */ && (
+                <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
+                  <Search className="h-12 w-12 text-muted-foreground/70 mb-4" />
+                  <h3 className="text-lg font-semibold">
+                    No Information Matches Filters
+                  </h3>
+                  <p className="text-sm">
+                    Try adjusting your search or filter criteria.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setGlobalFilterAction("");
+                      table.resetColumnFilters();
+                    }}
+                    className="mt-3"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+            {!isItemsLoading &&
+              !itemsError &&
+              allItems.length === 0 &&
+              !globalFilter &&
+              columnFilters.length === 0 /* Truly no items */ && (
+                <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
+                  <Inbox className="h-12 w-12 text-muted-foreground/70 mb-4" />
+                  <h3 className="text-lg font-semibold">
+                    No Practical Information Added Yet
+                  </h3>
+                  <p className="text-sm">
+                    Add important operational details for your organization.
+                  </p>
+                  <Button
+                    onClick={() => handleOpenFormModal()}
+                    className="mt-3"
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Information
+                  </Button>
+                </div>
+              )}
 
-        {!isItemsLoading &&
-          !itemsError &&
-          table.getRowModel().rows.length > 0 &&
-          (viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {currentTablePageRows.map((row) => (
-                <PracticalInfoCard
-                  key={row.original.information_id}
-                  item={row.original}
-                  onEditAction={handleOpenFormModal}
-                  onDeleteAction={handleDeleteItem}
+            {!isItemsLoading &&
+              !itemsError &&
+              table.getRowModel().rows.length > 0 &&
+              (viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {currentTablePageRows.map((row) => (
+                    <PracticalInfoCard
+                      key={row.original.information_id}
+                      item={row.original}
+                      onEditAction={handleOpenFormModal}
+                      onDeleteAction={handleDeleteItem}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={allItems}
+                  pageCount={table.getPageCount()}
+                  sorting={sorting}
+                  onSortingChange={setSorting}
+                  columnFilters={columnFilters}
+                  onColumnFiltersChange={setColumnFilters}
+                  globalFilter={globalFilter}
+                  onGlobalFilterChangeAction={setGlobalFilterAction}
+                  columnVisibility={columnVisibility}
+                  onColumnVisibilityChange={setColumnVisibility}
+                  rowSelection={rowSelection}
+                  onRowSelectionChange={setRowSelection}
+                  pagination={pagination}
+                  onPaginationChange={setPagination}
+                  manualPagination={false}
+                  manualSorting={false}
+                  manualFiltering={false}
                 />
               ))}
-            </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={allItems}
-              pageCount={table.getPageCount()}
-              sorting={sorting}
-              onSortingChange={setSorting}
-              columnFilters={columnFilters}
-              onColumnFiltersChange={setColumnFilters}
-              globalFilter={globalFilter}
-              onGlobalFilterChange={setGlobalFilterAction}
-              columnVisibility={columnVisibility}
-              onColumnVisibilityChange={setColumnVisibility}
-              rowSelection={rowSelection}
-              onRowSelectionChange={setRowSelection}
-              pagination={pagination}
-              onPaginationChange={setPagination}
-              manualPagination={false}
-              manualSorting={false}
-              manualFiltering={false}
-            />
-          ))}
-        {!isItemsLoading && !itemsError && table.getPageCount() > 0 && (
-          <div className="mt-6">
-            <DataTablePagination table={table} />
-          </div>
-        )}
-      </main>
-
+            {!isItemsLoading && !itemsError && table.getPageCount() > 0 && (
+              <div className="mt-6">
+                <DataTablePagination table={table} viewMode={viewMode} />
+              </div>
+            )}
+          </main>
+        </CardContent>
+      </Card>
       <Dialog
         open={isFormModalOpen}
         onOpenChange={(open) => {

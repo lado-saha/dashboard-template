@@ -43,9 +43,9 @@ import {
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { cn } from "@/lib/utils"; // Import cn for conditional classes
 import { getProductColumns } from "@/components/products/columns";
+import { ViewMode } from "@/types/common";
 
 type PageMode = "list" | "create" | "edit" | "detail";
-type ViewMode = "list" | "grid";
 
 const resourceStateTransitions: Record<string, string[]> = {
   FREE: ["AFFECTED"],
@@ -626,7 +626,7 @@ export default function ManageProductsPage() {
         {pageMode === "list" &&
           !isListLoading &&
           !listError &&
-          allProducts.length > 0 && <DataTablePagination table={table} />}
+          allProducts.length > 0 && <DataTablePagination viewMode={viewMode} table={table} />}
         {pageMode === "list" &&
           !isListLoading &&
           !listError &&

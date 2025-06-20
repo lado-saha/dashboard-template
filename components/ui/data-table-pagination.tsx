@@ -16,23 +16,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ViewMode } from "@/types/common";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  viewMode: ViewMode;
 }
 
 export function DataTablePagination<TData>({
   table,
+  viewMode,
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-2 py-4 border-t">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+        {table.getFilteredRowModel().rows.length}{" "}
+        {viewMode === "list" ? "row(s) selected" : "item(s) selected"} .
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">
+            {viewMode === "list" ? "Rows per page" : "Items per page"}
+          </p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {

@@ -5,7 +5,7 @@ import { PracticalInformationDto, CreatePracticalInformationRequest } from '@/ty
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreatePracticalInformationRequest;
 
     if (!body.type || !body.value) {
