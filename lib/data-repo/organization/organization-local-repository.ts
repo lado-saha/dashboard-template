@@ -383,7 +383,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   }
   async deleteCertification(orgId: string, certId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/certifications/${certId}`,
+      `/${orgId}/certifications/${certId}/delete`,
       { method: "DELETE" }
     );
   }
@@ -510,12 +510,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateEmployeeRequest
   ): Promise<EmployeeResponse> {
     return this.fetchMockApi<EmployeeResponse>(
-      `/${orgId}/employees/${employeeId}/update`,
+      `/${orgId}/employees/${employeeId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteOrgEmployee(orgId: string, employeeId: string): Promise<void> {
-    return this.fetchMockApi<void>(`/${orgId}/employees/${employeeId}/delete`, {
+    return this.fetchMockApi<void>(`/${orgId}/employees/${employeeId}`, {
       method: "DELETE",
     });
   }
@@ -555,7 +555,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateEmployeeRequest
   ): Promise<EmployeeResponse> {
     return this.fetchMockApi<EmployeeResponse>(
-      `/${orgId}/agencies/${agencyId}/employees/${employeeId}/update`,
+      `/${orgId}/agencies/${agencyId}/employees/${employeeId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -565,7 +565,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     employeeId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/agencies/${agencyId}/employees/${employeeId}/delete`,
+      `/${orgId}/agencies/${agencyId}/employees/${employeeId}`,
       { method: "DELETE" }
     );
   }

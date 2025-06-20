@@ -248,6 +248,24 @@ export type EmployeeRole =
   | "CUSTOMERSERVICE" | "OWNER" | "SALESPERSON" | "CUSTOMER" | "PROVIDER"
   | "MANAGER" | "SUPERADMIN" | "ADMIN" | "SUPPORT" | "OTHER";
 
+export const EmployeeRoleValues: [EmployeeRole, ...EmployeeRole[]] = [
+  "CEO",
+  "ENGINEER",
+  "MARKETING",
+  "FINANCE",
+  "HR",
+  "SALES",
+  "CUSTOMERSERVICE",
+  "OWNER",
+  "SALESPERSON",
+  "CUSTOMER",
+  "PROVIDER",
+  "MANAGER",
+  "SUPERADMIN",
+  "ADMIN",
+  "SUPPORT",
+  "OTHER",
+];
 
 export interface CreateEmployeeRequest {
   first_name?: string;
