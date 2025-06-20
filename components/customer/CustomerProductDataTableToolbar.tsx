@@ -45,19 +45,19 @@ export const customerProductStateOptions: DataTableFilterOption[] = [
 interface CustomerProductDataTableToolbarProps<TData extends ProductListItemData> {
   table: Table<TData>;
   globalFilter: string;
-  setGlobalFilter: (value: string) => void;
+  setGlobalFilterAction: (value: string) => void;
 }
 
 export function CustomerProductDataTableToolbar<TData extends ProductListItemData>({
   table,
   globalFilter,
-  setGlobalFilter,
+  setGlobalFilterAction,
 }: CustomerProductDataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0 || !!globalFilter;
 
   const resetAllFilters = () => {
     table.resetColumnFilters();
-    setGlobalFilter("");
+    setGlobalFilterAction("");
   };
 
   return (
@@ -68,7 +68,7 @@ export function CustomerProductDataTableToolbar<TData extends ProductListItemDat
           <Input
             placeholder="Search all..."
             value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            onChange={(event) => setGlobalFilterAction(event.target.value)}
             className="h-10 w-full sm:w-[180px] lg:w-[250px] pl-10" // Adjusted width
           />
         </div>

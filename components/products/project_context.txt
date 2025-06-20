@@ -1,0 +1,2149 @@
+Project Context From: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products
+Generated On: Thu Jun 19 11:50:18 PM WAT 2025
+===============================================
+Ignored Directory Patterns: .* node_modules vendor build dist target __pycache__ .next cache target venv svgs fontawesome scss fonts webfonts images storage
+Ignored File Patterns: *.log *.jar *.pdf *.png *.jpg *.class *.sqlite *.csv project_context.txt package-lock.json yarn.lock *.json composer.lock *.ico pnpm-lock.yaml
+===============================================
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/columns.tsx
+
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import { ProductListItemData } from "@/types/product";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit3, Trash2, Eye, RefreshCw, ArrowUpDown, Clock, Package, Combine, PlayCircle, CheckCircle2, XCircle, Loader2, InfoIcon, CircleDot, CircleSlash } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
+import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+
+// Helper for state badge, icon, and label (MODIFIED TO RETURN OBJECT)
+interface StateDisplayInfo {
+  variant: "default" | "secondary" | "outline" | "destructive";
+  icon: React.ElementType;
+  label: string;
+}
+
+const getStateDisplayInfo = (state: string = ""): StateDisplayInfo => {
+  const upperState = state.toUpperCase();
+  const label = upperState.toLowerCase().replace(/_/g, " "); // Keep underscore replacement for label
+  switch (upperState) {
+    case "FREE": case "AVAILABLE": return { variant: "default", icon: CheckCircle2, label };
+    case "PUBLISHED": case "FINISHED": return { variant: "default", icon: CheckCircle2, label };
+    case "AFFECTED": case "PLANNED": return { variant: "secondary", icon: Clock, label };
+    case "IN_USE": case "ONGOING": return { variant: "outline", icon: CircleDot, label };
+    case "CANCELLED": case "DELETED": return { variant: "destructive", icon: CircleSlash, label };
+    default: return { variant: "outline", icon: InfoIcon, label: label || "Unknown" }; // Use formatted label or Unknown
+  }
+};
+
+
+export interface ProductRowActionsProps {
+  product: ProductListItemData;
+  onEditAction: (product: ProductListItemData) => void;
+  onDeleteAction: (product: ProductListItemData) => void;
+  onChangeState: (product: ProductListItemData, newState: string) => void;
+  onViewDetails: (product: ProductListItemData) => void;
+  resourceStateTransitions: Record<string, string[]>;
+  serviceStateTransitions: Record<string, string[]>;
+  isItemActionLoading: boolean;
+}
+
+const ProductRowActions: React.FC<ProductRowActionsProps> = ({
+  product, onEditAction, onDeleteAction, onChangeState, onViewDetails,
+  resourceStateTransitions, serviceStateTransitions, isItemActionLoading
+}) => {
+  const getAvailableTransitions = (prod: ProductListItemData) => {
+    if (prod.productType === "RESOURCE") {
+      return resourceStateTransitions[prod.currentState.toUpperCase()] || [];
+    }
+    if (prod.productType === "SERVICE") {
+      return serviceStateTransitions[prod.currentState.toUpperCase()] || [];
+    }
+    return [];
+  };
+  const availableTransitions = getAvailableTransitions(product);
+
+  const getStateChangeIcon = (nextState: string) => {
+    switch (nextState.toUpperCase()) {
+      case "PUBLISHED": case "ONGOING": case "AFFECTED": case "IN_USE": return PlayCircle;
+      case "FINISHED": return CheckCircle2;
+      case "CANCELLED": case "FREE": return XCircle;
+      default: return RefreshCw;
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-muted" disabled={isItemActionLoading}>
+          {isItemActionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[200px]">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => onViewDetails(product)}>
+          <Eye className="mr-2 h-4 w-4" /> View Details
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onEditAction(product)}>
+          <Edit3 className="mr-2 h-4 w-4" /> Edit Product
+        </DropdownMenuItem>
+        {availableTransitions.length > 0 && <DropdownMenuSeparator />}
+        {availableTransitions.map(nextState => {
+          const Icon = getStateChangeIcon(nextState);
+          return (
+            <DropdownMenuItem key={nextState} onClick={() => onChangeState(product, nextState)}>
+              <Icon className="mr-2 h-4 w-4" /> Change to {nextState.toLowerCase().replace(/_/g, " ")}
+            </DropdownMenuItem>
+          );
+        })}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => onDeleteAction(product)}
+          className="text-destructive focus:text-destructive focus:bg-destructive/10"
+        >
+          <Trash2 className="mr-2 h-4 w-4" /> Delete Product
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const getProductColumns = (
+  actionHandlers: Omit<ProductRowActionsProps, 'product' | 'isItemActionLoading'> & { getIsItemActionLoading: (productId: string) => boolean }
+): ColumnDef<ProductListItemData>[] => [
+    {
+      id: "select",
+      header: ({ table }) => ( /* ... Checkbox ... */
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all rows"
+          className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+        />
+      ),
+      cell: ({ row }) => ( /* ... Checkbox ... */
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+        />
+      ),
+      enableSorting: false, enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => { /* ... Name cell with clickable and scheduled info ... */
+        const product = row.original;
+        return (
+          <div className="flex flex-col max-w-[200px] sm:max-w-[300px]">
+            <button
+              type="button"
+              className="font-medium text-left truncate hover:text-primary hover:underline focus:outline-none focus:ring-1 focus:ring-primary rounded-sm"
+              title={product.name}
+              onClick={() => actionHandlers.onViewDetails(product)}
+            > {product.name} </button>
+            {product.isScheduled && product.scheduledAt && isValid(parseISO(product.scheduledAt)) && (
+              <div className="text-xs text-muted-foreground flex items-center mt-0.5 whitespace-nowrap">
+                <Clock className="h-3 w-3 mr-1 flex-shrink-0 text-sky-600" />
+                Scheduled: {format(parseISO(product.scheduledAt), "PPp")}
+              </div>
+            )}
+          </div>
+        )
+      },
+      enableHiding: false,
+    },
+    {
+      accessorKey: "productType",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+      cell: ({ row }) => { /* ... Type badge with icon ... */
+        const Icon = row.original.productType === "RESOURCE" ? Package : Combine;
+        return (
+          <Badge variant={row.original.productType === "RESOURCE" ? "outline" : "secondary"} className="capitalize text-xs items-center">
+            <Icon className="mr-1.5 h-3.5 w-3.5 opacity-80" />
+            {row.original.productType.toLowerCase()}
+          </Badge>
+        );
+      },
+      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+    },
+    {
+      accessorKey: "currentState",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) => {
+        // Use the corrected helper function
+        const stateInfo = getStateDisplayInfo(row.original.currentState);
+        const StatusIcon = stateInfo.icon; // Get the icon from helper
+        return (
+          <Badge variant={stateInfo.variant} className="capitalize text-xs items-center">
+            <StatusIcon className="mr-1.5 h-3.5 w-3.5 opacity-80" />
+            {stateInfo.label} {/* Use label from helper */}
+          </Badge>
+        );
+      },
+      filterFn: (row, id, value) => value.includes(row.getValue(id)),
+    },
+    {
+      accessorKey: "basePrice",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
+      cell: ({ row }) => { /* ... Price cell ... */
+        const amount = parseFloat(row.getValue("basePrice"));
+        if (isNaN(amount)) return <div className="text-right font-medium text-muted-foreground">N/A</div>;
+        const formatted = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", }).format(amount);
+        return <div className="text-right font-medium">{formatted}</div>;
+      },
+    },
+    {
+      accessorKey: "updatedAt",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Last Updated" />,
+      cell: ({ row }) => ( /* ... UpdatedAt cell ... */
+        <div className="text-sm text-muted-foreground whitespace-nowrap">
+          {format(parseISO(row.original.updatedAt), "PP")}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="text-right">
+          <ProductRowActions
+            product={row.original}
+            onEditAction={actionHandlers.onEditAction}
+            onDeleteAction={actionHandlers.onDeleteAction}
+            onChangeState={actionHandlers.onChangeState}
+            onViewDetails={actionHandlers.onViewDetails}
+            resourceStateTransitions={actionHandlers.resourceStateTransitions}
+            serviceStateTransitions={actionHandlers.serviceStateTransitions}
+            isItemActionLoading={actionHandlers.getIsItemActionLoading(row.original.id)}
+          />
+        </div>
+      ),
+      enableSorting: false, enableHiding: false,
+    },
+  ];// END OF FILE: columns.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/data-table-toolbar.tsx
+
+"use client";
+
+import { Table } from "@tanstack/react-table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { SlidersHorizontal, X, Package, Combine, CheckCircle, CircleDot, ClockIcon, Search } from "lucide-react"; // Added Search
+import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
+
+export const productTypeOptions = [
+  { label: "Resource", value: "RESOURCE", icon: Package },
+  { label: "Service", value: "SERVICE", icon: Combine },
+];
+export const productStatusOptions = [
+  { label: "Free", value: "FREE", icon: CheckCircle }, { label: "Affected", value: "AFFECTED", icon: CircleDot },
+  { label: "In Use", value: "IN_USE", icon: CircleDot }, { label: "Planned", value: "PLANNED", icon: ClockIcon },
+  { label: "Published", value: "PUBLISHED", icon: CheckCircle }, { label: "Ongoing", value: "ONGOING", icon: CircleDot },
+  { label: "Finished", value: "FINISHED", icon: CheckCircle }, { label: "Cancelled", value: "CANCELLED", icon: X },
+];
+
+interface DataTableToolbarProps<TData> {
+  table: Table<TData>;
+  globalFilter: string; // Receive global filter state
+  setGlobalFilterAction: (value: string) => void; // Receive setter for global filter
+}
+
+export function ProductDataTableToolbar<TData>({
+  table,
+  globalFilter,
+  setGlobalFilterAction,
+}: DataTableToolbarProps<TData>) {
+  const isFiltered = table.getState().columnFilters.length > 0 || !!globalFilter;
+
+  const resetAllFilters = () => {
+    table.resetColumnFilters();
+    setGlobalFilterAction("");
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+      <div className="flex flex-1 flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+        <div className="relative w-full sm:w-auto">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search all fields..." // Changed placeholder
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilterAction(event.target.value)} // Use lifted global filter
+            className="h-9 w-full sm:w-[180px] lg:w-[280px] pl-8" // Added padding for icon
+          />
+        </div>
+        {table.getColumn("productType") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("productType")}
+            title="Type"
+            options={productTypeOptions}
+          />
+        )}
+        {table.getColumn("currentState") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("currentState")}
+            title="Status"
+            options={productStatusOptions}
+          />
+        )}
+        {isFiltered && (
+          <Button
+            variant="ghost"
+            onClick={resetAllFilters} // Reset both column and global filters
+            className="h-9 px-2 lg:px-3"
+          >
+            Reset
+            <X className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Column Visibility Toggle */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="h-9">
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Columns
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[180px]">
+          <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {table
+            .getAllColumns()
+            .filter(
+              (column) =>
+                typeof column.accessorFn !== "undefined" && column.getCanHide()
+            )
+            .map((column) => {
+              return (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id.replace(/([A-Z])/g, ' $1').replace(/_/g, " ")}
+                </DropdownMenuCheckboxItem>
+              );
+            })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}// END OF FILE: data-table-toolbar.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/page.tsx
+
+"use client";
+
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+// ... (all other imports remain the same)
+import { ProductForm } from "@/components/products/ProductForm";
+import { ProductList } from "@/components/products/ProductList";
+import { ProductGridView } from "@/components/products/ProductGridView";
+import { ProductDetailView } from "@/components/products/ProductDetailView";
+import { ProductDataTableToolbar } from "@/components/products/data-table-toolbar";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
+import { Button } from "@/components/ui/button";
+import { ProductListItemData } from "@/types/product";
+import { ProductFormData } from "@/lib/validators/productValidator";
+import {
+  PlusCircle,
+  ArrowLeft,
+  LayoutList,
+  LayoutGrid,
+  Loader2,
+  AlertTriangle,
+  Inbox,
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { resourceApi, serviceApi } from "@/lib/apiClient";
+import { toast } from "sonner";
+import {
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+  PaginationState,
+  RowSelectionState,
+  Table as TanstackTableInstance,
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  ColumnDef,
+  FilterFn,
+} from "@tanstack/react-table";
+import { rankItem } from "@tanstack/match-sorter-utils";
+import { cn } from "@/lib/utils"; // Import cn for conditional classes
+import { getProductColumns } from "@/components/products/columns";
+
+type PageMode = "list" | "create" | "edit" | "detail";
+type ViewMode = "list" | "grid";
+
+const resourceStateTransitions: Record<string, string[]> = {
+  FREE: ["AFFECTED"],
+  AFFECTED: ["FREE", "IN_USE"],
+  IN_USE: ["FREE"],
+};
+const serviceStateTransitions: Record<string, string[]> = {
+  PLANNED: ["PUBLISHED", "CANCELLED"],
+  PUBLISHED: ["PLANNED", "ONGOING", "CANCELLED"],
+  ONGOING: ["FINISHED"],
+  FINISHED: [],
+  CANCELLED: [],
+};
+
+
+
+export default function ManageProductsPage() {
+  const [pageMode, setPageMode] = useState<PageMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [activeProductForForm, setActiveProductForForm] = useState<
+    | Partial<
+        Omit<ProductFormData, "scheduledAt"> & {
+          id?: string;
+          scheduledAt?: string | Date;
+          productType?: "RESOURCE" | "SERVICE";
+          currentState?: string;
+        }
+      >
+    | undefined
+  >(undefined);
+  const [activeProductForDetail, setActiveProductForDetail] = useState<
+    ProductListItemData | undefined
+  >(undefined);
+  const [allProducts, setAllProducts] = useState<ProductListItemData[]>([]);
+  const [processedAndPaginatedProducts, setProcessedAndPaginatedProducts] =
+    useState<ProductListItemData[]>([]);
+  const [isListLoading, setIsListLoading] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
+  const [itemActionLoading, setItemActionLoading] = useState<{
+    [productId: string]: boolean;
+  }>({});
+  const [dataVersion, setDataVersion] = useState(0);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilterAction] = useState<string>("");
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [pageCount, setPageCount] = useState(0);
+
+  const refreshData = useCallback(() => setDataVersion((v) => v + 1), []);
+  const fetchAllProducts = useCallback(async () => {
+    /* ... as before ... */
+    setIsListLoading(true);
+    setListError(null);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const mockData: ProductListItemData[] = [
+   
+        {
+          id: "res6",
+          name: "Portable SSD 1TB",
+          productType: "RESOURCE",
+          currentState: "IN_USE",
+          basePrice: 120.0,
+          createdAt: new Date(now - 40 * dayMs).toISOString(),
+          updatedAt: new Date(now - 10 * dayMs).toISOString(),
+          description: "Fast and reliable portable solid state drive.",
+        },
+        {
+          id: "srv7",
+          name: "Social Media Management (Basic)",
+          productType: "SERVICE",
+          currentState: "ONGOING",
+          basePrice: 250,
+          createdAt: new Date(now - 25 * dayMs).toISOString(),
+          updatedAt: new Date(now - 2 * dayMs).toISOString(),
+          description: "Management of 2 social media platforms, 3 posts/week.",
+        },
+        {
+          id: "res7",
+          name: "USB-C Hub Multiport Adapter",
+          productType: "RESOURCE",
+          currentState: "FREE",
+          basePrice: 45.5,
+          createdAt: new Date(now - 8 * dayMs).toISOString(),
+          updatedAt: new Date(now - 3 * dayMs).toISOString(),
+          description: "7-in-1 USB-C hub with HDMI, USB 3.0, SD card reader.",
+        },
+        {
+          id: "srv8",
+          name: "Technical Writing Service (per page)",
+          productType: "SERVICE",
+          currentState: "PLANNED",
+          basePrice: 75,
+          createdAt: new Date(now - 12 * dayMs).toISOString(),
+          updatedAt: new Date(now - 5 * dayMs).toISOString(),
+          description: "Professional technical documentation writing.",
+          isScheduled: true,
+          scheduledAt: new Date(now + 10 * dayMs).toISOString(),
+        },
+        {
+          id: "res8",
+          name: "Office Plant - Snake Plant",
+          productType: "RESOURCE",
+          currentState: "AFFECTED",
+          basePrice: 30.0,
+          createdAt: new Date(now - 3 * dayMs).toISOString(),
+          updatedAt: new Date(now - 1 * dayMs).toISOString(),
+          description: "Low maintenance air-purifying office plant.",
+        },
+        {
+          id: "srv9",
+          name: "Custom Software Development (Hourly)",
+          productType: "SERVICE",
+          currentState: "PUBLISHED",
+          basePrice: 120,
+          createdAt: new Date(now - 50 * dayMs).toISOString(),
+          updatedAt: new Date(now - 15 * dayMs).toISOString(),
+          description: "Bespoke software solutions at an hourly rate.",
+        },
+        {
+          id: "res9",
+          name: "Noise-Cancelling Headphones",
+          productType: "RESOURCE",
+          currentState: "FREE",
+          basePrice: 199.0,
+          createdAt: new Date(now - 18 * dayMs).toISOString(),
+          updatedAt: new Date(now - 7 * dayMs).toISOString(),
+          description: "Over-ear headphones with active noise cancellation.",
+        },
+        {
+          id: "srv10",
+          name: "IT Support Ticket (Single Incident)",
+          productType: "SERVICE",
+          currentState: "FINISHED",
+          basePrice: 80,
+          createdAt: new Date(now - 35 * dayMs).toISOString(),
+          updatedAt: new Date(now - 25 * dayMs).toISOString(),
+          description: "Remote IT support for a single issue resolution.",
+        },
+        {
+          id: "res10",
+          name: "Monitor Arm - Single",
+          productType: "RESOURCE",
+          currentState: "IN_USE",
+          basePrice: 65.0,
+          createdAt: new Date(now - 22 * dayMs).toISOString(),
+          updatedAt: new Date(now - 9 * dayMs).toISOString(),
+          description: "Adjustable single monitor arm for ergonomic setup.",
+        },
+        {
+          id: "srv11",
+          name: "Online Course: Advanced JavaScript",
+          productType: "SERVICE",
+          currentState: "PUBLISHED",
+          basePrice: 199,
+          createdAt: new Date(now - 14 * dayMs).toISOString(),
+          updatedAt: new Date(now - 4 * dayMs).toISOString(),
+          description:
+            "Comprehensive online course for advanced JS developers.",
+        },
+        {
+          id: "res11",
+          name: "Webcam HD 1080p",
+          productType: "RESOURCE",
+          currentState: "FREE",
+          basePrice: 49.99,
+          createdAt: new Date(now - 6 * dayMs).toISOString(),
+          updatedAt: new Date(now - 2 * dayMs).toISOString(),
+          description: "Full HD webcam with built-in microphone.",
+        },
+        {
+          id: "srv12",
+          name: "QuickBook Setup & Training",
+          productType: "SERVICE",
+          currentState: "PLANNED",
+          basePrice: 300,
+          createdAt: new Date(now - 4 * dayMs).toISOString(),
+          updatedAt: new Date(now - 1 * dayMs).toISOString(),
+          description:
+            "QuickBooks Online setup and basic user training session.",
+          isScheduled: true,
+          scheduledAt: new Date(now + 12 * dayMs).toISOString(),
+        },
+      ];
+      setAllProducts(mockData);
+    } catch (err) {
+      setListError("Could not load products.");
+      toast.error("Could not load products.");
+    } finally {
+      setIsListLoading(false);
+    }
+  }, []);
+  const handleViewProductDetails = useCallback(
+    (product: ProductListItemData) => {
+      setActiveProductForDetail(product);
+      setPageMode("detail");
+    },
+    []
+  );
+  const handleCloseDetailViewAndGoToList = useCallback(() => {
+    setPageMode("list");
+    setActiveProductForDetail(undefined);
+  }, []);
+  const handleSwitchToCreateMode = useCallback(() => {
+    setActiveProductForForm(undefined);
+    setPageMode("create");
+  }, []);
+  const handleSwitchToListMode = useCallback(() => {
+    setActiveProductForForm(undefined);
+    setActiveProductForDetail(undefined);
+    setPageMode("list");
+  }, []);
+  const handleDeleteProduct = useCallback(
+    async (product: ProductListItemData) => {
+      /* ... */
+      if (!confirm(`Delete "${product.name}"?`)) return;
+      setItemActionLoading((prev) => ({ ...prev, [product.id]: true }));
+      try {
+        if (product.productType === "RESOURCE")
+          await resourceApi.delete(product.id);
+        else await serviceApi.delete(product.id);
+        toast.success(`"${product.name}" deleted.`);
+        refreshData();
+      } finally {
+        setItemActionLoading((prev) => ({ ...prev, [product.id]: false }));
+      }
+    },
+    [refreshData]
+  );
+
+  const handleChangeProductState = useCallback(
+    async (product: ProductListItemData, newState: string) => {
+      /* ... */
+      if (
+        !confirm(
+          `Change state of "${product.name}" to ${newState.toUpperCase()}?`
+        )
+      )
+        return;
+      setItemActionLoading((prev) => ({ ...prev, [product.id]: true }));
+      try {
+        const payload = { currentState: newState.toUpperCase() };
+        if (product.productType === "RESOURCE")
+          await resourceApi.update(product.id, payload);
+        else await serviceApi.update(product.id, payload);
+        toast.success(`State changed to ${newState.toUpperCase()}.`);
+        refreshData();
+      } catch (error: any) {
+        if (error.status === 409)
+          toast.error(`Cannot change state: Transition not allowed.`);
+      } finally {
+        setItemActionLoading((prev) => ({ ...prev, [product.id]: false }));
+      }
+    },
+    [refreshData]
+  );
+
+  const handleInitiateEdit = useCallback((product: ProductListItemData) => {
+    const formDataForEdit: Partial<
+      Omit<ProductFormData, "scheduledAt"> & {
+        id?: string;
+        scheduledAt?: string | Date;
+      }
+    > = {
+      id: product.id,
+      productType: product.productType,
+      name: product.name,
+      description: product.description,
+      basePrice: product.basePrice,
+      isScheduled: product.isScheduled,
+      scheduledAt: product.scheduledAt,
+      isCustomAction: (product as any).isCustomAction || false,
+      customActionQuery: (product as any).customActionQuery || "",
+    };
+    setActiveProductForForm(formDataForEdit);
+    setPageMode("edit");
+  }, []);
+
+  useEffect(() => {
+    fetchAllProducts();
+  }, [fetchAllProducts, dataVersion]);
+  const columns = useMemo<ColumnDef<ProductListItemData>[]>(
+    () =>
+      getProductColumns({
+        onEditAction: handleInitiateEdit,
+        onDeleteAction: handleDeleteProduct,
+        onChangeState: handleChangeProductState,
+        onViewDetails: handleViewProductDetails,
+        resourceStateTransitions,
+        serviceStateTransitions,
+        getIsItemActionLoading: (productId: string) =>
+          !!itemActionLoading[productId],
+      }),
+    [
+      handleInitiateEdit,
+      handleDeleteProduct,
+      handleChangeProductState,
+      handleViewProductDetails,
+      itemActionLoading,
+    ]
+  ); // Ensure all deps are here
+
+  const table = useReactTable({
+    data: allProducts,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      columnVisibility,
+      rowSelection,
+      pagination,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilterAction,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    globalFilterFn: fuzzyGlobalFilterFn, // Corrected to pass the function itself
+    manualPagination: false,
+    manualSorting: false,
+    manualFiltering: false,
+    pageCount,
+  });
+
+  useEffect(() => {
+    /* ... client-side processing for processedAndPaginatedProducts ... */
+    if (isListLoading) {
+      setProcessedAndPaginatedProducts([]);
+      return;
+    }
+    const sortedAndFilteredRowModel = table.getSortedRowModel();
+    const currentViewRows = sortedAndFilteredRowModel.rows.map(
+      (row) => row.original
+    );
+    const totalFilteredItems = table.getFilteredRowModel().rows.length;
+    const calculatedPageCount = Math.ceil(
+      totalFilteredItems / pagination.pageSize
+    );
+    setPageCount(calculatedPageCount);
+    let currentPageIndex = pagination.pageIndex;
+    if (pagination.pageIndex >= calculatedPageCount && calculatedPageCount > 0)
+      currentPageIndex = calculatedPageCount - 1;
+    else if (calculatedPageCount === 0) currentPageIndex = 0;
+    if (currentPageIndex !== pagination.pageIndex)
+      setPagination((p) => ({ ...p, pageIndex: currentPageIndex }));
+    const pageStart = currentPageIndex * pagination.pageSize;
+    setProcessedAndPaginatedProducts(
+      currentViewRows.slice(pageStart, pageStart + pagination.pageSize)
+    );
+  }, [
+    allProducts,
+    globalFilter,
+    columnFilters,
+    sorting,
+    pagination,
+    table,
+    isListLoading,
+  ]);
+
+  const handleFormSuccess = useCallback(() => {
+    setPageMode("list");
+    setActiveProductForForm(undefined);
+    refreshData();
+  }, [refreshData]);
+
+  const pageTitle = useMemo(() => {
+    /* ... */ return "Product Management";
+  }, [pageMode, activeProductForForm, activeProductForDetail]);
+  const pageDescription = useMemo(() => {
+    /* ... */ return "Browse, filter...";
+  }, [pageMode, activeProductForForm, activeProductForDetail]);
+
+  const commonActionHandlersForChildren = {
+    onEditAction: handleInitiateEdit,
+    onDeleteAction: handleDeleteProduct,
+    onChangeState: handleChangeProductState,
+    onViewDetails: handleViewProductDetails,
+    resourceStateTransitions,
+    serviceStateTransitions,
+    itemActionLoading,
+  };
+
+  const renderMainContent = () => {
+    /* ... (same as before, no changes needed here) ... */
+    if (pageMode === "create")
+      return (
+        <ProductForm
+          mode="create"
+          onFormSubmitSuccessAction={handleFormSuccess}
+        />
+      );
+    if (pageMode === "edit" && activeProductForForm)
+      return (
+        <ProductForm
+          mode="edit"
+          initialData={activeProductForForm}
+          onFormSubmitSuccessAction={handleFormSuccess}
+        />
+      );
+    if (isListLoading && allProducts.length === 0) {
+      /* ... skeleton ... */
+      return (
+        <div className="space-y-4 mt-4">
+          {" "}
+          <div className="flex justify-between">
+            <Skeleton className="h-9 w-1/3" />
+            <Skeleton className="h-9 w-1/4" />
+          </div>{" "}
+          <Skeleton className="h-[400px] w-full rounded-md" />{" "}
+          <div className="flex justify-between">
+            <Skeleton className="h-8 w-1/4" />
+            <Skeleton className="h-8 w-1/2" />
+          </div>{" "}
+        </div>
+      );
+    }
+    if (listError) {
+      /* ... error ... */
+      return (
+        <div className="mt-4 p-10 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
+          {" "}
+          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />{" "}
+          <p className="text-destructive-foreground font-semibold">
+            {listError}
+          </p>{" "}
+          <Button
+            onClick={fetchAllProducts}
+            variant="destructive"
+            className="mt-6"
+          >
+            Try Again
+          </Button>{" "}
+        </div>
+      );
+    }
+    if (viewMode === "grid") {
+      return (
+        <ProductGridView
+          products={processedAndPaginatedProducts}
+          isLoading={isListLoading && allProducts.length > 0}
+          error={null}
+          getActionLoadingState={(productId) => !!itemActionLoading[productId]}
+          {...commonActionHandlersForChildren}
+        />
+      );
+    }
+    return (
+      <ProductList
+        data={processedAndPaginatedProducts}
+        pageCount={pageCount}
+        sorting={sorting}
+        setSorting={setSorting}
+        columnFilters={columnFilters}
+        setColumnFilters={setColumnFilters}
+        globalFilter={globalFilter}
+        setGlobalFilterAction={setGlobalFilterAction}
+        columnVisibility={columnVisibility}
+        setColumnVisibility={setColumnVisibility}
+        rowSelection={rowSelection}
+        setRowSelection={setRowSelection}
+        pagination={pagination}
+        setPagination={setPagination}
+        itemActionLoading={itemActionLoading}
+        onEditProduct={handleInitiateEdit}
+        onViewProductDetails={handleViewProductDetails}
+        onDeleteProduct={handleDeleteProduct}
+        onChangeProductState={handleChangeProductState}
+      />
+    );
+  };
+
+  return (
+    <div className="container mx-auto py-6 sm:py-8">
+      <header className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              {pageTitle}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              {pageDescription}
+            </p>
+          </div>
+          <div className="flex items-center gap-x-2 flex-shrink-0">
+            {" "}
+            {pageMode === "list" && (
+              <>
+                {/* Segmented Control for View Mode */}
+                <div className="flex items-center p-0.5 bg-muted rounded-md">
+                  <Button
+                    variant={viewMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    aria-label="Switch to list view"
+                    className={cn(
+                      "h-8 px-3 rounded-sm data-[state=active]:shadow-sm",
+                      viewMode === "list"
+                        ? "bg-background text-foreground"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                    )}
+                    data-state={viewMode === "list" ? "active" : "inactive"}
+                  >
+                    <LayoutList className="h-4 w-4" />
+                    <span className="ml-1.5 hidden sm:inline">List</span>
+                  </Button>
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("grid")}
+                    aria-label="Switch to grid view"
+                    className={cn(
+                      "h-8 px-3 rounded-sm data-[state=active]:shadow-sm",
+                      viewMode === "grid"
+                        ? "bg-background text-foreground"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                    )}
+                    data-state={viewMode === "grid" ? "active" : "inactive"}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                    <span className="ml-1.5 hidden sm:inline">Grid</span>
+                  </Button>
+                </div>
+                {/* End Segmented Control */}
+
+                <Button
+                  onClick={handleSwitchToCreateMode}
+                  size="sm"
+                  className="h-9"
+                >
+                  {" "}
+                  {/* Matched height */}
+                  <PlusCircle className="mr-2 h-4 w-4" /> New
+                </Button>
+              </>
+            )}
+            {(pageMode === "create" ||
+              pageMode === "edit" ||
+              pageMode === "detail") && (
+              <Button
+                variant="outline"
+                onClick={handleSwitchToListMode}
+                size="sm"
+                className="h-9"
+              >
+                {" "}
+                {/* Matched height */}
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {pageMode === "list" && (
+          <ProductDataTableToolbar
+            table={table}
+            globalFilter={globalFilter}
+            setGlobalFilterAction={setGlobalFilterAction}
+          />
+        )}
+        {renderMainContent()}
+        {pageMode === "list" &&
+          !isListLoading &&
+          !listError &&
+          allProducts.length > 0 && <DataTablePagination table={table} />}
+        {pageMode === "list" &&
+          !isListLoading &&
+          !listError &&
+          allProducts.length === 0 &&
+          !globalFilter &&
+          columnFilters.length === 0 && (
+            <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-md p-6 mt-4">
+              <Inbox className="h-16 w-16 text-muted-foreground/70 mb-6" />
+              <h3 className="text-lg font-semibold">
+                Your Product Catalog is Empty
+              </h3>
+              <p className="text-sm">
+                Get started by clicking the "Create New" button above.
+              </p>
+            </div>
+          )}
+      </main>
+
+      {pageMode === "detail" && activeProductForDetail && (
+        <ProductDetailView
+          product={activeProductForDetail}
+          onClose={handleCloseDetailViewAndGoToList}
+          onEditAction={() => {
+            if (activeProductForDetail)
+              handleInitiateEdit(activeProductForDetail);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+// END OF FILE: page.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/ProductCard.tsx
+
+"use client";
+
+import React from "react";
+import { ProductListItemData } from "@/types/product";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Edit3, Trash2, Eye, RefreshCw, Package, Combine, Clock, InfoIcon, CircleDot, CheckCircle2, CircleSlash, PlayCircle, XCircle, Loader2, DollarSign } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
+
+// Re-use or import these helpers if they are in a shared location
+interface StateDisplayInfo {
+  variant: "default" | "secondary" | "outline" | "destructive";
+  icon: React.ElementType;
+  label: string;
+}
+const getStateDisplayInfo = (state: string = ""): StateDisplayInfo => {
+    const upperState = state.toUpperCase();
+    const label = upperState.toLowerCase().replace(/_/g, " ");
+    switch (upperState) {
+      case "FREE": case "AVAILABLE": return { variant: "default", icon: CheckCircle2, label };
+      case "PUBLISHED": case "FINISHED": return { variant: "default", icon: CheckCircle2, label };
+      case "AFFECTED": case "PLANNED": return { variant: "secondary", icon: Clock, label };
+      case "IN_USE": case "ONGOING": return { variant: "outline", icon: CircleDot, label };
+      case "CANCELLED": case "DELETED": return { variant: "destructive", icon: CircleSlash, label };
+      default: return { variant: "outline", icon: InfoIcon, label: label || "Unknown" };
+    }
+};
+
+const getStateChangeIcon = (nextState: string) => {
+    switch (nextState.toUpperCase()) {
+        case "PUBLISHED": case "ONGOING": case "AFFECTED": case "IN_USE": return PlayCircle;
+        case "FINISHED": return CheckCircle2;
+        case "CANCELLED": case "FREE": return XCircle;
+        default: return RefreshCw;
+    }
+};
+
+// Props for ProductCard, similar to ProductRowActionsProps but for a single card
+interface ProductCardActionsProps {
+  onEditAction: (product: ProductListItemData) => void;
+  onDeleteAction: (product: ProductListItemData) => void;
+  onChangeState: (product: ProductListItemData, newState: string) => void;
+  onViewDetails: (product: ProductListItemData) => void;
+  resourceStateTransitions: Record<string, string[]>;
+  serviceStateTransitions: Record<string, string[]>;
+  isItemActionLoading?: boolean; // Optional for card context
+}
+
+interface ProductCardProps extends ProductCardActionsProps {
+  product: ProductListItemData;
+}
+
+export function ProductCard({ product, onEditAction, onDeleteAction, onChangeState, onViewDetails, resourceStateTransitions, serviceStateTransitions, isItemActionLoading }: ProductCardProps) {
+  const stateInfo = getStateDisplayInfo(product.currentState);
+  const ProductIcon = product.productType === "RESOURCE" ? Package : Combine;
+
+  const getAvailableTransitions = (prod: ProductListItemData) => {
+    if (prod.productType === "RESOURCE") return resourceStateTransitions[prod.currentState.toUpperCase()] || [];
+    if (prod.productType === "SERVICE") return serviceStateTransitions[prod.currentState.toUpperCase()] || [];
+    return [];
+  };
+  const availableTransitions = getAvailableTransitions(product);
+
+  return (
+    <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-2">
+          <CardTitle className="text-base sm:text-lg font-semibold leading-tight line-clamp-2 hover:text-primary cursor-pointer" onClick={() => onViewDetails(product)}>
+            {product.name}
+          </CardTitle>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" disabled={isItemActionLoading}>
+                {isItemActionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+                <span className="sr-only">Product actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[190px]">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => onViewDetails(product)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEditAction(product)}><Edit3 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+              {availableTransitions.length > 0 && <DropdownMenuSeparator />}
+              {availableTransitions.map(nextState => {
+                  const Icon = getStateChangeIcon(nextState);
+                  return ( <DropdownMenuItem key={nextState} onClick={() => onChangeState(product, nextState)}> <Icon className="mr-2 h-4 w-4" /> Change to {nextState.toLowerCase().replace(/_/g, " ")} </DropdownMenuItem> );
+              })}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDeleteAction(product)} className="text-destructive focus:text-destructive focus:bg-destructive/10"> <Trash2 className="mr-2 h-4 w-4" /> Delete </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <CardDescription className="text-xs flex items-center mt-1">
+            <ProductIcon className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            {product.productType.toLowerCase()}
+            <span className="mx-1.5">·</span>
+            ID: {product.id.substring(0, 8)}...
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow space-y-2 text-sm py-3">
+        <div className="flex items-center">
+            <Badge variant={stateInfo.variant} className="capitalize text-xs items-center px-2 py-0.5">
+                <stateInfo.icon className="mr-1.5 h-3.5 w-3.5" />
+                {stateInfo.label}
+            </Badge>
+        </div>
+        {product.description && (
+          <p className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
+            {product.description}
+          </p>
+        )}
+         {product.isScheduled && product.scheduledAt && isValid(parseISO(product.scheduledAt)) && (
+            <div className="text-xs text-sky-600 dark:text-sky-400 flex items-center">
+                <Clock className="h-3.5 w-3.5 mr-1.5 flex-shrink-0"/>
+                Scheduled: {format(parseISO(product.scheduledAt), "PPp")}
+            </div>
+        )}
+      </CardContent>
+      <CardFooter className="pt-3 pb-4 text-xs justify-between items-center">
+        <div className="text-muted-foreground">
+            {product.basePrice != null ? (
+                <span className="font-medium text-foreground flex items-center"><DollarSign className="h-3.5 w-3.5 mr-1 text-green-600"/>${product.basePrice.toFixed(2)}</span>
+            ) : (
+                <span className="italic">No price set</span>
+            )}
+        </div>
+        <div className="text-muted-foreground" title={format(parseISO(product.updatedAt), "MMMM d, yyyy 'at' h:mm a")}>
+            Updated: {format(parseISO(product.updatedAt), "PP")}
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}// END OF FILE: ProductCard.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/ProductDetailView.tsx
+
+"use client";
+
+import React from "react";
+import { ProductListItemData } from "@/types/product";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { format, parseISO, isValid } from "date-fns";
+import {
+  AlertTriangle, CalendarDays, Clock, DollarSign, FileText, InfoIcon as DetailInfoIcon, // Renamed to avoid conflict if needed
+  TagIcon, TypeIcon, Edit3, XCircle,
+  Package, Combine, CheckCircle, CircleDot, CircleSlash, ShoppingCart // Added ShoppingCart
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Image from "next/image"; // Added Image import
+
+interface ProductDetailViewProps {
+  product?: ProductListItemData;
+  onClose: () => void;
+  onEditAction: (product: ProductListItemData) => void; // Retain for BA context
+  onReserve?: (product: ProductListItemData) => void; // NEW: Optional for Customer context
+  showReserveButton?: boolean; // NEW: To control visibility of reserve button
+  isBAView?: boolean; // NEW: To control visibility of edit button (or other BA-specific actions)
+}
+
+const getStateDisplay = (state: string = ""): { variant: "default" | "secondary" | "outline" | "destructive", icon: React.ElementType, label: string } => {
+  const upperState = state.toUpperCase();
+  const label = upperState.toLowerCase().replace(/_/g, " ");
+  switch (upperState) {
+    case "FREE": case "AVAILABLE": case "PUBLISHED": case "FINISHED":
+      return { variant: "default", icon: CheckCircle, label };
+    case "AFFECTED": case "PLANNED":
+      return { variant: "secondary", icon: Clock, label };
+    case "IN_USE": case "ONGOING":
+      return { variant: "outline", icon: CircleDot, label };
+    case "CANCELLED": case "DELETED":
+      return { variant: "destructive", icon: CircleSlash, label };
+    default: return { variant: "outline", icon: DetailInfoIcon, label: label || "Unknown" };
+  }
+};
+
+const DetailRow: React.FC<{ label: string; value?: string | number | React.ReactNode; icon: React.ElementType; className?: string }> = ({ label, value, icon: Icon, className }) => (
+  <div className={cn("grid grid-cols-3 gap-2 py-3 items-start", className)}>
+    <dt className="col-span-1 text-sm font-medium text-muted-foreground flex items-center">
+      <Icon className="mr-2 h-4 w-4 flex-shrink-0 text-muted-foreground/80" />
+      {label}
+    </dt>
+    <dd className="col-span-2 text-sm text-foreground break-words">{value ?? <span className="italic text-muted-foreground/70">N/A</span>}</dd>
+  </div>
+);
+
+export function ProductDetailView({
+  product,
+  onClose,
+  onEditAction,
+  onReserve, // New prop
+  showReserveButton = false, // New prop
+  isBAView = false // New prop to distinguish context
+}: ProductDetailViewProps) {
+  if (!product) {
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onClick={onClose}>
+        <Card className="w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <CardHeader>
+            <CardTitle className="flex items-center text-destructive">
+              <AlertTriangle className="mr-2 h-5 w-5" /> Product Not Found
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">The selected product data could not be loaded or is unavailable.</p>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" onClick={onClose} className="w-full">Close</Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  const stateDisplay = getStateDisplay(product.currentState);
+  const productTypeIcon = product.productType === "RESOURCE" ? Package : Combine;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6" onClick={onClose}>
+      <Card className="w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl rounded-lg" onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="border-b p-4 sm:p-6">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <CardTitle className="text-lg sm:text-xl font-semibold flex items-center">
+                {product.name}
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                ID: {product.id}
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close detail view" className="-mt-1 -mr-1 sm:-mt-2 sm:-mr-2">
+              <XCircle className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-4 sm:p-6 space-y-5 overflow-y-auto scrollbar-thin flex-1">
+          {product.imageUrl && product.imageUrl !== "/placeholder.svg" && (
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4 bg-muted">
+              <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover"/>
+            </div>
+          )}
+          <section className="space-y-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-2">General Information</h3>
+            <DetailRow label="Type" icon={TypeIcon} value={
+              <Badge variant={product.productType === "RESOURCE" ? "outline" : "secondary"} className="capitalize text-xs font-normal">
+                {React.createElement(productTypeIcon, { className: "mr-1.5 h-3.5 w-3.5" })}
+                {product.productType.toLowerCase()}
+              </Badge>
+            } />
+            <DetailRow label="Status" icon={stateDisplay.icon} value={
+              <Badge variant={stateDisplay.variant} className="capitalize text-xs font-normal">
+                {stateDisplay.label}
+              </Badge>
+            } />
+            {product.basePrice !== undefined && product.basePrice !== null && (
+              <DetailRow label="Base Price" icon={DollarSign} value={`$${product.basePrice.toFixed(2)}`} />
+            )}
+            {product.baInfo && (
+                 <DetailRow label="Offered By" icon={Package} value={product.baInfo.name} />
+            )}
+          </section>
+
+          <Separator />
+
+          {product.description && (
+            <section className="space-y-1">
+              <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-2">Description</h3>
+              <DetailRow label="" icon={FileText} value={
+                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{product.description}</p>
+              } className="grid-cols-[auto_1fr]" />
+            </section>
+          )}
+
+          {(product.isScheduled && product.scheduledAt && isValid(parseISO(product.scheduledAt))) && (
+            <>
+              <Separator />
+              <section className="space-y-1">
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-2">Scheduling</h3>
+                <DetailRow label="Scheduled For" icon={Clock} value={format(parseISO(product.scheduledAt), "MMMM d, yyyy 'at' h:mm a")} />
+              </section>
+            </>
+          )}
+
+          <Separator />
+
+          <section className="space-y-1">
+            <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-2">Timestamps</h3>
+            <DetailRow label="Created At" icon={CalendarDays} value={format(parseISO(product.createdAt), "MMMM d, yyyy, h:mm a")} />
+            <DetailRow label="Last Updated" icon={CalendarDays} value={format(parseISO(product.updatedAt), "MMMM d, yyyy, h:mm a")} />
+          </section>
+
+          {/* Example for custom attributes if needed
+          {product.customAttributes && Object.keys(product.customAttributes).length > 0 && (
+            <>
+              <Separator />
+              <section className="space-y-1">
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider mb-2">Additional Details</h3>
+                {Object.entries(product.customAttributes).map(([key, value]) => (
+                  <DetailRow key={key} label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} icon={TagIcon} value={String(value)} />
+                ))}
+              </section>
+            </>
+          )}
+          */}
+        </CardContent>
+
+        <CardFooter className="border-t p-4 sm:p-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Close</Button>
+          {isBAView && onEditAction && ( // Show Edit button only for BA view and if onEditAction is provided
+            <Button onClick={() => onEditAction(product)} className="w-full sm:w-auto">
+              <Edit3 className="mr-2 h-4 w-4" /> Edit Product
+            </Button>
+          )}
+          {showReserveButton && onReserve && ( // Show Reserve button if prop is true and handler exists
+             <Button onClick={() => onReserve(product)} className="w-full sm:w-auto">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {product.productType === "RESOURCE" ? "Enquire Now" : "Reserve Now"}
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}// END OF FILE: ProductDetailView.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/ProductForm.tsx
+
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  ProductTypeEnum, // Keep this if used elsewhere in the file
+  fullProductFormSchema,
+  ProductFormData,
+} from "@/lib/validators/productValidator";
+import { resourceApi, serviceApi } from "@/lib/apiClient";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { CalendarIcon, Loader2, ClockIcon, Settings2Icon } from "lucide-react";
+import { format, isValid, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface ProductFormProps {
+  initialData?: Partial<
+    Omit<ProductFormData, "scheduledAt"> & {
+      id?: string;
+      scheduledAt?: string | Date;
+    }
+  >;
+  onFormSubmitSuccessAction?: (data: any) => void;
+  mode?: "create" | "edit";
+}
+
+const parseInitialScheduledAt = (
+  scheduledAt?: string | Date
+): Date | undefined => {
+  if (!scheduledAt) return undefined;
+  if (scheduledAt instanceof Date && isValid(scheduledAt)) return scheduledAt;
+  if (typeof scheduledAt === "string") {
+    const parsedDate = parseISO(scheduledAt);
+    if (isValid(parsedDate)) return parsedDate;
+  }
+  return undefined;
+};
+
+export function ProductForm({
+  initialData,
+  onFormSubmitSuccessAction,
+  mode = "create",
+}: ProductFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  // Local state for conditional rendering, but primary source of truth for submission is form state
+  const [enableScheduling, setEnableScheduling] = useState(
+    initialData?.isScheduled || false
+  );
+  const [enableCustomAction, setEnableCustomAction] = useState(
+    initialData?.isCustomAction || false
+  );
+
+  const formSchema = fullProductFormSchema;
+
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      productType: initialData?.productType || undefined,
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      basePrice: initialData?.basePrice || undefined,
+      isScheduled: initialData?.isScheduled || false,
+      scheduledAt: parseInitialScheduledAt(initialData?.scheduledAt),
+      isCustomAction: initialData?.isCustomAction || false,
+      customActionQuery: initialData?.customActionQuery || "",
+    },
+  });
+
+  // Watch the productType from react-hook-form state for conditional rendering
+  const watchedProductType = form.watch("productType");
+
+  useEffect(() => {
+    const defaultVals = {
+      productType:
+        initialData?.productType ||
+        (mode === "create" ? "SERVICE" : watchedProductType),
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      basePrice: initialData?.basePrice || undefined,
+      isScheduled: initialData?.isScheduled || false,
+      scheduledAt: parseInitialScheduledAt(initialData?.scheduledAt),
+      isCustomAction: initialData?.isCustomAction || false,
+      customActionQuery: initialData?.customActionQuery || "",
+    };
+    form.reset(defaultVals);
+
+    setEnableScheduling(initialData?.isScheduled || false);
+    setEnableCustomAction(initialData?.isCustomAction || false);
+  }, [initialData, mode, form.reset, watchedProductType]); // Use watchedProductType from form
+
+  const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
+    setIsLoading(true);
+    if (mode === "edit" && !initialData?.id) {
+      toast.error("Product ID is missing for update operation.");
+      setIsLoading(false);
+      return;
+    }
+    if (!data.productType) {
+      // Should be caught by Zod, but good to have a check
+      toast.error("Product type is required.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const payload: any = {
+        name: data.name,
+        description: data.description,
+        basePrice: data.basePrice,
+        productType: data.productType, // Always include productType
+      };
+
+      payload.isScheduled = data.isScheduled || false; // Ensure boolean
+      if (data.isScheduled && data.scheduledAt && isValid(data.scheduledAt)) {
+        payload.scheduledAt = data.scheduledAt.toISOString();
+      } else if (data.isScheduled && !data.scheduledAt) {
+        toast.error("Scheduled date is missing for a scheduled action.");
+        setIsLoading(false);
+        return;
+      } else {
+        delete payload.scheduledAt;
+      }
+
+      payload.isCustomAction = data.isCustomAction || false; // Ensure boolean
+      if (data.isCustomAction && data.customActionQuery) {
+        payload.customActionQuery = data.customActionQuery;
+      } else if (data.isCustomAction && !data.customActionQuery) {
+        toast.error("Custom query is missing for a custom action.");
+        setIsLoading(false);
+        return;
+      } else {
+        delete payload.customActionQuery;
+      }
+
+      if (mode === "edit" && initialData?.id) payload.id = initialData.id;
+      let response;
+
+      if (data.productType === "RESOURCE") {
+        if (mode === "create") {
+          response = data.isScheduled
+            ? await resourceApi.scheduleCreate(payload)
+            : await resourceApi.create(payload);
+        } else {
+          response = data.isScheduled
+            ? await resourceApi.scheduleUpdate({
+                ...payload,
+                id: initialData!.id,
+              })
+            : await resourceApi.update(initialData!.id!, payload);
+        }
+      } else if (data.productType === "SERVICE") {
+        if (mode === "create") {
+          response = data.isScheduled
+            ? await serviceApi.scheduleCreate(payload)
+            : await serviceApi.create(payload);
+        } else {
+          response = data.isScheduled
+            ? await serviceApi.scheduleUpdate({
+                ...payload,
+                id: initialData!.id,
+              })
+            : await serviceApi.update(initialData!.id!, payload);
+        }
+      }
+      // No else needed here because of the check at the start of onSubmit
+
+      toast.success(
+        `Product ${mode === "create" ? "created" : "updated"} successfully!`
+      );
+      if (onFormSubmitSuccessAction) onFormSubmitSuccessAction(response);
+      if (mode === "create") {
+        form.reset({
+          // Reset to a truly blank state for create mode
+          productType: undefined,
+          name: "",
+          description: "",
+          basePrice: undefined,
+          isScheduled: false,
+          scheduledAt: undefined,
+          isCustomAction: false,
+          customActionQuery: "",
+        });
+        // setSelectedProductType(undefined); // This is now driven by watchedProductType
+        setEnableScheduling(false);
+        setEnableCustomAction(false);
+      }
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-2xl mx-auto shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-xl sm:text-2xl">
+          {mode === "create"
+            ? "Create New Product/Service"
+            : `Edit ${watchedProductType?.toLowerCase() || "Item"}`}
+        </CardTitle>
+        <CardDescription>
+          Provide the necessary details for your{" "}
+          {watchedProductType ? watchedProductType.toLowerCase() : "item"}.
+          {mode === "edit" && initialData?.id && (
+            <span className="block text-xs mt-1 text-muted-foreground">
+              Editing ID: {initialData.id}
+            </span>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <CardContent className="space-y-6 pt-2 pb-6 px-4 sm:px-6">
+            {/* Section 1: Core Information */}
+            <div className="space-y-4 p-4 border rounded-md bg-background/50">
+              <FormField
+                control={form.control}
+                name="productType"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-sm font-semibold">
+                      Item Type <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={(value) => {
+                          // Allow changing type only in create mode directly via UI
+                          // In edit mode, type is fixed.
+                          if (mode === "create") {
+                            field.onChange(value);
+                            // watchedProductType will update automatically due to form.watch
+                          }
+                        }}
+                        value={field.value || ""} // Ensure value is not undefined for RadioGroup
+                        className="flex gap-4"
+                      >
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem
+                              value="RESOURCE"
+                              disabled={mode === "edit"}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal text-sm">
+                            Resource
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem
+                              value="SERVICE"
+                              disabled={mode === "edit"}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal text-sm">
+                            Service
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {watchedProductType && ( // Use watchedProductType for conditional rendering
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>
+                          Name <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={`${
+                              watchedProductType === "RESOURCE"
+                                ? "Resource"
+                                : "Service"
+                            } name`}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField /* ... description ... */
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Provide a detailed description..."
+                            {...field}
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField /* ... basePrice ... */
+                    control={form.control}
+                    name="basePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Base Price (USD)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === ""
+                                  ? undefined
+                                  : parseFloat(e.target.value)
+                              )
+                            }
+                            value={field.value ?? ""}
+                            step="0.01"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
+
+            {watchedProductType && ( // Use watchedProductType here as well
+              <>
+                {/* Section 2: Scheduling Options */}
+                <div className="space-y-4 p-4 border rounded-md bg-background/50">
+                  {/* ... Scheduling FormField for isScheduled ... */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-semibold flex items-center">
+                        <ClockIcon className="mr-2 h-5 w-5 text-primary" />
+                        Scheduling Options
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        Configure if this operation should occur at a future
+                        time.
+                      </FormDescription>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="isScheduled"
+                      render={({ field }) => (
+                        <FormControl>
+                          <Switch
+                            checked={field.value || false}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              setEnableScheduling(checked);
+                              if (!checked)
+                                form.setValue("scheduledAt", undefined, {
+                                  shouldValidate: true,
+                                });
+                            }}
+                            aria-labelledby="scheduling-label"
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+                  {enableScheduling /* ... FormField for scheduledAt ... */ && (
+                    <div className="pt-2 pl-1">
+                      <FormField
+                        control={form.control}
+                        name="scheduledAt"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="text-sm mb-1">
+                              Scheduled Date & Time{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full justify-start text-left font-normal h-10",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {field.value && isValid(field.value) ? (
+                                      format(field.value, "PPP HH:mm")
+                                    ) : (
+                                      <span>Pick a date and time</span>
+                                    )}
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                    /* ... onSelect logic ... */
+                                    const newDate = date || new Date();
+                                    const currentTime =
+                                      field.value && isValid(field.value)
+                                        ? field.value
+                                        : new Date();
+                                    newDate.setHours(currentTime.getHours());
+                                    newDate.setMinutes(
+                                      currentTime.getMinutes()
+                                    );
+                                    newDate.setSeconds(0, 0);
+                                    field.onChange(newDate);
+                                  }}
+                                  disabled={(date) =>
+                                    date <
+                                    new Date(new Date().setHours(0, 0, 0, 0))
+                                  }
+                                  initialFocus
+                                />
+                                <div className="p-2 border-t">
+                                  <Input
+                                    type="time"
+                                    defaultValue={
+                                      field.value && isValid(field.value)
+                                        ? format(field.value, "HH:mm")
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      /* ... time input onChange logic ... */
+                                      const time = e.target.value;
+                                      const currentDate =
+                                        field.value && isValid(field.value)
+                                          ? new Date(field.value)
+                                          : new Date();
+                                      if (time) {
+                                        const [hours, minutes] = time
+                                          .split(":")
+                                          .map(Number);
+                                        currentDate.setHours(
+                                          hours,
+                                          minutes,
+                                          0,
+                                          0
+                                        );
+                                        field.onChange(currentDate);
+                                      }
+                                    }}
+                                    className="w-full h-9"
+                                  />
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Section 3: Custom Action */}
+                <div className="space-y-4 p-4 border rounded-md bg-background/50">
+                  {/* ... Custom Action FormField for isCustomAction ... */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-semibold flex items-center">
+                        <Settings2Icon className="mr-2 h-5 w-5 text-primary" />
+                        Advanced: Custom Action
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        {" "}
+                        For specific backend operations requiring a custom
+                        query.{" "}
+                      </FormDescription>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="isCustomAction"
+                      render={({ field }) => (
+                        <FormControl>
+                          <Switch
+                            checked={field.value || false}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              setEnableCustomAction(checked);
+                              if (!checked)
+                                form.setValue("customActionQuery", "", {
+                                  shouldValidate: true,
+                                });
+                            }}
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </div>
+                  {enableCustomAction /* ... FormField for customActionQuery ... */ && (
+                    <div className="pt-2 pl-1">
+                      <FormField
+                        control={form.control}
+                        name="customActionQuery"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm">
+                              Custom Action Query{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., {'action': 'applyDiscount', 'rate': 0.1}"
+                                {...field}
+                                value={field.value ?? ""}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-xs">
+                              Enter JSON or string query for the custom action.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+          <CardFooter className="border-t px-4 sm:px-6 py-4">
+            <Button
+              type="submit"
+              disabled={isLoading || !watchedProductType}
+              className="w-full sm:w-auto ml-auto"
+            >
+              {" "}
+              {/* Use watchedProductType */}
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading
+                ? "Processing..."
+                : mode === "create"
+                ? `Create ${watchedProductType?.toLocaleLowerCase() || "Item"}`
+                : "Save Changes"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
+    </Card>
+  );
+}
+// END OF FILE: ProductForm.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/ProductGridView.tsx
+
+"use client";
+
+import React from "react";
+import { ProductListItemData } from "@/types/product";
+import { ProductCard } from "./ProductCard"; // Assuming ProductCard is in the same directory
+import { ProductRowActionsProps } from "./columns"; // For action handlers consistency
+import { Loader2, AlertTriangle, Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "../ui/skeleton";
+interface ProductGridViewProps extends Omit<ProductRowActionsProps, 'product' | 'isItemActionLoading'> {
+  products: ProductListItemData[];
+  isLoading: boolean; // For overall loading state of the grid
+  error?: string | null;
+  fetchProducts?: () => void; // Optional: if grid handles its own refresh trigger
+  // actionLoading state needs to be managed by the parent or this component if actions are triggered from here
+  getActionLoadingState: (productId: string) => boolean;
+}
+
+export function ProductGridView({
+  products,
+  isLoading,
+  error,
+  fetchProducts,
+  getActionLoadingState,
+  ...actionHandlers // Spread remaining action handlers
+}: ProductGridViewProps) {
+
+  if (isLoading && products.length === 0) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 py-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card key={i} className="shadow-sm">
+            <CardHeader className="pb-3"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-3 w-1/2 mt-1" /></CardHeader>
+            <CardContent className="space-y-2 py-3"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /></CardContent>
+            <CardFooter className="pt-3 pb-4 justify-between"><Skeleton className="h-5 w-1/4" /><Skeleton className="h-5 w-1/3" /></CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-[300px] flex flex-col justify-center items-center p-10 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
+        <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
+        <p className="text-destructive-foreground font-semibold">{error}</p>
+        {fetchProducts && <Button onClick={fetchProducts} variant="destructive" className="mt-6">Try Again</Button>}
+      </div>
+    );
+  }
+
+  if (!isLoading && products.length === 0) {
+    return (
+      <div className="min-h-[300px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-10">
+        <Inbox className="h-16 w-16 text-muted-foreground/70 mb-6" />
+        <h3 className="text-xl font-semibold">No Products to Display</h3>
+        <p className="text-sm mt-1">Your catalog is currently empty or no items match your filters.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 py-6">
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          isItemActionLoading={getActionLoadingState(product.id)}
+          {...actionHandlers} // Pass down onEditAction, onDeleteAction, etc.
+        />
+      ))}
+    </div>
+  );
+}// END OF FILE: ProductGridView.tsx
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/components/products/ProductList.tsx
+
+"use client";
+
+import React, { useMemo } from "react";
+import { ProductListItemData } from "@/types/product";
+import { getProductColumns, ProductRowActionsProps } from "./columns";
+import { DataTable } from "@/components/ui/data-table";
+
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  Table as TanstackTableInstance,
+  PaginationState,
+  RowSelectionState,
+} from "@tanstack/react-table";
+
+interface ProductListProps {
+  data: ProductListItemData[]; // Data is now always the processed & paginated slice
+  pageCount: number;
+  // isLoading prop is removed
+
+  onEditProduct: (product: ProductListItemData) => void;
+  onViewProductDetails: (product: ProductListItemData) => void;
+  onDeleteProduct: (product: ProductListItemData) => void;
+  onChangeProductState: (
+    product: ProductListItemData,
+    newState: string
+  ) => void;
+
+  sorting: SortingState;
+  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
+  columnFilters: ColumnFiltersState;
+  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
+  globalFilter: string;
+  setGlobalFilterAction: React.Dispatch<React.SetStateAction<string>>;
+  columnVisibility: VisibilityState;
+  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>;
+  rowSelection: RowSelectionState;
+  setRowSelection: React.Dispatch<React.SetStateAction<RowSelectionState>>;
+  pagination: PaginationState;
+  setPagination: React.Dispatch<React.SetStateAction<PaginationState>>;
+
+  // setTableInstance prop can be removed if parent ManageProductsPage creates the primary table instance
+  // setTableInstance: (table: TanstackTableInstance<ProductListItemData> | null) => void;
+  itemActionLoading: { [productId: string]: boolean };
+}
+
+const resourceStateTransitions: Record<string, string[]> = {
+  FREE: ["AFFECTED"],
+  AFFECTED: ["FREE", "IN_USE"],
+  IN_USE: ["FREE"],
+};
+const serviceStateTransitions: Record<string, string[]> = {
+  PLANNED: ["PUBLISHED", "CANCELLED"],
+  PUBLISHED: ["PLANNED", "ONGOING", "CANCELLED"],
+  ONGOING: ["FINISHED"],
+  FINISHED: [],
+  CANCELLED: [],
+};
+
+export function ProductList({
+  data,
+  pageCount,
+  onEditProduct,
+  onViewProductDetails,
+  onDeleteProduct,
+  onChangeProductState,
+  sorting,
+  setSorting,
+  columnFilters,
+  setColumnFilters,
+  globalFilter,
+  setGlobalFilterAction,
+  columnVisibility,
+  setColumnVisibility,
+  rowSelection,
+  setRowSelection,
+  pagination,
+  setPagination,
+  itemActionLoading,
+}: ProductListProps) {
+  const columns = useMemo<ColumnDef<ProductListItemData>[]>(
+    () =>
+      getProductColumns({
+        onEditAction: onEditProduct,
+        onDeleteAction: onDeleteProduct,
+        onChangeState: onChangeProductState,
+        onViewDetails: onViewProductDetails,
+        resourceStateTransitions,
+        serviceStateTransitions,
+        getIsItemActionLoading: (productId: string) =>
+          !!itemActionLoading[productId],
+      }),
+    [
+      onEditProduct,
+      onDeleteProduct,
+      onChangeProductState,
+      onViewProductDetails,
+      itemActionLoading,
+    ]
+  );
+
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      pageCount={pageCount}
+      sorting={sorting}
+      onSortingChange={setSorting}
+      columnFilters={columnFilters}
+      onColumnFiltersChange={setColumnFilters}
+      globalFilter={globalFilter}
+      onGlobalFilterChange={setGlobalFilterAction}
+      columnVisibility={columnVisibility}
+      onColumnVisibilityChange={setColumnVisibility}
+      rowSelection={rowSelection}
+      onRowSelectionChange={setRowSelection}
+      pagination={pagination}
+      onPaginationChange={setPagination}
+      // If ManageProductsPage is doing all filtering/sorting/pagination on allProducts
+      // and ProductList just displays a slice, then these should be false
+      // because the `data` prop is already the "final" data for the current page.
+      // TanStack Table would then only sort/filter THIS current page of data if these are false.
+      // For consistency with how ManageProductsPage is now set up to leverage the table instance for filtering:
+      manualPagination={true} // Parent sends paginated data
+      manualSorting={true} // Parent sends sorted data (based on table state)
+      manualFiltering={true} // Parent sends filtered data (based on table state)
+      // setTable is used by ManageProductsPage for its primary table instance
+    />
+  );
+}
+// END OF FILE: ProductList.tsx
+

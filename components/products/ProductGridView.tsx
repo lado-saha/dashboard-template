@@ -68,7 +68,7 @@ export function ProductGridView({
           key={product.id}
           product={product}
           isItemActionLoading={getActionLoadingState(product.id)}
-          {...actionHandlers} // Pass down onEdit, onDelete, etc.
+          {...actionHandlers} // Pass down onEditAction, onDeleteAction, etc.
         />
       ))}
     </div>

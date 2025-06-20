@@ -21,19 +21,19 @@ export const productStatusOptions = [
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   globalFilter: string; // Receive global filter state
-  setGlobalFilter: (value: string) => void; // Receive setter for global filter
+  setGlobalFilterAction: (value: string) => void; // Receive setter for global filter
 }
 
 export function ProductDataTableToolbar<TData>({
   table,
   globalFilter,
-  setGlobalFilter,
+  setGlobalFilterAction,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0 || !!globalFilter;
 
   const resetAllFilters = () => {
     table.resetColumnFilters();
-    setGlobalFilter("");
+    setGlobalFilterAction("");
   };
 
   return (
@@ -44,7 +44,7 @@ export function ProductDataTableToolbar<TData>({
           <Input
             placeholder="Search all fields..." // Changed placeholder
             value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)} // Use lifted global filter
+            onChange={(event) => setGlobalFilterAction(event.target.value)} // Use lifted global filter
             className="h-9 w-full sm:w-[180px] lg:w-[280px] pl-8" // Added padding for icon
           />
         </div>

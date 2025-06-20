@@ -5,17 +5,11 @@ import { PracticalInformationDto } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = await params;
-    const { searchParams } = new URL(request.url);
-    const organizationIdQueryParam = searchParams.get('organizationId'); // As per spec for GET all
-    if (orgId !== organizationIdQueryParam) {
-      return NextResponse.json({ message: "Path orgId and query organizationId must match for this mock." }, { status: 400 });
-    }
-
+    const { orgId } = params;
     const allInfos = dbManager.getCollection('practicalInformation');
-    const filteredInfos = allInfos.filter(info => info.organization_id === orgId);
-    return NextResponse.json(filteredInfos);
+    const orgInfos = allInfos.filter(info => info.organization_id === orgId);
+    return NextResponse.json(orgInfos);
   } catch (error: any) {
-    return NextResponse.json({ message: "Failed to get practical information", error: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Failed to get practical information list", error: error.message }, { status: 500 });
   }
 }

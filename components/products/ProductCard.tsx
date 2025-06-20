@@ -40,8 +40,8 @@ const getStateChangeIcon = (nextState: string) => {
 
 // Props for ProductCard, similar to ProductRowActionsProps but for a single card
 interface ProductCardActionsProps {
-  onEdit: (product: ProductListItemData) => void;
-  onDelete: (product: ProductListItemData) => void;
+  onEditAction: (product: ProductListItemData) => void;
+  onDeleteAction: (product: ProductListItemData) => void;
   onChangeState: (product: ProductListItemData, newState: string) => void;
   onViewDetails: (product: ProductListItemData) => void;
   resourceStateTransitions: Record<string, string[]>;
@@ -53,7 +53,7 @@ interface ProductCardProps extends ProductCardActionsProps {
   product: ProductListItemData;
 }
 
-export function ProductCard({ product, onEdit, onDelete, onChangeState, onViewDetails, resourceStateTransitions, serviceStateTransitions, isItemActionLoading }: ProductCardProps) {
+export function ProductCard({ product, onEditAction, onDeleteAction, onChangeState, onViewDetails, resourceStateTransitions, serviceStateTransitions, isItemActionLoading }: ProductCardProps) {
   const stateInfo = getStateDisplayInfo(product.currentState);
   const ProductIcon = product.productType === "RESOURCE" ? Package : Combine;
 
@@ -81,14 +81,14 @@ export function ProductCard({ product, onEdit, onDelete, onChangeState, onViewDe
             <DropdownMenuContent align="end" className="w-[190px]">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => onViewDetails(product)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(product)}><Edit3 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEditAction(product)}><Edit3 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
               {availableTransitions.length > 0 && <DropdownMenuSeparator />}
               {availableTransitions.map(nextState => {
                   const Icon = getStateChangeIcon(nextState);
                   return ( <DropdownMenuItem key={nextState} onClick={() => onChangeState(product, nextState)}> <Icon className="mr-2 h-4 w-4" /> Change to {nextState.toLowerCase().replace(/_/g, " ")} </DropdownMenuItem> );
               })}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(product)} className="text-destructive focus:text-destructive focus:bg-destructive/10"> <Trash2 className="mr-2 h-4 w-4" /> Delete </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDeleteAction(product)} className="text-destructive focus:text-destructive focus:bg-destructive/10"> <Trash2 className="mr-2 h-4 w-4" /> Delete </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

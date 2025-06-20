@@ -18,7 +18,7 @@ import Image from "next/image"; // Added Image import
 interface ProductDetailViewProps {
   product?: ProductListItemData;
   onClose: () => void;
-  onEdit: (product: ProductListItemData) => void; // Retain for BA context
+  onEditAction: (product: ProductListItemData) => void; // Retain for BA context
   onReserve?: (product: ProductListItemData) => void; // NEW: Optional for Customer context
   showReserveButton?: boolean; // NEW: To control visibility of reserve button
   isBAView?: boolean; // NEW: To control visibility of edit button (or other BA-specific actions)
@@ -53,7 +53,7 @@ const DetailRow: React.FC<{ label: string; value?: string | number | React.React
 export function ProductDetailView({
   product,
   onClose,
-  onEdit,
+  onEditAction,
   onReserve, // New prop
   showReserveButton = false, // New prop
   isBAView = false // New prop to distinguish context
@@ -173,8 +173,8 @@ export function ProductDetailView({
 
         <CardFooter className="border-t p-4 sm:p-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">Close</Button>
-          {isBAView && onEdit && ( // Show Edit button only for BA view and if onEdit is provided
-            <Button onClick={() => onEdit(product)} className="w-full sm:w-auto">
+          {isBAView && onEditAction && ( // Show Edit button only for BA view and if onEditAction is provided
+            <Button onClick={() => onEditAction(product)} className="w-full sm:w-auto">
               <Edit3 className="mr-2 h-4 w-4" /> Edit Product
             </Button>
           )}

@@ -177,4 +177,6 @@ export class OrganizationRemoteRepository implements IOrganizationRepository {
   async createApplication(data: CreateApplicationRequest): Promise<ApplicationDto> { return yowyobOrganizationApi.createApplication(data); }
   async getApplicationKeys(applicationId: string): Promise<ApplicationKeyDto[]> { return yowyobOrganizationApi.getApplicationKeys(applicationId); }
   async createApiKey(applicationId: string): Promise<ApplicationKeyDto> { return yowyobOrganizationApi.createApiKey(applicationId); }
+
+
 }

@@ -175,7 +175,6 @@ export interface AddressDto extends Auditable {
   longitude?: number;
 }
 
-
 // --- Practical Information ---
 export interface CreatePracticalInformationRequest {
   type?: string;
@@ -190,7 +189,6 @@ export interface PracticalInformationDto extends Auditable {
   value?: string;
   notes?: string;
 }
-
 
 // --- Agency ---
 export interface CreateAgencyRequest {
@@ -243,7 +241,6 @@ export interface AgencyDto extends Auditable {
   total_affiliated_customers?: number; // int32
 }
 export interface UpdateAgencyStatusRequest { active: boolean; }
-
 
 // --- Employee ---
 export type EmployeeRole =
@@ -346,7 +343,6 @@ export interface BusinessActorDto extends Auditable {
   biography?: string;
   type?: BusinessActorType; // The type of business actor they are (Provider, Customer, etc.)
 }
-
 
 // --- ThirdParty (Potentially represents external partners or could be an abstraction for Agency/Supplier) ---
 export type ThirdPartyType = "11" | "12" | "21" | "22" | "23" | "24" | "25" | "31" | "32" | "33" | "34" | "41" | "42" | "43" | "51" | "52" | "61" | "62" | "63" | "71" | "72";

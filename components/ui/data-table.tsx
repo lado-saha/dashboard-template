@@ -14,10 +14,9 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  Table as TanstackTable,
+  Table as TanstackTableInstance,
   PaginationState,
   RowSelectionState,
-  GlobalFilterTableState, // Import this
 } from "@tanstack/react-table";
 
 import {
@@ -29,19 +28,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Extend props to accept an optional, pre-configured table instance
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pageCount?: number;
+  pageCount?: number; // For server-side pagination, if tableInstance is not provided
 
+  // Props for controlled state if tableInstance is NOT provided
   sorting?: SortingState;
   onSortingChange?: React.Dispatch<React.SetStateAction<SortingState>>;
   columnFilters?: ColumnFiltersState;
   onColumnFiltersChange?: React.Dispatch<
     React.SetStateAction<ColumnFiltersState>
   >;
-  globalFilter?: string; // Add globalFilter prop
-  onGlobalFilterChange?: React.Dispatch<React.SetStateAction<string>>; // Add globalFilter setter
+  globalFilter?: string;
+  onGlobalFilterChange?: React.Dispatch<React.SetStateAction<string>>;
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: React.Dispatch<
     React.SetStateAction<VisibilityState>
@@ -56,19 +57,20 @@ export interface DataTableProps<TData, TValue> {
   manualPagination?: boolean;
   manualSorting?: boolean;
   manualFiltering?: boolean;
-  setTable?: (table: TanstackTable<TData>) => void;
+
+  tableInstance?: TanstackTableInstance<TData>; // Optional pre-configured table instance
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pageCount,
+  pageCount: parentPageCount,
   sorting: controlledSorting,
   onSortingChange,
   columnFilters: controlledColumnFilters,
   onColumnFiltersChange,
   globalFilter: controlledGlobalFilter,
-  onGlobalFilterChange, // Destructure global filter
+  onGlobalFilterChange,
   columnVisibility: controlledColumnVisibility,
   onColumnVisibilityChange,
   rowSelection: controlledRowSelection,
@@ -78,58 +80,30 @@ export function DataTable<TData, TValue>({
   manualPagination = false,
   manualSorting = false,
   manualFiltering = false,
-  setTable: setParentTableInstance,
+  tableInstance, // Use this if provided
 }: DataTableProps<TData, TValue>) {
-  const [internalSorting, setInternalSorting] = React.useState<SortingState>(
-    []
-  );
-  const [internalColumnFilters, setInternalColumnFilters] =
-    React.useState<ColumnFiltersState>([]);
-  const [internalGlobalFilter, setInternalGlobalFilter] =
-    React.useState<string>(""); // Internal global filter
-  const [internalColumnVisibility, setInternalColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [internalRowSelection, setInternalRowSelection] =
-    React.useState<RowSelectionState>({});
-  const [internalPagination, setInternalPagination] =
-    React.useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-
-  const sorting = controlledSorting ?? internalSorting;
-  const setSorting = onSortingChange ?? setInternalSorting;
-  const columnFilters = controlledColumnFilters ?? internalColumnFilters;
-  const setColumnFilters = onColumnFiltersChange ?? setInternalColumnFilters;
-  const globalFilter = controlledGlobalFilter ?? internalGlobalFilter; // Use controlled or internal global filter
-  const setGlobalFilter = onGlobalFilterChange ?? setInternalGlobalFilter; // Use controlled or internal setter
-  const columnVisibility =
-    controlledColumnVisibility ?? internalColumnVisibility;
-  const setColumnVisibility =
-    onColumnVisibilityChange ?? setInternalColumnVisibility;
-  const rowSelection = controlledRowSelection ?? internalRowSelection;
-  const setRowSelection = onRowSelectionChange ?? setInternalRowSelection;
-  const pagination = controlledPagination ?? internalPagination;
-  const setPagination = onPaginationChange ?? setInternalPagination;
-
-  const table = useReactTable({
+  // Use the provided table instance, or create one if not provided
+  const internalTable = useReactTable({
     data,
     columns,
-    pageCount: pageCount ?? -1,
+    pageCount: parentPageCount ?? -1, // Use parentPageCount or default for internal calculation
     state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination,
-      globalFilter, // Pass globalFilter to table state
+      sorting: controlledSorting,
+      columnFilters: controlledColumnFilters,
+      globalFilter: controlledGlobalFilter,
+      columnVisibility: controlledColumnVisibility,
+      rowSelection: controlledRowSelection,
+      pagination: controlledPagination,
     },
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter, // Handle global filter changes
-    onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onRowSelectionChange: onRowSelectionChange,
+    onSortingChange: onSortingChange,
+    onColumnFiltersChange: onColumnFiltersChange,
+    onGlobalFilterChange: onGlobalFilterChange,
+    onColumnVisibilityChange: onColumnVisibilityChange,
+    onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(), // Enables global filtering
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
@@ -139,12 +113,9 @@ export function DataTable<TData, TValue>({
     manualFiltering,
   });
 
-  React.useEffect(() => {
-    if (setParentTableInstance) setParentTableInstance(table);
-  }, [table, setParentTableInstance]);
+  const table = tableInstance || internalTable; // Prioritize passed instance
 
   return (
-    /* ... Table JSX (no changes needed here) ... */
     <div className="w-full space-y-0">
       <div className="rounded-md border">
         <Table>
@@ -158,14 +129,14 @@ export function DataTable<TData, TValue>({
                     style={{
                       width:
                         header.getSize() !== 150 ? header.getSize() : undefined,
-                    }}
+                    }} // Default size in tanstack table v8
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>

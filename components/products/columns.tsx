@@ -33,8 +33,8 @@ const getStateDisplayInfo = (state: string = ""): StateDisplayInfo => {
 
 export interface ProductRowActionsProps {
   product: ProductListItemData;
-  onEdit: (product: ProductListItemData) => void;
-  onDelete: (product: ProductListItemData) => void;
+  onEditAction: (product: ProductListItemData) => void;
+  onDeleteAction: (product: ProductListItemData) => void;
   onChangeState: (product: ProductListItemData, newState: string) => void;
   onViewDetails: (product: ProductListItemData) => void;
   resourceStateTransitions: Record<string, string[]>;
@@ -43,7 +43,7 @@ export interface ProductRowActionsProps {
 }
 
 const ProductRowActions: React.FC<ProductRowActionsProps> = ({
-  product, onEdit, onDelete, onChangeState, onViewDetails,
+  product, onEditAction, onDeleteAction, onChangeState, onViewDetails,
   resourceStateTransitions, serviceStateTransitions, isItemActionLoading
 }) => {
   const getAvailableTransitions = (prod: ProductListItemData) => {
@@ -79,7 +79,7 @@ const ProductRowActions: React.FC<ProductRowActionsProps> = ({
         <DropdownMenuItem onClick={() => onViewDetails(product)}>
           <Eye className="mr-2 h-4 w-4" /> View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onEdit(product)}>
+        <DropdownMenuItem onClick={() => onEditAction(product)}>
           <Edit3 className="mr-2 h-4 w-4" /> Edit Product
         </DropdownMenuItem>
         {availableTransitions.length > 0 && <DropdownMenuSeparator />}
@@ -93,7 +93,7 @@ const ProductRowActions: React.FC<ProductRowActionsProps> = ({
         })}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => onDelete(product)}
+          onClick={() => onDeleteAction(product)}
           className="text-destructive focus:text-destructive focus:bg-destructive/10"
         >
           <Trash2 className="mr-2 h-4 w-4" /> Delete Product
@@ -205,8 +205,8 @@ export const getProductColumns = (
         <div className="text-right">
           <ProductRowActions
             product={row.original}
-            onEdit={actionHandlers.onEdit}
-            onDelete={actionHandlers.onDelete}
+            onEditAction={actionHandlers.onEditAction}
+            onDeleteAction={actionHandlers.onDeleteAction}
             onChangeState={actionHandlers.onChangeState}
             onViewDetails={actionHandlers.onViewDetails}
             resourceStateTransitions={actionHandlers.resourceStateTransitions}
