@@ -1,18 +1,18 @@
 "use client";
 
-import { DataGrid } from "@/components/ui/data-grid";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import {
-  PracticalInformationDto,
-  CreatePracticalInformationRequest,
-  UpdatePracticalInformationRequest,
+  CertificationDto,
+  CreateCertificationRequest,
+  UpdateCertificationRequest,
 } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
-import { PracticalInfoForm } from "@/components/organization/practical-info/practical-info-form";
+import { CertificationForm } from "@/components/organization/certifications/certification-form";
 import { DataTable } from "@/components/ui/data-table";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { PracticalInfoCard } from "@/components/organization/practical-info/practical-info-card";
+import { CertificationCard } from "@/components/organization/certifications/certification-card";
+import { DataGrid } from "@/components/ui/data-grid";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -22,9 +22,9 @@ import {
   Loader2,
   AlertTriangle,
   Inbox,
-  FileText,
   Search,
   Trash2,
+  Award,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -63,7 +63,7 @@ import {
 } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { cn } from "@/lib/utils";
-import { getPracticalInfoColumns } from "@/components/organization/practical-info/columns";
+import { getCertificationColumns } from "@/components/organization/certifications/columns";
 import {
   Card,
   CardContent,
@@ -75,8 +75,8 @@ import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
 import { ViewMode } from "@/types/common";
 
-const getPracticalInfoTypeOptions = (
-  items: PracticalInformationDto[]
+const getCertificationTypeOptions = (
+  items: CertificationDto[]
 ): DataTableFilterOption[] => {
   const allTypes = items.map((item) => item.type);
   const uniqueValidTypes = [...new Set(allTypes)].filter(Boolean);
@@ -88,7 +88,7 @@ const getPracticalInfoTypeOptions = (
     .sort((a, b) => a.label.localeCompare(b.label));
 };
 
-const fuzzyGlobalFilterFn: FilterFn<PracticalInformationDto> = (
+const fuzzyGlobalFilterFn: FilterFn<CertificationDto> = (
   row,
   columnId,
   value,
@@ -99,7 +99,7 @@ const fuzzyGlobalFilterFn: FilterFn<PracticalInformationDto> = (
   return itemRank.passed;
 };
 
-export default function ManagePracticalInfoPage() {
+export default function ManageCertificationsPage() {
   const {
     activeOrganizationId,
     activeOrganizationDetails,
@@ -107,16 +107,14 @@ export default function ManagePracticalInfoPage() {
   } = useActiveOrganization();
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [editingItem, setEditingItem] = useState<
-    PracticalInformationDto | undefined
-  >(undefined);
+  const [editingItem, setEditingItem] = useState<CertificationDto | undefined>(
+    undefined
+  );
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemsToDelete, setItemsToDelete] = useState<PracticalInformationDto[]>(
-    []
-  );
+  const [itemsToDelete, setItemsToDelete] = useState<CertificationDto[]>([]);
 
-  const [allItems, setAllItems] = useState<PracticalInformationDto[]>([]);
+  const [allItems, setAllItems] = useState<CertificationDto[]>([]);
   const [isItemsLoading, setIsItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
@@ -132,7 +130,7 @@ export default function ManagePracticalInfoPage() {
   });
 
   const derivedTypeOptions = useMemo(
-    () => getPracticalInfoTypeOptions(allItems),
+    () => getCertificationTypeOptions(allItems),
     [allItems]
   );
 
@@ -144,13 +142,12 @@ export default function ManagePracticalInfoPage() {
     setIsItemsLoading(true);
     setItemsError(null);
     try {
-      const data = await organizationRepository.getPracticalInformation(
+      const data = await organizationRepository.getCertifications(
         activeOrganizationId
       );
       setAllItems(data || []);
     } catch (err: any) {
-      const errorMessage =
-        err.message || "Could not load practical information.";
+      const errorMessage = err.message || "Could not load certifications.";
       setItemsError(errorMessage);
       toast.error(errorMessage);
       setAllItems([]);
@@ -164,45 +161,45 @@ export default function ManagePracticalInfoPage() {
   }, [fetchData, dataVersion]);
 
   const handleFormSubmitAttempt = async (
-    data: CreatePracticalInformationRequest | UpdatePracticalInformationRequest,
-    infoId?: string
+    data: CreateCertificationRequest | UpdateCertificationRequest,
+    certId?: string
   ): Promise<boolean> => {
     if (!activeOrganizationId) {
       toast.error("No active organization selected.");
       return false;
     }
     try {
-      if (infoId) {
-        await organizationRepository.updatePracticalInformation(
+      if (certId) {
+        await organizationRepository.updateCertification(
           activeOrganizationId,
-          infoId,
-          data as UpdatePracticalInformationRequest
+          certId,
+          data as UpdateCertificationRequest
         );
-        toast.success("Practical information updated successfully!");
+        toast.success("Certification updated successfully!");
       } else {
-        await organizationRepository.createPracticalInformation(
+        await organizationRepository.createCertification(
           activeOrganizationId,
-          data as CreatePracticalInformationRequest
+          data as CreateCertificationRequest
         );
-        toast.success("Practical information added successfully!");
+        toast.success("Certification added successfully!");
       }
       refreshData();
       setIsFormModalOpen(false);
       return true;
     } catch (error: any) {
-      toast.error(error.message || "Failed to save practical information.");
+      toast.error(error.message || "Failed to save certification.");
       return false;
     }
   };
 
   const refreshData = useCallback(() => setDataVersion((v) => v + 1), []);
 
-  const handleOpenFormModal = (item?: PracticalInformationDto) => {
+  const handleOpenFormModal = (item?: CertificationDto) => {
     setEditingItem(item);
     setIsFormModalOpen(true);
   };
 
-  const handleDeleteConfirmation = (items: PracticalInformationDto[]) => {
+  const handleDeleteConfirmation = (items: CertificationDto[]) => {
     if (items.length === 0) {
       toast.info("No items selected to delete.");
       return;
@@ -216,13 +213,15 @@ export default function ManagePracticalInfoPage() {
     try {
       await Promise.all(
         itemsToDelete.map((item) =>
-          organizationRepository.deletePracticalInformation(
+          organizationRepository.deleteCertification(
             activeOrganizationId,
-            item.information_id!
+            item.certification_id!
           )
         )
       );
-      toast.success(`${itemsToDelete.length} item(s) deleted successfully.`);
+      toast.success(
+        `${itemsToDelete.length} certification(s) deleted successfully.`
+      );
       refreshData();
       table.resetRowSelection();
     } catch (error: any) {
@@ -233,9 +232,9 @@ export default function ManagePracticalInfoPage() {
     }
   };
 
-  const columns = useMemo<ColumnDef<PracticalInformationDto>[]>(
+  const columns = useMemo<ColumnDef<CertificationDto>[]>(
     () =>
-      getPracticalInfoColumns({
+      getCertificationColumns({
         onEditAction: handleOpenFormModal,
         onDeleteAction: (item) => handleDeleteConfirmation([item]),
       }),
@@ -276,13 +275,14 @@ export default function ManagePracticalInfoPage() {
     table.setPageSize(viewMode === "grid" ? 9 : 10);
   }, [viewMode, table]);
 
-  const currentTablePageRows: Row<PracticalInformationDto>[] =
+  const currentTablePageRows: Row<CertificationDto>[] =
     table.getRowModel().rows;
 
   if (isLoadingOrgDetails) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-12 w-1/2" /> <Skeleton className="h-16 w-full" />{" "}
+        <Skeleton className="h-12 w-1/2" />
+        <Skeleton className="h-16 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -293,7 +293,7 @@ export default function ManagePracticalInfoPage() {
       <div className="p-6 text-center text-muted-foreground border rounded-lg min-h-[400px] flex flex-col justify-center items-center">
         <Inbox className="h-12 w-12 mb-4" />
         <h3 className="text-lg font-semibold">No Organization Selected</h3>
-        <p>Select an organization to manage its practical information.</p>
+        <p>Select an organization to manage its certifications.</p>
       </div>
     );
   }
@@ -304,10 +304,10 @@ export default function ManagePracticalInfoPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Practical Information
+              Certifications
             </h1>
             <p className="text-muted-foreground">
-              Manage operational details for{" "}
+              Manage awards and certifications for{" "}
               <b>{activeOrganizationDetails?.long_name}</b>
             </p>
           </div>
@@ -324,7 +324,7 @@ export default function ManagePracticalInfoPage() {
                 )}
                 data-state={viewMode === "list" ? "active" : "inactive"}
               >
-                <LayoutList className="h-4 w-4" />{" "}
+                <LayoutList className="h-4 w-4" />
                 <span className="ml-1.5 hidden sm:inline">List</span>
               </Button>
               <Button
@@ -338,7 +338,7 @@ export default function ManagePracticalInfoPage() {
                 )}
                 data-state={viewMode === "grid" ? "active" : "inactive"}
               >
-                <LayoutGrid className="h-4 w-4" />{" "}
+                <LayoutGrid className="h-4 w-4" />
                 <span className="ml-1.5 hidden sm:inline">Grid</span>
               </Button>
             </div>
@@ -354,12 +354,12 @@ export default function ManagePracticalInfoPage() {
       </header>
       <Card>
         <CardContent className="space-y-6">
-          <DataTableToolbar<PracticalInformationDto>
+          <DataTableToolbar<CertificationDto>
             table={table}
             viewMode={viewMode}
             globalFilter={globalFilter}
             onGlobalFilterChangeAction={setGlobalFilterAction}
-            searchPlaceholder="Search by type, value, notes..."
+            searchPlaceholder="Search by name, type..."
             filterControls={
               table.getColumn("type") && derivedTypeOptions.length > 0 ? (
                 <DataTableFacetedFilter
@@ -389,22 +389,18 @@ export default function ManagePracticalInfoPage() {
           <main>
             {isItemsLoading &&
               (viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="flex flex-col h-[200px] shadow-sm">
+                    <Card key={i} className="h-[200px]">
                       <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <Skeleton className="h-5 w-3/4" />
-                          <Skeleton className="h-6 w-6 rounded-md" />
-                        </div>
+                        <Skeleton className="h-5 w-3/5" />
                       </CardHeader>
-                      <CardContent className="flex-grow space-y-2">
+                      <CardContent>
                         <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-5/6" />
-                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-4 w-4/5 mt-2" />
                       </CardContent>
-                      <CardFooter className="pt-2 pb-3 justify-end">
-                        <Skeleton className="h-4 w-1/3" />
+                      <CardFooter>
+                        <Skeleton className="h-6 w-16 ml-auto" />
                       </CardFooter>
                     </Card>
                   ))}
@@ -452,7 +448,7 @@ export default function ManagePracticalInfoPage() {
                 <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
                   <Search className="h-12 w-12 text-muted-foreground/70 mb-4" />
                   <h3 className="text-lg font-semibold">
-                    No Information Matches Filters
+                    No Certifications Match Filters
                   </h3>
                   <p className="text-sm">
                     Try adjusting your search or filter criteria.
@@ -475,19 +471,19 @@ export default function ManagePracticalInfoPage() {
               !globalFilter &&
               columnFilters.length === 0 && (
                 <div className="min-h-[200px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
-                  <Inbox className="h-12 w-12 text-muted-foreground/70 mb-4" />
+                  <Award className="h-12 w-12 text-muted-foreground/70 mb-4" />
                   <h3 className="text-lg font-semibold">
-                    No Practical Information Added Yet
+                    No Certifications Added Yet
                   </h3>
                   <p className="text-sm">
-                    Add important operational details for your organization.
+                    Add your organization's awards and certifications.
                   </p>
                   <Button
                     onClick={() => handleOpenFormModal()}
                     className="mt-3"
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Information
+                    Add Certification
                   </Button>
                 </div>
               )}
@@ -495,19 +491,18 @@ export default function ManagePracticalInfoPage() {
               !itemsError &&
               table.getRowModel().rows.length > 0 &&
               (viewMode === "grid" ? (
-                <DataGrid
-                  table={table}
-                  renderCardAction={({ row }) => (
-                    <PracticalInfoCard
-                      key={row.original.information_id}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {currentTablePageRows.map((row) => (
+                    <CertificationCard
+                      key={row.original.certification_id}
                       item={row.original}
                       onEditAction={handleOpenFormModal}
                       onDeleteAction={(item) =>
                         handleDeleteConfirmation([item])
                       }
                     />
-                  )}
-                />
+                  ))}
+                </div>
               ) : (
                 <DataTable
                   columns={columns}
@@ -548,18 +543,15 @@ export default function ManagePracticalInfoPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingItem
-                ? "Edit Practical Information"
-                : "Add New Practical Information"}
+              {editingItem ? "Edit Certification" : "Add New Certification"}
             </DialogTitle>
             <DialogDescription>
               {editingItem
-                ? `Update details for "${editingItem?.type}"`
-                : "Provide details for the new piece of information."}
+                ? `Update details for "${editingItem?.name}"`
+                : "Provide details for the new certification."}
             </DialogDescription>
           </DialogHeader>
-          <PracticalInfoForm
-            organizationId={activeOrganizationId!}
+          <CertificationForm
             initialData={editingItem}
             mode={editingItem ? "edit" : "create"}
             onSubmitAttemptAction={handleFormSubmitAttempt}
@@ -579,7 +571,7 @@ export default function ManagePracticalInfoPage() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete{" "}
-              <strong>{itemsToDelete.length} item(s)</strong>.
+              <strong>{itemsToDelete.length} certification(s)</strong>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

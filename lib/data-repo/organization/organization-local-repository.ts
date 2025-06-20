@@ -377,13 +377,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateCertificationRequest
   ): Promise<CertificationDto> {
     return this.fetchMockApi<CertificationDto>(
-      `/${orgId}/certifications/${certId}/update`,
+      `/${orgId}/certifications/${certId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteCertification(orgId: string, certId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/certifications/${certId}/delete`,
+      `/${orgId}/certifications/${certId}`,
       { method: "DELETE" }
     );
   }

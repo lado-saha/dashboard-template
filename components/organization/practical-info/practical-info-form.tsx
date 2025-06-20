@@ -47,19 +47,19 @@ interface PracticalInfoFormProps {
   initialData?: Partial<PracticalInformationDto>; // For editing
   mode: "create" | "edit";
   // Parent handles actual API call and refreshes data
-  onSubmitAttempt: (
+  onSubmitAttemptAction: (
     data: CreatePracticalInformationRequest | UpdatePracticalInformationRequest,
     infoId?: string
   ) => Promise<boolean>;
-  onCancel: () => void;
+  onCancelAction: () => void;
 }
 
 export function PracticalInfoForm({
   organizationId,
   initialData,
   mode,
-  onSubmitAttempt,
-  onCancel,
+  onSubmitAttemptAction,
+  onCancelAction,
 }: PracticalInfoFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -85,7 +85,7 @@ export function PracticalInfoForm({
     setIsSubmitting(true);
     const payload = data as CreatePracticalInformationRequest; // Types are compatible
 
-    const success = await onSubmitAttempt(payload, initialData?.information_id);
+    const success = await onSubmitAttemptAction(payload, initialData?.information_id);
     if (success) {
       form.reset(); // Reset form on success
     }
@@ -162,7 +162,7 @@ export function PracticalInfoForm({
           <Button
             type="button"
             variant="outline"
-            onClick={onCancel}
+            onClick={onCancelAction}
             disabled={isSubmitting}
           >
             Cancel

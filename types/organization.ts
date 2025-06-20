@@ -249,9 +249,6 @@ export type EmployeeRole =
   | "MANAGER" | "SUPERADMIN" | "ADMIN" | "SUPPORT" | "OTHER";
 
 
-export interface UpdateEmployeeRequest extends Partial<CreateEmployeeRequest> { }
-export interface AffectEmployeeRequest { employee_id: string; /* uuid of an existing BusinessActor or User to be made employee */ }
-
 export interface CreateEmployeeRequest {
   first_name?: string;
   last_name?: string;
@@ -261,7 +258,6 @@ export interface CreateEmployeeRequest {
   logo?: string;              // Photo URL
   department?: string;
   employee_role?: EmployeeRole;
-  // user_id?: string; // If linking an existing User from Auth Service
 }
 export interface UpdateEmployeeRequest extends Partial<CreateEmployeeRequest> { }
 export interface AffectEmployeeRequest { employee_id: string; /* uuid */ }
@@ -518,7 +514,6 @@ export interface ProspectDto extends Auditable {
   partner_type?: "PROSPECT"; // Fixed for ProspectDto
   partner_details?: string;
 }
-
 
 // --- Customer (Organization-linked, distinct from global User/Customer from Auth Service) ---
 export interface CreateCustomerRequest { // For POST /organizations/{orgId}/customers
