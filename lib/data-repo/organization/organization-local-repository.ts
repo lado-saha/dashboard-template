@@ -444,7 +444,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     data: CreateAgencyRequest
   ): Promise<AgencyDto> {
-    return this.fetchMockApi<AgencyDto>(`/${orgId}/agencies/create`, {
+    return this.fetchMockApi<AgencyDto>(`/${orgId}/agencies`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -463,12 +463,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateAgencyRequest
   ): Promise<AgencyDto> {
     return this.fetchMockApi<AgencyDto>(
-      `/${orgId}/agencies/${agencyId}/update`,
+      `/${orgId}/agencies/${agencyId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteAgency(orgId: string, agencyId: string): Promise<void> {
-    return this.fetchMockApi<void>(`/${orgId}/agencies/${agencyId}/delete`, {
+    return this.fetchMockApi<void>(`/${orgId}/agencies/${agencyId}`, {
       method: "DELETE",
     });
   }
@@ -535,7 +535,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateEmployeeRequest
   ): Promise<EmployeeResponse> {
     return this.fetchMockApi<EmployeeResponse>(
-      `/${orgId}/agencies/${agencyId}/employees/create`,
+      `/${orgId}/agencies/${agencyId}/employees`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }

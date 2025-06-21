@@ -1,7 +1,7 @@
 // app/api/mock/organization/[orgId]/agencies/[agencyId]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { AgencyDto, UpdateAgencyRequest } from '@/types/organization';
+import { UpdateAgencyRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {

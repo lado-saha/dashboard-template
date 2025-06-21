@@ -1,8 +1,7 @@
 "use client";
 
-import { Sidebar } from "@/components/sidebar";
+import { DashboardUI } from "@/components/dashboard-ui";
 import { TopNav } from "@/components/top-nav";
-import React from "react";
 import { ActiveOrganizationProvider } from "@/contexts/active-organization-context";
 
 interface DashboardLayoutProps {
@@ -13,10 +12,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <ActiveOrganizationProvider>
       <div className="flex min-h-screen">
-        <Sidebar />
+        <DashboardUI />
+
         <div className="flex flex-1 flex-col overflow-x-hidden">
           <TopNav />
-          <main className="flex-1 p-4 pt-20 sm:p-6 md:p-8">
+          <main className="flex-1 bg-muted/30 p-4 pt-20 sm:p-6 md:p-8">
             <div className="mx-auto">{children}</div>
           </main>
         </div>

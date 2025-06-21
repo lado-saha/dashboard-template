@@ -12,37 +12,15 @@ import {
 } from "@/components/ui/tooltip";
 import { ChevronsUpDown, Building } from "lucide-react";
 import Image from "next/image";
-import { Skeleton } from "@/components/ui/skeleton";
-import { OrganizationSelectorDialog } from "./organization-selector-dialog";
+import { AgencySelectorDialog } from "./agency-selector-dialog";
 
-interface OrganizationSwitcherProps {
+interface AgencySwitcherProps {
   isCollapsed: boolean;
 }
 
-export function OrganizationSwitcher({
-  isCollapsed,
-}: OrganizationSwitcherProps) {
+export function AgencySwitcher({ isCollapsed }: AgencySwitcherProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const {
-    userOrganizations,
-    activeOrganizationId,
-    activeOrganizationDetails,
-    isLoadingUserOrgs,
-  } = useActiveOrganization();
-
-  if (isLoadingUserOrgs) {
-    return (
-      <div className="px-2 py-2">
-        <Skeleton className="h-14 w-full" />
-      </div>
-    );
-  }
-
-  const activeOrg =
-    activeOrganizationDetails ||
-    userOrganizations.find(
-      (org) => org.organization_id === activeOrganizationId
-    );
+  const { activeAgencyDetails } = useActiveOrganization();
 
   if (isCollapsed) {
     return (
@@ -52,10 +30,10 @@ export function OrganizationSwitcher({
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9">
-                  {activeOrg?.logo_url ? (
+                  {activeAgencyDetails?.logo ? (
                     <Image
-                      src={activeOrg.logo_url}
-                      alt="Org Logo"
+                      src={activeAgencyDetails.logo}
+                      alt="Agency Logo"
                       width={24}
                       height={24}
                       className="h-6 w-6 rounded-md object-cover"
@@ -63,19 +41,17 @@ export function OrganizationSwitcher({
                   ) : (
                     <Building className="h-5 w-5" />
                   )}
-                  <span className="sr-only">Switch Organization</span>
+                  <span className="sr-only">Switch Agency</span>
                 </Button>
               </DialogTrigger>
             </TooltipTrigger>
             <TooltipContent side="right">
-              {activeOrg?.short_name || "Switch Organization"}
+              {activeAgencyDetails?.short_name || "Switch Agency"}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
         <DialogContent className="p-0 gap-0 w-[95vw] max-w-md h-[70vh] flex flex-col">
-          <OrganizationSelectorDialog
-            onCloseAction={() => setIsDialogOpen(false)}
-          />
+          <AgencySelectorDialog onCloseAction={() => setIsDialogOpen(false)} />
         </DialogContent>
       </Dialog>
     );
@@ -92,10 +68,10 @@ export function OrganizationSwitcher({
             className="w-full h-14 justify-between text-left hover:bg-muted/50 focus:ring-1 focus:ring-primary"
           >
             <div className="flex items-center gap-3 min-w-0">
-              {activeOrg?.logo_url ? (
+              {activeAgencyDetails?.logo ? (
                 <Image
-                  src={activeOrg.logo_url}
-                  alt="Org Logo"
+                  src={activeAgencyDetails.logo}
+                  alt="Agency Logo"
                   width={32}
                   height={32}
                   className="h-8 w-8 rounded-md object-cover"
@@ -107,12 +83,10 @@ export function OrganizationSwitcher({
               )}
               <div className="flex flex-col items-start min-w-0">
                 <span className="truncate font-semibold text-sm">
-                  {activeOrg?.short_name || "Select Organization"}
+                  {activeAgencyDetails?.short_name || "Select Agency"}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {activeOrg
-                    ? "Switch organization"
-                    : "No organization selected"}
+                  Switch agency
                 </span>
               </div>
             </div>
@@ -121,9 +95,7 @@ export function OrganizationSwitcher({
         </div>
       </DialogTrigger>
       <DialogContent className="p-0 gap-0 w-[95vw] max-w-md h-[70vh] flex flex-col">
-        <OrganizationSelectorDialog
-          onCloseAction={() => setIsDialogOpen(false)}
-        />
+        <AgencySelectorDialog onCloseAction={() => setIsDialogOpen(false)} />
       </DialogContent>
     </Dialog>
   );
