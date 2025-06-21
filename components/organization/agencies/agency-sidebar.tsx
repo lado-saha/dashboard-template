@@ -43,7 +43,8 @@ export function AgencySidebar() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { clearActiveAgency, activeAgencyDetails } = useActiveOrganization();
+  const { clearActiveAgency, activeAgencyDetails, activeOrganizationDetails } =
+    useActiveOrganization();
 
   const handleExitAgency = () => {
     clearActiveAgency();
@@ -119,13 +120,13 @@ export function AgencySidebar() {
             href="/business-actor/agency/dashboard"
             className="flex items-center gap-2 font-semibold"
           >
-            {activeAgencyDetails?.logo ? (
+            {activeOrganizationDetails?.logo_url ? (
               <Image
-                src={activeAgencyDetails.logo}
+                src={activeOrganizationDetails.logo_url}
                 alt="Logo"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-md"
+                className="h-6 w-6 rounded-md"
               />
             ) : (
               <div className="h-8 w-8 shrink-0 rounded-md bg-muted flex items-center justify-center">

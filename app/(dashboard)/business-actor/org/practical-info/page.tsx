@@ -530,7 +530,7 @@ export default function ManagePracticalInfoPage() {
                   manualFiltering={false}
                 />
               ))}
-            {!isItemsLoading && !itemsError && table.getPageCount() > 1 && (
+            {!isItemsLoading && !itemsError && table.getPageCount() >= 1 && (
               <div className="mt-6">
                 <DataTablePagination table={table} viewMode={viewMode} />
               </div>

@@ -59,6 +59,7 @@ import { cn, fuzzyGlobalFilterFn } from "@/lib/utils";
 import { DataTableFilterOption } from "@/types/table";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
 import { ViewMode } from "@/types/common";
+import { ListViewSkeleton } from "@/components/ui/list-view-skeleton";
 
 export default function ManageEmployeesPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function ManageEmployeesPage() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 12,
+    pageSize: 10,
   });
 
   const fetchData = useCallback(async () => {
@@ -214,22 +215,24 @@ export default function ManageEmployeesPage() {
   });
 
   const renderContent = () => {
-    if (isItemsLoading) {
-      return viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full" />
-          ))}
+    {
+      isItemsLoading && <ListViewSkeleton viewMode={viewMode} />;
+    }
+
+    {
+      !isItemsLoading && itemsError && (
+        <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
+          <AlertTriangle className="h-10 w-10 text-destructive mb-3" />
+          <p className="text-destructive-foreground font-medium">
+            {itemsError}
+          </p>
+          <Button onClick={refreshData} variant="destructive" className="mt-4">
+            Try Again
+          </Button>
         </div>
-      ) : (
-        <Skeleton className="h-[400px] w-full rounded-md" />
       );
     }
-    if (itemsError) {
-      return (
-        <div className="text-center py-10 text-destructive">{itemsError}</div>
-      );
-    }
+
     if (allItems.length === 0) {
       return (
         <div className="min-h-[300px] text-center flex flex-col items-center justify-center text-muted-foreground border rounded-lg p-6">
@@ -264,8 +267,10 @@ export default function ManageEmployeesPage() {
         ) : (
           <DataTable tableInstance={table} columns={columns} data={allItems} />
         )}
-        {table.getPageCount() > 1 && (
-          <DataTablePagination table={table} viewMode={viewMode} />
+        {!isItemsLoading && !itemsError && table.getPageCount() >= 0 && (
+          <div className="mt-7">
+            <DataTablePagination table={table} viewMode={viewMode} />
+          </div>
         )}
       </>
     );
@@ -379,7 +384,7 @@ export default function ManageEmployeesPage() {
               </Button>
             }
           />
-          {/* 2. Added padding */}
+
           <main className="mt-4">{renderContent()}</main>
         </CardContent>
       </Card>

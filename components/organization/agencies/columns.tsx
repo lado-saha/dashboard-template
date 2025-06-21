@@ -149,7 +149,7 @@ export const getAgencyColumns = (
         </Badge>
       );
     },
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
+    filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
   },
   {
     accessorKey: "manager_name",

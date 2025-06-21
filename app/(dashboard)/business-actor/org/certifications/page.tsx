@@ -74,6 +74,7 @@ import { DataTableFilterOption } from "@/types/table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
 import { ViewMode } from "@/types/common";
+import { ListViewSkeleton } from "@/components/ui/list-view-skeleton";
 
 const getCertificationTypeOptions = (
   items: CertificationDto[]
@@ -272,7 +273,7 @@ export default function ManageCertificationsPage() {
   });
 
   useEffect(() => {
-    table.setPageSize(viewMode === "grid" ? 9 : 10);
+    table.setPageSize(10);
   }, [viewMode, table]);
 
   const currentTablePageRows: Row<CertificationDto>[] =
@@ -387,43 +388,8 @@ export default function ManageCertificationsPage() {
             }
           />
           <main>
-            {isItemsLoading &&
-              (viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Card key={i} className="h-[200px]">
-                      <CardHeader>
-                        <Skeleton className="h-5 w-3/5" />
-                      </CardHeader>
-                      <CardContent>
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-4/5 mt-2" />
-                      </CardContent>
-                      <CardFooter>
-                        <Skeleton className="h-6 w-16 ml-auto" />
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <div className="p-4 border-b">
-                    <Skeleton className="h-6 w-1/3" />
-                  </div>
-                  <div className="divide-y">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-3 p-4">
-                        <Skeleton className="h-8 w-8" />
-                        <div className="space-y-1.5 flex-1">
-                          <Skeleton className="h-4 w-1/2" />
-                          <Skeleton className="h-3 w-3/4" />
-                        </div>
-                        <Skeleton className="h-8 w-20" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            {isItemsLoading && <ListViewSkeleton viewMode={viewMode} />}
+
             {!isItemsLoading && itemsError && (
               <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
                 <AlertTriangle className="h-10 w-10 text-destructive mb-3" />
@@ -525,7 +491,7 @@ export default function ManageCertificationsPage() {
                   manualFiltering={false}
                 />
               ))}
-            {!isItemsLoading && !itemsError && table.getPageCount() > 1 && (
+            {!isItemsLoading && !itemsError && table.getPageCount() >= 1 && (
               <div className="mt-6">
                 <DataTablePagination table={table} viewMode={viewMode} />
               </div>
