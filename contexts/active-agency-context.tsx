@@ -64,7 +64,7 @@ export const ActiveAgencyProvider = ({ children }: { children: ReactNode }) => {
         activeOrganizationId
       );
       setAgenciesForCurrentOrg(agencies || []);
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Could not load agencies for the organization.");
       setAgenciesForCurrentOrg([]);
     } finally {
@@ -87,7 +87,7 @@ export const ActiveAgencyProvider = ({ children }: { children: ReactNode }) => {
           toast.error(`Could not load details for agency ID: ${agencyId}.`);
           setActiveAgencyIdState(null); // Clear ID if details fail
         }
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch agency details.");
         setActiveAgencyDetailsState(null);
         setActiveAgencyIdState(null);

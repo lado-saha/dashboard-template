@@ -7,7 +7,6 @@ import { organizationRepository } from "@/lib/data-repo/organization";
 import {
   EmployeeDto,
   AgencyDto,
-  EmployeeRole,
   EmployeeRoleValues,
 } from "@/types/organization";
 import { DataTable } from "@/components/ui/data-table";
@@ -15,12 +14,9 @@ import { DataGrid } from "@/components/ui/data-grid";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   PlusCircle,
-  Loader2,
   AlertTriangle,
-  Inbox,
   Users,
   Trash2,
   LayoutGrid,
@@ -239,7 +235,7 @@ export default function ManageEmployeesPage() {
           <Users className="h-12 w-12 text-muted-foreground/70 mb-4" />
           <h3 className="text-lg font-semibold">No Employees Found</h3>
           <p className="text-sm">
-            Get started by clicking "Add Employee" to build your team.
+            Get started by clicking &quot;Add Employee&quot; to build your team.
           </p>
         </div>
       );
@@ -302,7 +298,7 @@ export default function ManageEmployeesPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "grid" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -315,7 +311,7 @@ export default function ManageEmployeesPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "list" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
               >
                 <LayoutList className="h-4 w-4" />

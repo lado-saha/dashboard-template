@@ -5,7 +5,6 @@ import { PracticalInformationDto } from "@/types/organization";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -23,7 +22,6 @@ import {
   MoreHorizontal,
   Edit3,
   Trash2,
-  Info as InfoIcon,
   StickyNote,
 } from "lucide-react"; // Use specific icon
 import { format, parseISO, isValid } from "date-fns";

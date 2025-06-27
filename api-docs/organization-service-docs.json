@@ -9555,7 +9555,7 @@
           "size": {
             "minimum": 1,
             "type": "integer",
-            "description": "La taille d'une page",
+            "description": "La taille d&apos;dne page",
             "format": "int32"
           }
         }

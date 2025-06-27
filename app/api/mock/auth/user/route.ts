@@ -4,9 +4,9 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UserDto, UserInfo } from '@/types/auth';
 import { getToken } from 'next-auth/jwt';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const nextAuthToken = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const nextAuthToken = await getToken({ req: _request, secret: process.env.NEXTAUTH_SECRET });
 
     if (nextAuthToken && (nextAuthToken.email || nextAuthToken.name || nextAuthToken.sub)) {
       const users = dbManager.getCollection('authUsers');
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ message: "Unauthorized: No active user session found in mock." }, { status: 401 });
 
-  } catch (error: any) {
+  } catch (error: any)  {
     console.error("[MOCK API /auth/user ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to get current user." }, { status: 500 });
   }

@@ -2,8 +2,8 @@
 "use client"; // <-- Mark as Client Component
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Use App Router's router
-import { Home, LogIn, ArrowLeft } from 'lucide-react'; // Add ArrowLeft icon
+import { useRouter } from 'next/navigation'; // Use App Router&apos;r router
+import { ArrowLeft } from 'lucide-react'; // Add ArrowLeft icon
 
 import { Button } from '@/components/ui/button';
 import { DashboardIcon } from '@radix-ui/react-icons';
@@ -15,7 +15,6 @@ interface NotFoundButtonsProps {
 }
 
 export function NotFoundButtons({
-  isAuthenticated,
   primaryLinkHref,
   primaryLinkText,
 }: NotFoundButtonsProps) {

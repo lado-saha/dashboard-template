@@ -3,9 +3,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AddressDto, CreateAddressRequest, AddressableType } from '@/types/organization';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const addressableType = searchParams.get('entityType') as AddressableType | null;
     const addressableId = searchParams.get('entityId');
 
@@ -15,17 +15,17 @@ export async function GET(request: NextRequest) {
     const allAddresses = dbManager.getCollection('addresses');
     const filteredAddresses = allAddresses.filter(c => c.addressable_type === addressableType && c.addressable_id === addressableId);
     return NextResponse.json(filteredAddresses);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get addresses", error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const addressableType = searchParams.get('entityType') as AddressableType | null;
     const addressableId = searchParams.get('entityId');
-    const body = await request.json() as CreateAddressRequest;
+    const body = await _request.json() as CreateAddressRequest;
 
      if (!addressableType || !addressableId) {
       return NextResponse.json({ message: "addressableType and addressableId query params are required." }, { status: 400 });
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     };
     const createdAddress = dbManager.addItem('addresses', newAddressData);
     return NextResponse.json(createdAddress, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create address", error: error.message }, { status: 500 });
   }
 }

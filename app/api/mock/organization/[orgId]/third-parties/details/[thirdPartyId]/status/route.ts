@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ThirdPartyDto, UpdateThirdPartyStatusRequest } from '@/types/organization';
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string, thirdPartyId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, thirdPartyId: string } }) {
   try {
     const { orgId, thirdPartyId } = await params;
-    const body = await request.json() as UpdateThirdPartyStatusRequest;
+    const body = await _request.json() as UpdateThirdPartyStatusRequest;
     if (typeof body.active !== 'boolean') {
         return NextResponse.json({ message: "Field 'active' (boolean) is required." }, { status: 400 });
     }

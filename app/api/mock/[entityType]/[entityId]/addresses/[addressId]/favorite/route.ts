@@ -11,7 +11,7 @@ interface RouteParams {
   };
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(_request: NextRequest, { params }: RouteParams) {
   try {
     const { entityId, entityType, addressId } = await params;
     const allAddresses = dbManager.getCollection('addresses');
@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     dbManager.saveCollection('addresses', allAddresses);
     const updatedAddress = dbManager.getItemById('addresses', addressId);
     return NextResponse.json(updatedAddress, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to set default address", error: error.message }, { status: 500 });
   }
 }

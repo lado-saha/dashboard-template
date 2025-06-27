@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DollarSign, ShoppingCart, Info, Package, Combine } from "lucide-react"; // Removed UserCircle
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder"; // Import placeholder
 
 interface CustomerProductCardProps {

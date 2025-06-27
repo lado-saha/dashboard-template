@@ -1,11 +1,11 @@
 // app/api/mock/business-domains/list/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { BusinessDomainDto, GetBusinessDomainRequest } from '@/types/organization';
+import {  GetBusinessDomainRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const params: GetBusinessDomainRequest = {
       organization_id: searchParams.get('organization_id') || undefined,
       parent_domain_id: searchParams.get('parent_domain_id') || undefined,
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       domains = domains.slice(start, end);
     }
     return NextResponse.json(domains);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get business domains", error: error.message }, { status: 500 });
   }
 }

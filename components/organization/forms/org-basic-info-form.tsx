@@ -24,7 +24,7 @@ import { BusinessDomainDto } from "@/types/organization";
 export const basicInfoSchema = z.object({
   long_name: z.string().min(3, "Official name is required.").max(100),
   short_name: z.string().min(2, "Short name is required.").max(50),
-  ceo_name: z.string().min(3, "CEO's name is required.").max(50),
+  ceo_name: z.string().min(3, "CEO&apos;O name is required.").max(50),
   email: z.string().email("A valid contact email is required."),
   description: z
     .string()
@@ -101,7 +101,7 @@ export function OrgBasicInfoForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>CEO's Name *</FormLabel>
+                <FormLabel>CEO&apos;O Name *</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -134,7 +134,7 @@ export function OrgBasicInfoForm({
                   placeholder="Search domains..."
                   className="mb-2 h-9"
                   value={domainSearch}
-                  onChange={(e) => onDomainSearchChangeAction(e.target.value)}
+                  onChange= {(e)  => onDomainSearchChangeAction(e.target.value)}
                 />
                 <ScrollArea className="h-40">
                   <div className="space-y-2 p-1">
@@ -147,7 +147,7 @@ export function OrgBasicInfoForm({
                           <input
                             type="checkbox"
                             checked={field.value?.includes(domain.id!)}
-                            onChange={(e) => {
+                            onChange= {(e)  => {
                               const currentValues = field.value || [];
                               field.onChange(
                                 e.target.checked

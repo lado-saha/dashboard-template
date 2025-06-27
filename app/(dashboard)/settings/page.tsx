@@ -1,6 +1,6 @@
 "use client";
 
-import { CombinedUserSettings, useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/settings-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -25,7 +25,6 @@ import { Slider } from "@/components/ui/slider";
 // Checkbox might not be directly used if FormFieldSwitchInternal is preferred, but good to have for flexibility
 // import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   UserCircle,
   Palette,
@@ -37,44 +36,27 @@ import {
   Info,
   Star,
   Settings as SettingsIconLucide,
-  Edit3,
-  MapPin,
-  Phone,
-  FileText,
-  Tag,
-  CalendarDays,
-  Users as UsersIcon,
-  Briefcase,
-  LinkIcon,
-  Image as ImageIconLucide,
-  Clock,
   MessageCircleIcon,
 } from "lucide-react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation"; // Added useRouter
-import {
-  UserDisplayPreferences,
-  UserNotificationPreferences,
-  UserPrivacyPreferences,
-  UserPreferencesDto,
-} from "@/types/user-preferences";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { FormControl, FormItem } from "@/components/ui/form";
 import Link from "next/link";
 
-const defaultAvatarsStock = [
-  // Renamed to avoid conflict if defaultAvatars is used elsewhere
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9439775.jpg-4JVJWOjPksd3DtnBYJXoWHA5lc1DU9.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238645_11475210.jpg-lU8bOe6TLt5Rv51hgjg8NT8PsDBmvN.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238208_11475222.jpg-poEIzVHAGiIfMFQ7EiF8PUG1u0Zkzz.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dd.jpg-4MCwPC2Bec6Ume26Yo1kao3CnONxDg.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334178.jpg-Y74tW6XFO68g7N36SE5MSNDNVKLQ08.jpeg",
-];
+// const defaultAvatarsStock = [
+//   // Renamed to avoid conflict if defaultAvatars is used elsewhere
+//   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9439775.jpg-4JVJWOjPksd3DtnBYJXoWHA5lc1DU9.jpeg",
+//   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238645_11475210.jpg-lU8bOe6TLt5Rv51hgjg8NT8PsDBmvN.jpeg",
+//   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/375238208_11475222.jpg-poEIzVHAGiIfMFQ7EiF8PUG1u0Zkzz.jpeg",
+//   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dd.jpg-4MCwPC2Bec6Ume26Yo1kao3CnONxDg.jpeg",
+//   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/9334178.jpg-Y74tW6XFO68g7N36SE5MSNDNVKLQ08.jpeg",
+// ];
 
 type UserRoleForUI = "customer" | "business-actor" | "super-admin" | "unknown";
 
@@ -99,22 +81,22 @@ const FormFieldItem: React.FC<{
   description,
   disabled = false,
 }) => (
-  <div className="space-y-1.5">
-    <Label htmlFor={id}>{label}</Label>
-    <Input
-      id={id}
-      type={type}
-      value={value || ""}
-      onChange={onChange}
-      readOnly={readOnly}
-      placeholder={placeholder}
-      disabled={disabled}
-    />
-    {description && (
-      <p className="text-xs text-muted-foreground">{description}</p>
-    )}
-  </div>
-);
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type={type}
+        value={value || ""}
+        onChange={onChange}
+        readOnly={readOnly}
+        placeholder={placeholder}
+        disabled={disabled}
+      />
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
 
 const FormFieldSelectInternal: React.FC<{
   label: string;
@@ -133,22 +115,22 @@ const FormFieldSelectInternal: React.FC<{
   id,
   disabled = false,
 }) => (
-  <div className="space-y-1.5">
-    <Label htmlFor={id}>{label}</Label>
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger id={id}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((opt) => (
-          <SelectItem key={opt.value} value={opt.value}>
-            {opt.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
 const FormFieldSwitchInternal: React.FC<{
   id: string;
@@ -165,34 +147,34 @@ const FormFieldSwitchInternal: React.FC<{
   onCheckedChange,
   disabled = false,
 }) => (
-  <div
-    className={cn(
-      "flex items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50",
-      disabled && "opacity-70 cursor-not-allowed"
-    )}
-  >
-    <div className="space-y-0.5 pr-4">
-      <Label
-        htmlFor={id}
-        className={cn(
-          "text-base font-normal",
-          disabled && "cursor-not-allowed"
-        )}
-      >
-        {label}
-      </Label>
-      {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
+    <div
+      className={cn(
+        "flex items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50",
+        disabled && "opacity-70 cursor-not-allowed"
       )}
+    >
+      <div className="space-y-0.5 pr-4">
+        <Label
+          htmlFor={id}
+          className={cn(
+            "text-base font-normal",
+            disabled && "cursor-not-allowed"
+          )}
+        >
+          {label}
+        </Label>
+        {description && (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        )}
+      </div>
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+      />
     </div>
-    <Switch
-      id={id}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      disabled={disabled}
-    />
-  </div>
-);
+  );
 
 export default function UnifiedSettingsPage() {
   const {
@@ -205,7 +187,7 @@ export default function UnifiedSettingsPage() {
   } = useSettings();
   const { setTheme: setNextTheme } = useTheme();
   const pathname = usePathname();
-  const router = useRouter();
+  // const router = useRouter();
 
   const inferredRole = useMemo((): UserRoleForUI => {
     // This inference will be replaced by actual role from session when available
@@ -251,8 +233,8 @@ export default function UnifiedSettingsPage() {
   };
 
   const handleSaveAccountProfile = async () => {
-    let fn = localFirstName.trim();
-    let ln = localLastName.trim();
+    const fn = localFirstName.trim();
+    const ln = localLastName.trim();
     if (!fn) {
       toast.error("First name cannot be empty.");
       return;
@@ -277,7 +259,7 @@ export default function UnifiedSettingsPage() {
         newPhotoUrl = `/mock-profile-photos/${profilePhotoFile.name}`; // Mock URL
         console.log("Simulated upload, using mock URL:", newPhotoUrl);
       }
-      await updateDisplayPreferences({ profilePhotoUrl: newPhotoUrl });
+      await updateDisplayPreferences({ profilePhotoUrl: newPhotoUrl ?? undefined });
       setProfilePhotoFile(null);
     }
   };
@@ -388,14 +370,14 @@ export default function UnifiedSettingsPage() {
                   label="First Name"
                   id="firstName"
                   value={localFirstName}
-                  onChange={(e) => setLocalFirstName(e.target.value)}
+                  onChange= {(e)  => setLocalFirstName(e.target.value)}
                   placeholder="Your first name"
                 />
                 <FormFieldItem
                   label="Last Name"
                   id="lastName"
                   value={localLastName}
-                  onChange={(e) => setLocalLastName(e.target.value)}
+                  onChange= {(e)  => setLocalLastName(e.target.value)}
                   placeholder="Your last name"
                 />
               </div>
@@ -422,7 +404,7 @@ export default function UnifiedSettingsPage() {
                 id="phone"
                 type="tel"
                 value={localPhone}
-                onChange={(e) => setLocalPhone(e.target.value)}
+                onChange= {(e)  => setLocalPhone(e.target.value)}
                 placeholder="+1234567890"
                 description={
                   settings.phoneVerified
@@ -599,7 +581,7 @@ export default function UnifiedSettingsPage() {
                 id="currentPassword"
                 type="password"
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange= {(e)  => setCurrentPassword(e.target.value)}
                 placeholder="Enter your current password"
               />
               <FormFieldItem
@@ -607,7 +589,7 @@ export default function UnifiedSettingsPage() {
                 id="newPassword"
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange= {(e)  => setNewPassword(e.target.value)}
                 placeholder="Enter a new strong password"
               />
               <FormFieldItem
@@ -615,7 +597,7 @@ export default function UnifiedSettingsPage() {
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange= {(e)  => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your new password"
               />
               <Button
@@ -727,7 +709,7 @@ export default function UnifiedSettingsPage() {
                     id="quiet-hours-start"
                     type="time"
                     value={settings.notifications.quietHoursStart}
-                    onChange={(e) =>
+                    onChange= {(e)  =>
                       updateNotificationPreferences({
                         quietHoursStart: e.target.value,
                       })
@@ -739,7 +721,7 @@ export default function UnifiedSettingsPage() {
                     id="quiet-hours-end"
                     type="time"
                     value={settings.notifications.quietHoursEnd}
-                    onChange={(e) =>
+                    onChange= {(e)  =>
                       updateNotificationPreferences({
                         quietHoursEnd: e.target.value,
                       })
@@ -860,7 +842,7 @@ export default function UnifiedSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="mr-2 h-5 w-5" />
-              What's New
+              What&apos;t New
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -127,7 +127,9 @@ export function AgencyForm({ organizationId }: AgencyFormProps) {
     setIsLoading(true);
     const payload: CreateAgencyRequest = {
       ...data,
+      capital_share: data.capital_share ?? undefined,
       registration_date: data.registration_date?.toISOString(),
+      average_revenue: data.average_revenue ?? undefined,
     };
     try {
       const newAgency = await organizationRepository.createAgency(
@@ -137,7 +139,7 @@ export function AgencyForm({ organizationId }: AgencyFormProps) {
       toast.success(`Agency "${newAgency.short_name}" created successfully!`);
       router.push("/business-actor/org/agencies");
       router.refresh();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to create agency.");
     } finally {
       setIsLoading(false);
@@ -179,7 +181,7 @@ export function AgencyForm({ organizationId }: AgencyFormProps) {
                         placeholder="Search domains..."
                         className="mb-2 h-9"
                         value={domainSearch}
-                        onChange={(e) => setDomainSearch(e.target.value)}
+                        onChange= {(e)  => setDomainSearch(e.target.value)}
                       />
                       <ScrollArea className="h-40">
                         <div className="space-y-2 p-1">
@@ -192,7 +194,7 @@ export function AgencyForm({ organizationId }: AgencyFormProps) {
                                 <input
                                   type="checkbox"
                                   checked={field.value?.includes(domain.id!)}
-                                  onChange={(e) => {
+                                  onChange= {(e)  => {
                                     const values = field.value || [];
                                     field.onChange(
                                       e.target.checked

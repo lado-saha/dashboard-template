@@ -118,7 +118,7 @@ export function AgencyLegalForm() {
                 </PopoverTrigger>
                 <PopoverContent
                   className="w-auto p-0"
-                  onInteractOutside={(e) => e.preventDefault()}
+                  onInteractOutside={(e: any)  => e.preventDefault()}
                 >
                   <Calendar
                     mode="single"

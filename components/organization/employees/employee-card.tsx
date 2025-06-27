@@ -18,9 +18,9 @@ import {
   Trash2,
   Building2,
   Briefcase,
-  User,
+  // User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 
 interface EmployeeCardProps {
   employee: EmployeeDto;

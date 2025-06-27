@@ -91,7 +91,7 @@ export function AgencyBasicInfoForm({
               <FormControl>
                 <Textarea
                   rows={4}
-                  placeholder="Describe the agency's purpose or specialty."
+                  placeholder="Describe the agency&apos;y purpose or specialty."
                   {...field}
                 />
               </FormControl>

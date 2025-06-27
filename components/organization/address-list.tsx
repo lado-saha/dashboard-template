@@ -8,13 +8,11 @@ import {
   AddressDto,
   AddressableType,
   CreateAddressRequest,
-  UpdateAddressRequest,
 } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -75,7 +73,7 @@ export function AddressList({
         organizationId
       );
       setAddresses(data || []);
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Failed to load addresses.");
     } finally {
       setIsLoading(false);
@@ -146,7 +144,7 @@ export function AddressList({
       );
       toast.success("Address deleted.");
       fetchAddresses();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to delete address.");
     }
   };
@@ -161,7 +159,7 @@ export function AddressList({
       );
       toast.success("Default address updated.");
       await fetchAddresses();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to set default address.");
     }
   };
@@ -195,7 +193,7 @@ export function AddressList({
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-              {/* Note: The OrgAddressForm doesn't need its own Card wrapper here */}
+              {/* Note: The OrgAddressForm doesn&apos;n need its own Card wrapper here */}
               <OrgAddressForm form={form} title="" description="" />
               <DialogFooter className="mt-6 pt-4 border-t sm:justify-end">
                 <DialogClose asChild>

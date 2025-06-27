@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { EmployeeResponse, CreateEmployeeRequest, EmployeeDto } from '@/types/organization';
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const body = await request.json() as CreateEmployeeRequest;
+    const body = await _request.json() as CreateEmployeeRequest;
 
     // Add validation for required fields in CreateEmployeeRequest
     if (!body.first_name || !body.last_name || !body.employee_role) {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
         updated_at: createdEmployeeFull.updated_at,
     };
     return NextResponse.json(response, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create organization employee", error: error.message }, { status: 500 });
   }
 }

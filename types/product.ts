@@ -24,7 +24,7 @@ export interface ProductListItemData {
   tags?: string[];
   additionnalInfo?: JSON;
   // additional custom attributes relevant for customer display
-  // For example, if it's a "ConsultationSlot"
+  // For example, if it&apos;t a "ConsultationSlot"
   // duration?: string;
   // location?: string;
 }

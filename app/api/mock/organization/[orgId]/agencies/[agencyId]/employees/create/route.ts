@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { EmployeeResponse, CreateEmployeeRequest, EmployeeDto } from '@/types/organization';
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
     const { orgId, agencyId } = await params;
-    const body = await request.json() as CreateEmployeeRequest;
+    const body = await _request.json() as CreateEmployeeRequest;
 
     if (!body.first_name || !body.last_name || !body.employee_role) {
         return NextResponse.json({ message: "First name, last name, and role are required." }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
         updated_at: createdEmployeeFull.updated_at,
     };
     return NextResponse.json(response, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create agency employee", error: error.message }, { status: 500 });
   }
 }

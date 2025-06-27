@@ -177,7 +177,7 @@ export function CertificationForm({
                   className="w-auto p-0"
                   align="start"
                   // THE FIX: This prevents the parent Dialog from closing when interacting with the Popover
-                  onInteractOutside={(e) => e.preventDefault()}
+                  onInteractOutside={(e)  => e.preventDefault()}
                 >
                   <Calendar
                     mode="single"

@@ -1,7 +1,7 @@
 // app/api/mock/geo/reverse/route.ts
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET() {
   // In a more advanced mock, you could check the lat/lon and return different addresses.
   const mockAddress: any = {
     place_id: 12345,

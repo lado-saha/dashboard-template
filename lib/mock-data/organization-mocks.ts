@@ -5,19 +5,19 @@ import {
   ContactDto,
   AgencyDto,
   EmployeeDto,
-  SalesPersonDto,
-  CustomerOrgDto,
-  ProviderDto,
-  ProspectDto,
-  PracticalInformationDto,
-  CertificationDto,
+  // SalesPersonDto,
+  // CustomerOrgDto,
+  // ProviderDto,
+  // ProspectDto,
+  // PracticalInformationDto,
+  // CertificationDto,
   BusinessDomainDto,
-  ImageDto,
-  ContactableType,
-  AddressableType,
-  OrganizationStatus,
-  OrganizationLegalForm,
-  EmployeeRole
+  // ImageDto,
+  // ContactableType,
+  // AddressableType,
+  // OrganizationStatus,
+  // OrganizationLegalForm,
+  // EmployeeRole
 } from '@/types/organization'; // Assuming all types are correctly defined here
 
 const placeholderImageUrl = "/placeholder.svg";

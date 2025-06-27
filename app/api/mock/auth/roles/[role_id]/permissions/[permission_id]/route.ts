@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RolePermissionDto } from '@/types/auth';
 
-export async function POST(request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
   try {
     const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
@@ -16,12 +16,12 @@ export async function POST(request: NextRequest, { params }: { params: { role_id
     rolePermissions.push(newRp);
     dbManager.saveCollection('authRolePermissions', rolePermissions);
     return NextResponse.json(newRp, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to assign permission." }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
   try {
     const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
@@ -36,7 +36,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { role_
       return NextResponse.json({ message: "Permission removed successfully." }, { status: 200 });
     }
     return NextResponse.json({ message: "Permission not found for this role or already removed." }, { status: 404 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to remove permission." }, { status: 500 });
   }
 }

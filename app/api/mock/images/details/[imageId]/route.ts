@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ImageDto } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { imageId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { imageId: string } }) {
   try {
     const { imageId } = await params;
     const imageInfo = dbManager.getItemById('organizationImages', imageId); // Assumes 'id' is the key
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { imageId:
       return NextResponse.json({ message: `Image with ID ${imageId} not found.` }, { status: 404 });
     }
     return NextResponse.json(imageInfo);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get image info", error: error.message }, { status: 500 });
   }
 }

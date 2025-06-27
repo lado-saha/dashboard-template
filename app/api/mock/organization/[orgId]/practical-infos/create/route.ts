@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { PracticalInformationDto, CreatePracticalInformationRequest } from '@/types/organization';
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const body = await request.json() as CreatePracticalInformationRequest;
+    const body = await _request.json() as CreatePracticalInformationRequest;
 
     if (!body.type || !body.value) {
       return NextResponse.json({ message: "Type and Value are required." }, { status: 400 });
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
     };
     const createdInfo = dbManager.addItem('practicalInformation', newData);
     return NextResponse.json(createdInfo, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create practical information", error: error.message }, { status: 500 });
   }
 }

@@ -10,7 +10,7 @@ interface RouteParams {
   };
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { entityType, entityId } = await params;
     const allAddresses = dbManager.getCollection('addresses');
@@ -18,15 +18,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       addr => addr.addressable_type === entityType && addr.addressable_id === entityId
     );
     return NextResponse.json(filteredAddresses);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get addresses", error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(_request: NextRequest, { params }: RouteParams) {
   try {
     const { entityType, entityId } = await params;
-    const body = await request.json() as CreateAddressRequest;
+    const body = await _request.json() as CreateAddressRequest;
     if (!body.address_line_1 || !body.city || !body.state || !body.zip_code || !body.country_id) {
       return NextResponse.json({ message: "Address line 1, city, state, country and zip code are required." }, { status: 400 });
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     };
     const createdAddress = dbManager.addItem('addresses', newAddressData);
     return NextResponse.json(createdAddress, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create address", error: error.message }, { status: 500 });
   }
 }

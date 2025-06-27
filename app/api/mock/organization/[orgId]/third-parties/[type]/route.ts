@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ThirdPartyDto, CreateThirdPartyRequest, ThirdPartyType } from '@/types/organization';
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string, type: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string, type: string } }) {
   try {
     const { orgId, type } = await params;
-    const body = await request.json() as CreateThirdPartyRequest;
+    const body = await _request.json() as CreateThirdPartyRequest;
 
     if (!body.name) {
         return NextResponse.json({ message: "Third party name is required." }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
     };
     const createdThirdParty = dbManager.addItem('thirdParties', newThirdPartyData);
     return NextResponse.json(createdThirdParty, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create third party", error: error.message }, { status: 500 });
   }
 }

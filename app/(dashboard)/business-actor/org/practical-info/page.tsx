@@ -19,10 +19,8 @@ import {
   PlusCircle,
   LayoutList,
   LayoutGrid,
-  Loader2,
   AlertTriangle,
   Inbox,
-  FileText,
   Search,
   Trash2,
 } from "lucide-react";
@@ -78,15 +76,20 @@ import { ViewMode } from "@/types/common";
 const getPracticalInfoTypeOptions = (
   items: PracticalInformationDto[]
 ): DataTableFilterOption[] => {
-  const allTypes = items.map((item) => item.type);
-  const uniqueValidTypes = [...new Set(allTypes)].filter(Boolean);
-  return uniqueValidTypes
+  const allTypes = items
+    .map((item) => item.type)
+    .filter((type): type is string => typeof type === 'string');
+
+  const uniqueTypes = Array.from(new Set(allTypes));
+
+  return uniqueTypes
     .map((type) => ({
-      label: String(type),
-      value: String(type),
+      label: type,
+      value: type,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 };
+
 
 const fuzzyGlobalFilterFn: FilterFn<PracticalInformationDto> = (
   row,
@@ -189,7 +192,7 @@ export default function ManagePracticalInfoPage() {
       refreshData();
       setIsFormModalOpen(false);
       return true;
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to save practical information.");
       return false;
     }
@@ -225,7 +228,7 @@ export default function ManagePracticalInfoPage() {
       toast.success(`${itemsToDelete.length} item(s) deleted successfully.`);
       refreshData();
       table.resetRowSelection();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || `Failed to delete items.`);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -276,8 +279,8 @@ export default function ManagePracticalInfoPage() {
     table.setPageSize(viewMode === "grid" ? 9 : 10);
   }, [viewMode, table]);
 
-  const currentTablePageRows: Row<PracticalInformationDto>[] =
-    table.getRowModel().rows;
+  // const currentTablePageRows: Row<PracticalInformationDto>[] =
+  //   table.getRowModel().rows;
 
   if (isLoadingOrgDetails) {
     return (
@@ -320,7 +323,7 @@ export default function ManagePracticalInfoPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "list" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
                 data-state={viewMode === "list" ? "active" : "inactive"}
               >
@@ -334,7 +337,7 @@ export default function ManagePracticalInfoPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "grid" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
                 data-state={viewMode === "grid" ? "active" : "inactive"}
               >

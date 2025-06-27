@@ -47,7 +47,7 @@ const SignUpSchema = z
     phone_number: z.string().optional().or(z.literal("")), // Add validation if needed e.g. .regex(/^\+[1-9]\d{1,14}$/, "Invalid phone number")
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: "Passwords don&apos;n match",
     path: ["confirmPassword"], // path of error
   });
 
@@ -87,6 +87,9 @@ export const SignUpForm = () => {
           ...(values.last_name && { last_name: values.last_name }),
           ...(values.phone_number && { phone_number: values.phone_number }),
         };
+
+        const roles = await authRepository.getRoles()
+        console.log(`My ${roles} r`)
 
         const registeredUser = await authRepository.register(requestPayload);
         toast.success(

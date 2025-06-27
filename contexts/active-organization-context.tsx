@@ -106,7 +106,7 @@ export const ActiveOrganizationProvider = ({
           if (activeOrganizationId === id) setActiveOrganizationIdState(null);
         }
         return details;
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Could not load organization details.");
         setActiveOrganizationDetailsState(null);
         if (activeOrganizationId === id) setActiveOrganizationIdState(null);
@@ -150,7 +150,7 @@ export const ActiveOrganizationProvider = ({
         activeOrganizationId
       );
       setAgenciesForCurrentOrg(agencies || []);
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Could not load agencies for the organization.");
       setAgenciesForCurrentOrg([]);
     } finally {
@@ -181,7 +181,7 @@ export const ActiveOrganizationProvider = ({
           toast.error(`Could not load details for agency ID: ${agencyId}.`);
           setActiveAgencyIdState(null);
         }
-      } catch (error) {
+      } catch (error: any) {
         toast.error("Failed to fetch agency details.");
         setActiveAgencyDetailsState(null);
         setActiveAgencyIdState(null);
@@ -217,7 +217,7 @@ export const ActiveOrganizationProvider = ({
     try {
       const orgs = await organizationRepository.getMyOrganizations();
       setUserOrganizations(orgs || []);
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Could not load your organizations.");
       setUserOrganizations([]);
     } finally {

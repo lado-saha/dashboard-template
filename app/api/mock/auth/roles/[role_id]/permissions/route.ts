@@ -2,10 +2,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RolePermissionDto } from '@/types/auth';
 
-export async function POST(request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { role_id: string } }) {
   try {
     const roleId = params.role_id;
-    const permissionIds = await request.json() as string[];
+    const permissionIds = await _request.json() as string[];
     if (!roleId || !Array.isArray(permissionIds)) {
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
     }
@@ -22,15 +22,15 @@ export async function POST(request: NextRequest, { params }: { params: { role_id
     });
     dbManager.saveCollection('authRolePermissions', rolePermissions);
     return NextResponse.json(added, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to assign permissions." }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { role_id: string } }) {
   try {
     const roleId = params.role_id;
-    const permissionIdsToRemove = await request.json() as string[];
+    const permissionIdsToRemove = await _request.json() as string[];
     if (!roleId || !Array.isArray(permissionIdsToRemove)) {
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
     }
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { role_
       return NextResponse.json({ message: "Permissions removed successfully." }, { status: 200 });
     }
     return NextResponse.json({ message: "No matching permissions found to remove or already removed." }, { status: 200 }); // Or 404 if none were found
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to remove permissions." }, { status: 500 });
   }
 }

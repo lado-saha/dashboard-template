@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UserDto } from '@/types/auth';
 
-export async function GET(request: NextRequest, { params }: { params: { username: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { username: string } }) {
   try {
     const username = params.username;
     const users = dbManager.getCollection('authUsers');
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, { params }: { params: { username
     }
     const { password_hash, ...userWithoutPassword } = user;
     return NextResponse.json(userWithoutPassword, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to get user by username." }, { status: 500 });
   }
 }

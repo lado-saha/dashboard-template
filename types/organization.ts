@@ -236,7 +236,7 @@ export interface AgencyDto extends Auditable {
   tax_number?: string;
   keywords?: string[];
   is_public?: boolean;
-  is_business?: boolean; // What's diff from is_individual_business?
+  is_business?: boolean; // What&apos;t diff from is_individual_business?
   operation_time_plan?: Record<string, string>; // e.g. {"monday": "9am-5pm"}
   total_affiliated_customers?: number; // int32
 }
@@ -304,7 +304,7 @@ export interface EmployeeDto extends Auditable {
   short_description?: string; // e.g., "Senior Developer"
   long_description?: string;  // e.g., "Responsible for backend services..."
   location_id?: string;       // Office Address ID
-  logo?: string;              // Employee's professional photo
+  logo?: string;              // Employee&apos;e professional photo
   is_manager?: boolean;
   contact_info?: string; // Could be an email or phone from ContactDto
   address?: string; // Simple address string, or link to AddressDto
@@ -604,7 +604,7 @@ export interface CreateBusinessDomainRequest {
 export interface UpdateBusinessDomainRequest extends Partial<CreateBusinessDomainRequest> { }
 export interface BusinessDomainDto extends Auditable {
   id?: string; //uuid
-  organization_id?: string; //uuid (indicates if it's custom to an org, or global if null)
+  organization_id?: string; //uuid (indicates if it&apos;t custom to an org, or global if null)
   parent_domain_id?: string | null; //uuid
   name?: string;
   image?: string;

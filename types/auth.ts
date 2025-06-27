@@ -129,9 +129,9 @@ export interface LoginResponse {
   permissions?: string[];
 }
 
-// Generic API response for some endpoints that don't return specific DTOs directly
+// Generic API response for some endpoints that don&apos;n return specific DTOs directly
 // but wrap it in an ApiResponse. For example, a GET that might return 400.
-// This is a placeholder; you'd refine this based on actual error structures if needed.
+// This is a placeholder; you&apos;u refine this based on actual error structures if needed.
 export interface GenericApiResponse<T = any> {
   status?: "SUCCESS" | "FAILED" | "UNKNOWN";
   message?: string;

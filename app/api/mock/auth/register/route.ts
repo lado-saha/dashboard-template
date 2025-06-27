@@ -6,9 +6,9 @@ import bcrypt from 'bcryptjs';
 
 const SALT_ROUNDS = 10;
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
-    const body = await request.json() as CreateUserRequest;
+    const body = await _request.json() as CreateUserRequest;
 
     if (!body.username || !body.password || !body.first_name) {
       return NextResponse.json({ message: "Username, password, and first name are required." }, { status: 400 });
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(userDtoFields, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: any)  {
     console.error("[MOCK API /auth/register ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to register user." }, { status: 500 });
   }

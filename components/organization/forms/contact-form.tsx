@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CreateContactRequest, UpdateContactRequest, ContactDto } from "@/types/organization";
+import { ContactDto } from "@/types/organization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -48,7 +48,7 @@ export function ContactForm({ initialData, mode, onSubmitAction, onCancelAction 
     setIsLoading(true);
     try {
       await onSubmitAction(data);
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || `Failed to ${mode} contact.`);
     } finally {
       setIsLoading(false);

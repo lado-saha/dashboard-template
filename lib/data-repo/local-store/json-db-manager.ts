@@ -9,16 +9,19 @@ import {
   ImageDto, ThirdPartyDto, ProposedActivityDto, SalesPersonDto, CustomerOrgDto, ProviderDto, ProspectDto,
   PracticalInformationDto, CertificationDto, ApplicationDto, ApplicationKeyDto, BusinessActorDto,
 } from "@/types/organization";
-import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
+// import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
 import { UserPreferencesDto } from "@/types/user-preferences";
 
 export type CollectionName =
-  | "authUsers" | "authRoles" | "authPermissions" | "authRolePermissions" | "authRbacResources"
+  | "authUsers"
+  | "authRoles" | "authPermissions" | "authRolePermissions" | "authRbacResources"
   | "organizationsTableRows" | "organizationsDetails" | "contacts" | "addresses"
   | "agencies" | "employees" | "salesPersons" | "orgCustomers" | "providers" | "userPreferences"
   | "prospects" | "practicalInformation" | "certifications" | "businessDomains"
   | "organizationImages" | "thirdParties" | "proposedActivities" | "businessActors"
-  | "applicationsData" | "applicationKeysData" | "resources" | "services";
+  | "applicationsData" | "applicationKeysData"
+// | "resources" 
+// | "services";
 
 export interface LocalJsonDBCollections {
   authUsers: UserDto[]; authRoles: RoleDto[]; authPermissions: PermissionDto[]; authRolePermissions: RolePermissionDto[]; authRbacResources: RbacResource[];
@@ -27,7 +30,9 @@ export interface LocalJsonDBCollections {
   orgCustomers: CustomerOrgDto[]; providers: ProviderDto[]; prospects: ProspectDto[]; practicalInformation: PracticalInformationDto[];
   certifications: CertificationDto[]; businessDomains: BusinessDomainDto[]; organizationImages: ImageDto[]; thirdParties: ThirdPartyDto[];
   proposedActivities: ProposedActivityDto[]; businessActors: BusinessActorDto[]; applicationsData: ApplicationDto[];
-  applicationKeysData: ApplicationKeyDto[]; resources: ResourceDto[]; services: ServiceDto[];
+  applicationKeysData: ApplicationKeyDto[];
+  // resources: ResourceDto[];
+  //  services: ServiceDto[];
 }
 
 const collectionFileMap: Record<CollectionName, string> = {
@@ -39,8 +44,9 @@ const collectionFileMap: Record<CollectionName, string> = {
   userPreferences: "user-preferences.json", prospects: "prospects.json", practicalInformation: "practical-information.json",
   certifications: "certifications.json", businessDomains: "business-domains.json", organizationImages: "organization-images.json",
   thirdParties: "third-parties.json", proposedActivities: "proposed-activities.json", businessActors: "business-actors.json",
-  applicationsData: "applications-data.json", applicationKeysData: "application-keys.json", resources: "resources.json",
-  services: "services.json",
+  applicationsData: "applications-data.json", applicationKeysData: "application-keys.json",
+  // resources: "resources.json",
+  // services: "services.json",
 };
 
 // NEW: Explicit mapping of collection name to its primary ID field.
@@ -70,8 +76,8 @@ const collectionIdMap: Record<CollectionName, string> = {
   businessActors: "business_actor_id",
   applicationsData: "id",
   applicationKeysData: "public_key",
-  resources: "resource_id",
-  services: "service_id",
+  // resources: "resource_id",
+  // services: "service_id",
 };
 
 
@@ -91,7 +97,7 @@ function readCollectionData<T>(collectionName: CollectionName): T[] {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
     return fileContent.trim() === "" ? [] : JSON.parse(fileContent) as T[];
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error reading or parsing ${collectionFileMap[collectionName]}:`, error);
     try {
       fs.writeFileSync(filePath, JSON.stringify([]), "utf-8");
@@ -106,7 +112,7 @@ function writeCollectionData<T>(collectionName: CollectionName, data: T[]): void
   const filePath = getCollectionFilePath(collectionName);
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error writing to ${collectionFileMap[collectionName]}:`, error);
   }
 }

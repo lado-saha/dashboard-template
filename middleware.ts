@@ -3,7 +3,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  // `withAuth` augments your `Request` with the user's token.
+  // `withAuth` augments your `Request` with the user&apos;r token.
   function middleware(req) {
     // console.log("Token in middleware: ", req.nextauth.token);
 
@@ -42,6 +42,7 @@ export const config = {
      * - The root landing page '/'
      */
     "/((?!api|_next/static|_next/image|favicon.ico|login|auth|signup|data|forgot-password|$).*)", // Protects everything else including dashboard routes
+    // "/.*", // Protects everything else including dashboard routes
     // Or be more specific:
     // "/business-actor/:path*",
     // "/customer/:path*",

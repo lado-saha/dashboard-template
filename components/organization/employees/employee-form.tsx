@@ -7,11 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   AgencyDto,
-  CreateEmployeeRequest,
   EmployeeDto,
   EmployeeRole,
-  UpdateEmployeeRequest,
 } from "@/types/organization";
+
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ import { ImageUploader } from "@/components/ui/image-uploader";
 import {
   Loader2,
   User,
-  Briefcase,
   ChevronLeft,
   Building2,
   ChevronRight,
@@ -155,7 +153,7 @@ export function EmployeeForm({
         router.push(`/business-actor/org/employees`);
       }
       router.refresh();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
@@ -177,7 +175,7 @@ export function EmployeeForm({
       <CardHeader>
         <CardTitle>Employee Identity & Role</CardTitle>
         <CardDescription>
-          Enter the employee's personal and professional details.
+          Enter the employee&apos;e personal and professional details.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -7,7 +7,7 @@ export default function SuppliersPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization's suppliers
+          This page will be used to manage the organization&apos;n suppliers
           (providers). Coming soon.
         </p>
       </CardContent>

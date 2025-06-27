@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowRight, Building, Gift, HandCoins, History, Megaphone, Star } from 'lucide-react';
+import { Building, Gift, HandCoins, History, Megaphone, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useSettings } from '@/contexts/settings-context'; // To get user name
 
@@ -22,7 +22,7 @@ export default function CustomerDashboardPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Welcome back, {settings.fullName || "Customer"}!</h1>
-            <p className="text-muted-foreground">Here's a quick overview of your account.</p>
+            <p className="text-muted-foreground">Here&apos;e a quick overview of your account.</p>
         </div>
          {/* CTA to Become Business Actor */}
          {/* TODO: Add logic to hide this if the user is already a BA */}

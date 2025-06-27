@@ -7,7 +7,7 @@ export default function ProspectsPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization's prospects. Coming
+          This page will be used to manage the organization&apos;n prospects. Coming
           soon.
         </p>
       </CardContent>

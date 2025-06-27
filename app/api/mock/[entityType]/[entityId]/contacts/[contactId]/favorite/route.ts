@@ -11,7 +11,7 @@ interface RouteParams {
   };
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(_request: NextRequest, { params }: RouteParams) {
   try {
     const { contactId } = await params;
     const contact = dbManager.getItemById('contacts', contactId);
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
     const updatedContact = dbManager.updateItem('contacts', contactId, { is_favorite: !contact.is_favorite });
     return NextResponse.json(updatedContact, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to toggle favorite contact", error: error.message }, { status: 500 });
   }
 }

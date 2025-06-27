@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange: onRowSelectionChange,
     onSortingChange: onSortingChange,
     onColumnFiltersChange: onColumnFiltersChange,
-    onGlobalFilterChangeAction: onGlobalFilterChangeAction,
+    onGlobalFilterChange: onGlobalFilterChangeAction,
     onColumnVisibilityChange: onColumnVisibilityChange,
     onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),

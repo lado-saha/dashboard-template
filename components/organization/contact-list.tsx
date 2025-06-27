@@ -25,7 +25,6 @@ import {
   Star,
   Mail,
   Phone,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,7 +53,7 @@ export function ContactList({
         organizationId
       );
       setContacts(data || []);
-    } catch (error) {
+    } catch (_error: any) {
       toast.error("Failed to load contacts.");
     } finally {
       setIsLoading(false);
@@ -105,15 +104,15 @@ export function ContactList({
       );
       toast.success("Contact deleted.");
       fetchContacts();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to delete contact.");
     }
   };
 
-  const handleToggleFavorite = async (contact: ContactDto) => {
-    if (!contact.contact_id) return;
-    toast.info(`Favorite toggle for ${contact.first_name} TBD.`);
-  };
+  // const handleToggleFavorite = async (contact: ContactDto) => {
+  //   if (!contact.contact_id) return;
+  //   toast.info(`Favorite toggle for ${contact.first_name} TBD.`);
+  // };
 
   if (isLoading) {
     return (

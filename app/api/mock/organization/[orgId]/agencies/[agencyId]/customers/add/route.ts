@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CustomerOrgDto, AffectCustomerRequest } from '@/types/organization';
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
     const { orgId, agencyId } = await params;
-    const body = await request.json() as AffectCustomerRequest;
+    const body = await _request.json() as AffectCustomerRequest;
 
     if (!body.customer_id) {
       return NextResponse.json({ message: "customer_id is required." }, { status: 400 });
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
     // In a real system, this would link an existing global customer/BA to this agency.
     // For mock, we might check if a customer with this ID exists in a global customer list or BA list,
     // then create/update an entry in 'orgCustomers' linking them.
-    // For simplicity, let's assume we are updating an existing orgCustomer or creating one if it doesn't exist.
+    // For simplicity, let&apos;t assume we are updating an existing orgCustomer or creating one if it doesn&apos;n exist.
 
     let customer = dbManager.getItemById('orgCustomers', body.customer_id); // Check if customer record exists
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
     }
 
     return NextResponse.json(customer, { status: 201 }); // 201 Created or 200 OK
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to affect customer to agency", error: error.message }, { status: 500 });
   }
 }

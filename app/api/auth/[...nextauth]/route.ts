@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authRepository } from '@/lib/data-repo/auth'; // Updated import path
-import { AuthRequest, LoginResponse, UserInfo } from "@/types/auth";
+import { AuthRequest, LoginResponse } from "@/types/auth";
 
 interface ExtendedUser extends Omit<NextAuthUser, 'id' | 'name' | 'email'> {
   id: string;
@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
             console.warn(`[NextAuth] Login via authRepository failed or response malformed for: ${authRequest.username}`, loginResponse);
             throw new Error("Invalid credentials or malformed response from authentication service.");
           }
-        } catch (error: any) {
+        } catch (error: any)  {
           console.error("[NextAuth] Error during login via authRepository:", error.message || error);
           throw new Error(error.message || "Authentication failed.");
         }

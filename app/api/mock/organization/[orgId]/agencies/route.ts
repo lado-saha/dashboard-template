@@ -3,10 +3,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AgencyDto, CreateAgencyRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const activeFilter = searchParams.get('active'); // boolean as string or null
 
     const allAgencies = dbManager.getCollection('agencies');
@@ -17,15 +17,15 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
       filteredAgencies = filteredAgencies.filter(agency => agency.is_active === isActive);
     }
     return NextResponse.json(filteredAgencies);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get agencies", error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const body = await request.json() as CreateAgencyRequest;
+    const body = await _request.json() as CreateAgencyRequest;
 
     if (!body.short_name || !body.long_name || !body.location || !body.business_domains || body.business_domains.length === 0) {
       return NextResponse.json({ message: "Short name, long name, location, and at least one business domain are required." }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
     };
     const createdAgency = dbManager.addItem('agencies', { ...newAgencyData, is_active: true }); // Default new agencies to active
     return NextResponse.json(createdAgency, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create agency", error: error.message }, { status: 500 });
   }
 }

@@ -13,7 +13,7 @@ export interface IAuthRepository {
   getUserByUsername(username: string): Promise<UserDto | null>;
   getUserByPhoneNumber(phoneNumber: string): Promise<UserDto | null>;
   getUserByEmail(email: string): Promise<UserDto | null>;
-  // (Update/Delete user methods might be via user's own profile or admin panel elsewhere)
+  // (Update/Delete user methods might be via user&apos;r own profile or admin panel elsewhere)
 
   // Login & Session
   login(data: AuthRequest): Promise<LoginResponse>;

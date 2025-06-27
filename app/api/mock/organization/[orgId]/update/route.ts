@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateOrganizationRequest, OrganizationDto, OrganizationTableRow } from '@/types/organization';
 
-export async function PUT(request: Request, { params }: { params: { orgId: string } }) {
+export async function PUT(_request: Request, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const body = await request.json() as UpdateOrganizationRequest;
+    const body = await _request.json() as UpdateOrganizationRequest;
 
     // THE FIX: Ensure we merge with existing data, not just overwrite.
     const existingOrg = dbManager.getItemById('organizationsDetails', orgId);
@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: { orgId: strin
     dbManager.updateItem('organizationsTableRows', orgId, tableRowUpdates);
 
     return NextResponse.json(updatedOrg, { status: 202 }); // Spec says 202 Accepted for update
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to update organization", error: error.message }, { status: 500 });
   }
 }

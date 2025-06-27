@@ -12,14 +12,14 @@ import { CertificationForm } from "@/components/organization/certifications/cert
 import { DataTable } from "@/components/ui/data-table";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { CertificationCard } from "@/components/organization/certifications/certification-card";
-import { DataGrid } from "@/components/ui/data-grid";
+// import { DataGrid } from "@/components/ui/data-grid";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   PlusCircle,
   LayoutList,
   LayoutGrid,
-  Loader2,
+  // Loader2,
   AlertTriangle,
   Inbox,
   Search,
@@ -67,8 +67,8 @@ import { getCertificationColumns } from "@/components/organization/certification
 import {
   Card,
   CardContent,
-  CardFooter,
-  CardHeader,
+  // CardFooter,
+  // CardHeader,
 } from "@/components/ui/card";
 import { DataTableFilterOption } from "@/types/table";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
@@ -187,7 +187,7 @@ export default function ManageCertificationsPage() {
       refreshData();
       setIsFormModalOpen(false);
       return true;
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to save certification.");
       return false;
     }
@@ -225,7 +225,7 @@ export default function ManageCertificationsPage() {
       );
       refreshData();
       table.resetRowSelection();
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || `Failed to delete items.`);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -321,7 +321,7 @@ export default function ManageCertificationsPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "list" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
                 data-state={viewMode === "list" ? "active" : "inactive"}
               >
@@ -335,7 +335,7 @@ export default function ManageCertificationsPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "grid" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
                 data-state={viewMode === "grid" ? "active" : "inactive"}
               >
@@ -442,7 +442,7 @@ export default function ManageCertificationsPage() {
                     No Certifications Added Yet
                   </h3>
                   <p className="text-sm">
-                    Add your organization's awards and certifications.
+                    Add your organization&apos;n awards and certifications.
                   </p>
                   <Button
                     onClick={() => handleOpenFormModal()}

@@ -14,8 +14,8 @@ const faqData = [
   {
     category: "Getting Started",
     questions: [
-      { q: "How do I create an account?", a: "Navigate to the Sign Up page and fill in your details. You'll receive a confirmation email." },
-      { q: "What's the difference between Business Actor and Customer roles?", a: "Business Actors manage services, products, and organization details. Customers interact with services, manage their profile, and view bonuses." },
+      { q: "How do I create an account?", a: "Navigate to the Sign Up page and fill in your details. You&apos;ul receive a confirmation email." },
+      { q: "What&apos;t the difference between Business Actor and Customer roles?", a: "Business Actors manage services, products, and organization details. Customers interact with services, manage their profile, and view bonuses." },
       { q: "How do I navigate the dashboard?", a: "Use the sidebar on the left to access different sections. The top navigation provides quick access to notifications and user settings." },
     ],
   },
@@ -86,8 +86,8 @@ export default function HelpPage() {
               type="text"
               placeholder="Search help articles..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onChange= {(e)  => setSearchQuery(e.target.value)}
+              onKeyDown= {(e)  => e.key === 'Enter' && handleSearch()}
               className="flex-1"
             />
             <Button type="button" onClick={handleSearch}>
@@ -132,7 +132,7 @@ export default function HelpPage() {
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl">Contact Support</CardTitle>
-              <CardDescription>Can't find an answer? Get in touch.</CardDescription>
+              <CardDescription>Can&apos;n find an answer? Get in touch.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                <Button variant="outline" className="w-full justify-start gap-3" onClick={() => handleContactAction('Ticket')}>
@@ -163,10 +163,10 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-            {/* What's New Card */}
+            {/* What&apos;t New Card */}
             <Card className="shadow-sm">
                 <CardHeader>
-                <CardTitle className="text-xl">What's New?</CardTitle>
+                <CardTitle className="text-xl">What&apos;t New?</CardTitle>
                 <CardDescription>See the latest platform updates.</CardDescription>
                 </CardHeader>
                 <CardContent>

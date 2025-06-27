@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  ShoppingCart, Info, Package, Combine, DollarSign,
+  ShoppingCart, Info, Package, Combine, 
   PlayCircle, CheckCircle2, InfoIcon as StatusInfoIcon, CircleSlash // Renamed to avoid conflict
 } from "lucide-react";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";

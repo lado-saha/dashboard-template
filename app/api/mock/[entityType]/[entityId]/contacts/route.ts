@@ -10,7 +10,7 @@ interface RouteParams {
   };
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { entityType, entityId } = await params;
     const allContacts = dbManager.getCollection('contacts');
@@ -18,15 +18,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       c => c.contactable_type === entityType && c.contactable_id === entityId
     );
     return NextResponse.json(filteredContacts);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get contacts", error: error.message }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(_request: NextRequest, { params }: RouteParams) {
   try {
     const { entityType, entityId } = await params;
-    const body = await request.json() as CreateContactRequest;
+    const body = await _request.json() as CreateContactRequest;
     if (!body.first_name || !body.last_name) {
       return NextResponse.json({ message: "First name and last name are required." }, { status: 400 });
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     };
     const createdContact = dbManager.addItem('contacts', newContactData);
     return NextResponse.json(createdContact, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create contact", error: error.message }, { status: 500 });
   }
 }

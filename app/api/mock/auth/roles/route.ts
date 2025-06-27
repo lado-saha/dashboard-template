@@ -3,19 +3,19 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RoleDto, CreateRoleRequest } from '@/types/auth';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const roles = dbManager.getCollection('authRoles'); // Assuming 'authRoles' collection in dbManager
     return NextResponse.json(roles, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     console.error("[MOCK API /auth/roles GET ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to get roles." }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    const body = await request.json() as CreateRoleRequest;
+    const body = await _request.json() as CreateRoleRequest;
     if (!body.name) {
       return NextResponse.json({ message: "Role name is required." }, { status: 400 });
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(createdRole, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error: any)  {
     console.error("[MOCK API /auth/roles POST ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to create role." }, { status: 500 });
   }

@@ -4,9 +4,9 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AuthRequest, LoginResponse, UserDto, UserInfo } from '@/types/auth';
 import bcrypt from 'bcryptjs';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
-    const body = await request.json() as AuthRequest;
+    const body = await _request.json() as AuthRequest;
 
     if (!body.username || !body.password) {
       return NextResponse.json({ message: "Username and password are required." }, { status: 400 });
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(loginResponse, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: any)  {
     console.error("[MOCK API /auth/login ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to login user." }, { status: 500 });
   }

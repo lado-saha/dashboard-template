@@ -168,7 +168,7 @@
 }
 
 /* @theme inline - This block seems specific to a build tool/plugin.
-   The core definitions are in :root and .dark, which is what we'll modify.
+   The core definitions are in :root and .dark, which is what we&apos;el modify.
    Keep this block if your build process relies on it. */
 @theme inline {
   --color-background: var(--background);

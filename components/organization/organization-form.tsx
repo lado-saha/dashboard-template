@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   useForm,
-  SubmitHandler,
   FieldErrors,
   FieldName,
 } from "react-hook-form";
@@ -33,7 +32,7 @@ import { OrgBasicInfoForm, basicInfoSchema } from "./forms/org-basic-info-form";
 import { OrgLegalForm, legalFormSchema } from "./forms/org-legal-form";
 import { OrgBrandingForm, brandingSchema } from "./forms/org-branding-form";
 import { OrgAddressForm, addressSchema } from "./forms/org-address-form";
-import { isValid, parseISO } from "date-fns";
+import { isValid } from "date-fns";
 
 const fullOrganizationSchema = basicInfoSchema
   .merge(legalFormSchema)
@@ -121,22 +120,22 @@ export function OrganizationForm({
       capital_share: initialData?.capital_share || null,
       registration_date:
         initialData?.registration_date &&
-        isValid(new Date(initialData.registration_date))
+          isValid(new Date(initialData.registration_date))
           ? new Date(initialData.registration_date)
           : undefined,
       year_founded:
         initialData?.year_founded && isValid(new Date(initialData.year_founded))
           ? new Date(
-              new Date(initialData.year_founded).getFullYear().toString()
-            )
+            new Date(initialData.year_founded).getFullYear().toString()
+          )
           : undefined,
       logo_url: initialData?.logo_url || "",
       web_site_url: initialData?.website_url || "",
       social_networks: initialData?.social_network
         ? initialData.social_network
-            .split(",")
-            .filter(Boolean)
-            .map((url) => ({ url }))
+          .split(",")
+          .filter(Boolean)
+          .map((url) => ({ url }))
         : [{ url: "" }],
       keywords: Array.isArray(initialData?.keywords)
         ? initialData.keywords.join(", ")
@@ -169,18 +168,18 @@ export function OrganizationForm({
           : initialData.keywords || "",
         social_networks: initialData.social_network
           ? initialData.social_network
-              .split(",")
-              .filter(Boolean)
-              .map((url) => ({ url }))
+            .split(",")
+            .filter(Boolean)
+            .map((url) => ({ url }))
           : [{ url: "" }],
         registration_date:
           initialData.registration_date &&
-          isValid(new Date(initialData.registration_date))
+            isValid(new Date(initialData.registration_date))
             ? new Date(initialData.registration_date)
             : undefined,
         year_founded:
           initialData.year_founded &&
-          isValid(new Date(initialData.year_founded))
+            isValid(new Date(initialData.year_founded))
             ? new Date(initialData.year_founded)
             : undefined,
         // Now, merge the default address if it exists
@@ -267,7 +266,7 @@ export function OrganizationForm({
     toast.error("Please fix the errors before submitting.");
     for (const [index, step] of formSteps.entries()) {
       const hasErrorInStep = step.fields.some(
-        (field) => errors[field as keyof OrganizationFormData]
+        (field: string) => errors[field as keyof OrganizationFormData]
       );
       if (hasErrorInStep || (index === 0 && errors.business_domains)) {
         setCurrentStep(index);
@@ -297,9 +296,9 @@ export function OrganizationForm({
           .join(",") || "",
       keywords: data.keywords
         ? data.keywords
-            .split(",")
-            .map((k) => k.trim())
-            .filter(Boolean)
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
         : [],
       business_registration_number: data.business_registration_number,
       tax_number: data.tax_number,
@@ -367,7 +366,7 @@ export function OrganizationForm({
         toast.success(`Organization updated successfully!`);
         onFormSubmitSuccessAction(orgUpdateResponse);
       }
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || `Failed to ${mode} organization.`);
     } finally {
       setIsLoading(false);

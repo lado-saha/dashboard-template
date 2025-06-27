@@ -1,5 +1,4 @@
 import "./globals.css"; // Ensure globals are imported first
-import { Montserrat } from "next/font/google"; // Change here
 import type React from "react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner"; // Sonner Toaster for notifications
@@ -7,7 +6,6 @@ import { Toaster } from "@/components/ui/sonner"; // Sonner Toaster for notifica
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { SessionProvider } from "@/components/providers/session-provider";
-import { ModeToggle } from "@/components/mode-toggle";
 
 // Initialize Montserrat font (adjust subsets and weights as needed)
 // const montserrat = Montserrat({

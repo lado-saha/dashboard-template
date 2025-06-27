@@ -4,7 +4,7 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AddressDto } from '@/types/organization';
 
 // Spec says GET for favorite, using PUT for mock update consistency
-export async function PUT(request: NextRequest, { params }: { params: { addressId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: { addressId: string } }) {
   try {
     const { addressId } = await params;
     const address = dbManager.getItemById('addresses', addressId);
@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: { params: { addressI
     }
     const updatedAddress = dbManager.updateItem('addresses', addressId, { is_default: !address.is_default });
     return NextResponse.json(updatedAddress, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to toggle favorite address", error: error.message }, { status: 500 });
   }
 }

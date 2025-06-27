@@ -12,14 +12,13 @@ import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UploadCloud, XCircle, UserCircle, Maximize } from "lucide-react"; // Removed zoom/pan icons
+import { UploadCloud, XCircle, Maximize } from "lucide-react"; // Removed zoom/pan icons
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-  DialogClose,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -170,7 +169,7 @@ export function ImageUploader({
                     size="icon"
                     className="h-7 w-7 opacity-80 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background/90"
                     aria-label="View full image"
-                    onClick={(e) => {
+                    onClick= {(e) => {
                       e.stopPropagation();
                       setIsFullViewOpen(true);
                     }}

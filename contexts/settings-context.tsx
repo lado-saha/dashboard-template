@@ -172,7 +172,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           notifications: prefsDto.notifications,
           privacy: prefsDto.privacy,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch initial settings:", error);
         toast.error("Could not load your settings.");
         setSettings((prev) => ({
@@ -229,7 +229,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         phone: updatedProfile.phone_number || prev.phone,
       }));
       toast.success("Profile updated successfully!");
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(error.message || "Failed to update profile.");
     } finally {
       setIsLoadingSettings(false);
@@ -291,7 +291,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           String(segmentName).slice(1)
         } preferences updated!`
       );
-    } catch (error: any) {
+    } catch (error: any)  {
       toast.error(
         error.message || `Failed to update ${String(segmentName)} preferences.`
       );

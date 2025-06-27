@@ -171,7 +171,7 @@ export default function BusinessActorLandingPage() {
                 Empower Your <span className="text-primary">Structure</span>
               </>
             }
-            description="From a single headquarters to a network of agencies, define your organization's hierarchy. Manage personnel, assign roles, and build a scalable foundation for growth."
+            description="From a single headquarters to a network of agencies, define your organization&apos;n hierarchy. Manage personnel, assign roles, and build a scalable foundation for growth."
             imagePosition="right"
             delay="[animation-delay:600ms]"
             imagePlaceholder={

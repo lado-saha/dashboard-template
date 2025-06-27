@@ -1008,8 +1008,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     formData: FormData
   ): Promise<ImageDto[]> {
-    // For FormData with mock API routes, you'd typically have a specific route.
-    // This simple fetch won't send FormData correctly to a generic mock handler without special parsing on the route side.
+    // For FormData with mock API routes, you&apos;u typically have a specific route.
+    // This simple fetch won&apos;n send FormData correctly to a generic mock handler without special parsing on the route side.
     // For now, returning a placeholder:
     console.warn(
       "uploadOrganizationImages mock in local repo needs a dedicated mock API route for FormData."

@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateAgencyRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
     const { orgId, agencyId } = await params;
     const agency = dbManager.getItemById('agencies', agencyId);
@@ -11,27 +11,27 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
       return NextResponse.json({ message: `Agency with ID ${agencyId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(agency);
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to get agency", error: error.message }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
     const { orgId, agencyId } = await params;
-    const body = await request.json() as UpdateAgencyRequest;
+    const body = await _request.json() as UpdateAgencyRequest;
     const existingAgency = dbManager.getItemById('agencies', agencyId);
     if (!existingAgency || existingAgency.organization_id !== orgId) {
       return NextResponse.json({ message: `Agency with ID ${agencyId} not found for organization ${orgId}.` }, { status: 404 });
     }
     const updatedAgency = dbManager.updateItem('agencies', agencyId, body);
     return NextResponse.json(updatedAgency, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to update agency", error: error.message }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
     const { orgId, agencyId } = await params;
     const existingAgency = dbManager.getItemById('agencies', agencyId);
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { orgId
     }
     // TODO: Handle cascading deletes or disassociation of employees, customers etc. linked to this agency
     return NextResponse.json(null, { status: 204 }); // Spec: 204 No Content
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to delete agency", error: error.message }, { status: 500 });
   }
 }

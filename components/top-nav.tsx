@@ -66,7 +66,7 @@ export function TopNav() {
           >
             {activeAgencyDetails?.short_name || "Agency"}
           </span>
-          {agencySegments.map((segment, index) => (
+          {agencySegments.map((segment) => (
             <React.Fragment key={segment}>
               <span className="text-muted-foreground mx-1">/</span>
               <span className="font-medium text-foreground">
@@ -95,7 +95,7 @@ export function TopNav() {
           >
             {activeOrganizationDetails?.short_name || "Organization"}
           </span>
-          {orgSegments.map((segment, index) => (
+          {orgSegments.map((segment,) => (
             <React.Fragment key={segment}>
               <span className="text-muted-foreground mx-1">/</span>
               <span className="font-medium text-foreground">

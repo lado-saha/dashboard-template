@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation"; // Use App Router's router
+import { useRouter } from "next/navigation"; // Use App Router&apos;r router
 import { Building2, User, ShieldAlert } from "lucide-react"; // Icons for roles
 
 import {

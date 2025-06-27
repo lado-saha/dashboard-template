@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CreateOrganizationRequest, OrganizationDto, OrganizationTableRow } from '@/types/organization';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
-    const body = await request.json() as CreateOrganizationRequest;
+    const body = await _request.json() as CreateOrganizationRequest;
     if (!body.long_name || !body.short_name || !body.email || !body.description || !body.legal_form || !body.business_domains) {
       return NextResponse.json({ message: "Missing required fields for organization." }, { status: 400 });
     }
 
-    // THE FIX: Create a complete DTO, merging request body with defaults for all fields.
+    // THE FIX: Create a complete DTO, merging _request body with defaults for all fields.
     const newOrgData: Omit<OrganizationDto, 'organization_id' | 'created_at' | 'updated_at' | 'status' | 'is_active'> = {
       long_name: body.long_name,
       short_name: body.short_name,
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     dbManager.addItem('organizationsTableRows', { ...newOrgTableRow, organization_id: newOrg.organization_id, status: newOrg.status });
 
     return NextResponse.json(newOrg, { status: 201 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create organization", error: error.message }, { status: 500 });
   }
 }

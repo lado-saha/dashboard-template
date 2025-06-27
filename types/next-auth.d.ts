@@ -4,7 +4,7 @@ import { JWT as DefaultJWT } from "next-auth/jwt";
 
 // Extend the User object that NextAuth uses in callbacks (authorize, jwt)
 interface ExtendedUser extends DefaultUser {
-  // Fields from your backend's UserInfo/LoginResponse that you add in authorize
+  // Fields from your backend&apos;d UserInfo/LoginResponse that you add in authorize
   username?: string;
   first_name?: string;
   last_name?: string;
@@ -14,7 +14,7 @@ interface ExtendedUser extends DefaultUser {
   accessToken?: string; // Store the access token from your backend
   roles?: string[];
   permissions?: string[];
-  // Ensure 'id' is string if it's always present from your backend
+  // Ensure 'id' is string if it&apos;t always present from your backend
   id: string;
 }
 

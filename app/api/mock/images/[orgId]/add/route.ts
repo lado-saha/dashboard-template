@@ -3,12 +3,12 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ImageDto } from '@/types/organization';
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
     // Actual FormData parsing is complex in Next.js Edge/Node runtime for API routes.
     // This mock will just assume success and return some dummy ImageDto objects.
-    // In a real scenario, you'd parse formData, save files, and generate URLs.
+    // In a real scenario, you&apos;u parse formData, save files, and generate URLs.
     console.warn("Mock image upload for org:", orgId, "- returning dummy data.");
 
     const dummyImages: ImageDto[] = [
@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
     dbManager.saveCollection('organizationImages', orgImages);
 
     return NextResponse.json(dummyImages, { status: 200 });
-  } catch (error: any) {
+  } catch (error: any)  {
     return NextResponse.json({ message: error.message || "Failed to upload images." }, { status: 500 });
   }
 }

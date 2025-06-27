@@ -15,7 +15,7 @@ export default function OrganizationLayout({ children }: OrgLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // If context is initialized and there's no active org, redirect to selection.
+    // If context is initialized and there&apos;e no active org, redirect to selection.
     if (isOrgContextInitialized && !activeOrganizationId) {
       router.replace("/business-actor/dashboard");
     }

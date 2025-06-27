@@ -11,7 +11,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-  Dialog,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,7 +83,7 @@ export function OrganizationSelectorDialog({
       <Briefcase className="h-16 w-16 text-muted-foreground mb-4" />
       <h3 className="text-xl font-semibold">No Organizations Yet</h3>
       <p className="text-muted-foreground mt-2 mb-6 max-w-sm">
-        It looks like you haven't created or joined an organization. Get started
+        It looks like you haven&apos;n created or joined an organization. Get started
         by creating your first one.
       </p>
       <Button onClick={handleCreateNew}>
@@ -110,7 +109,7 @@ export function OrganizationSelectorDialog({
             <Input
               placeholder="Search organizations..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange= {(e)  => setSearchQuery(e.target.value)}
               className="pl-10 h-10"
             />
           </div>

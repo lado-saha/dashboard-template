@@ -11,11 +11,11 @@ import { DataGrid } from "@/components/ui/data-grid";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+// import { Skeleton } from "@/components/ui/skeleton";
 import {
   PlusCircle,
   AlertTriangle,
-  Inbox,
+  // Inbox,
   Building,
   Trash2,
   LayoutGrid,
@@ -155,7 +155,7 @@ export default function ManageAgenciesPage() {
         onEditAction: handleEditAction,
         onDeleteAction: (item) => handleDeleteConfirmation([item]),
       }),
-    []
+    [handleEditAction, handleEnterAgency]
   );
 
   const table = useReactTable({
@@ -186,9 +186,7 @@ export default function ManageAgenciesPage() {
   });
 
   const renderContent = () => {
-    {
-      isItemsLoading && <ListViewSkeleton viewMode={viewMode} />;
-    }
+    isItemsLoading && <ListViewSkeleton viewMode={viewMode} />;
     {
       !isItemsLoading && itemsError && (
         <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
@@ -300,7 +298,7 @@ export default function ManageAgenciesPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "grid" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -313,7 +311,7 @@ export default function ManageAgenciesPage() {
                 className={cn(
                   "h-9 px-3",
                   viewMode === "list" &&
-                    "bg-background text-foreground shadow-sm"
+                  "bg-background text-foreground shadow-sm"
                 )}
               >
                 <LayoutList className="h-4 w-4" />

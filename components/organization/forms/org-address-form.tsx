@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import * as z from "zod";
-import { useDebounce } from "use-debounce";
 import { LatLngExpression } from "leaflet";
 import {
   FormField,
@@ -10,7 +9,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
+
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -126,7 +125,7 @@ export function OrgAddressForm({
       } else {
         toast.warning("Could not find a specific address for this location.");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Failed to fetch address.");
     } finally {
       setIsGeocoding(false);
@@ -160,7 +159,7 @@ export function OrgAddressForm({
       } else {
         toast.warning("Could not find this address.");
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Failed to search address.");
     } finally {
       toast.dismiss();

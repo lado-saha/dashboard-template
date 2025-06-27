@@ -21,7 +21,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 const practicalInfoFormSchema = z.object({
@@ -55,7 +54,6 @@ interface PracticalInfoFormProps {
 }
 
 export function PracticalInfoForm({
-  organizationId,
   initialData,
   mode,
   onSubmitAttemptAction,

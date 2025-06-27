@@ -15,13 +15,13 @@ export class AuthRemoteRepository implements IAuthRepository {
     return yowyobAuthApi.getAllUsers();
   }
   async getUserByUsername(username: string): Promise<UserDto | null> {
-    return yowyobAuthApi.getUserByUsername(username).catch(e => (e.status === 404 ? null : Promise.reject(e)));
+    return yowyobAuthApi.getUserByUsername(username).catch(e => (e.status === 404 ? null : Promise.reject(e) ));
   }
   async getUserByPhoneNumber(phoneNumber: string): Promise<UserDto | null> {
-    return yowyobAuthApi.getUserByPhoneNumber(phoneNumber).catch(e => (e.status === 404 ? null : Promise.reject(e)));
+    return yowyobAuthApi.getUserByPhoneNumber(phoneNumber).catch(e => (e.status === 404 ? null : Promise.reject(e) ));
   }
   async getUserByEmail(email: string): Promise<UserDto | null> {
-    return yowyobAuthApi.getUserByEmail(email).catch(e => (e.status === 404 ? null : Promise.reject(e)));
+    return yowyobAuthApi.getUserByEmail(email).catch(e => (e.status === 404 ? null : Promise.reject(e) ));
   }
   async login(data: AuthRequest): Promise<LoginResponse> {
     return yowyobAuthApi.login(data);
@@ -29,7 +29,7 @@ export class AuthRemoteRepository implements IAuthRepository {
   async getCurrentUser(): Promise<UserInfo | null> {
     try {
       return await yowyobAuthApi.getCurrentUser();
-    } catch (error: any) {
+    } catch (error: any)  {
       if (error.status === 401 || error.status === 403) return null;
       throw error;
     }
@@ -50,7 +50,7 @@ export class AuthRemoteRepository implements IAuthRepository {
     return yowyobAuthApi.getAllPermissions();
   }
   async getPermissionById(permissionId: string): Promise<PermissionDto | null> {
-    return yowyobAuthApi.getPermissionById(permissionId).catch(e => (e.status === 404 ? null : Promise.reject(e)));
+    return yowyobAuthApi.getPermissionById(permissionId).catch(e => (e.status === 404 ? null : Promise.reject(e) ));
   }
   async createPermission(data: CreatePermissionRequest): Promise<PermissionDto> {
     return yowyobAuthApi.createPermission(data);

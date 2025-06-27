@@ -7,7 +7,7 @@ export default function CustomersPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization's customers. Coming
+          This page will be used to manage the organization&apos;n customers. Coming
           soon.
         </p>
       </CardContent>
