@@ -1,132 +1,148 @@
-Project Context From: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template
-Generated On: Thu Jun 26 02:36:20 AM WAT 2025
-===============================================
-Ignored Directory Patterns: .* node_modules vendor build dist target __pycache__ .next cache target venv svgs fontawesome scss fonts webfonts images storage
-Ignored File Patterns: *.log *.jar *.pdf *.png *.jpg *.class *.sqlite *.csv project_context.txt package-lock.json yarn.lock *.json composer.lock *.ico pnpm-lock.yaml
-===============================================
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/amiddleware.ts
+
+// FILE: middleware.ts
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+
+export default withAuth(
+  function middleware(req) {
+    // console.log("Token in middleware: ", req.nextauth.token);
+
+    // Example: Role-based access (implement later)
+    // if (req.nextUrl.pathname.startsWith("/admin") && req.nextauth.token?.role !== "admin") {
+    //   return NextResponse.rewrite(new URL("/denied", req.url));
+    // }
+
+    // If no specific rules, just let authorized users pass
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      // This callback determines if the user is authorized *at all*.
+      // If it returns false, the user is redirected to the login page.
+      authorized: ({ token }) => !!token, // Allow if token exists (user is logged in)
+    },
+    // Redirect users to custom login page if `authorized` callback fails
+    pages: {
+      signIn: "/login",
+      // error: "/auth-error", // Optional error page
+    },
+  }
+);
+
+// Configure which paths are protected by this middleware
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - login, signup, forgot-password (auth pages)
+     * - The root landing page '/'
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|login|auth|signup|data|forgot-password|$).*)", // Protects everything else including dashboard routes
+    // "/.*", // Protects everything else including dashboard routes
+    // Or be more specific:
+    // "/business-actor/:path*",
+    // "/customer/:path*",
+    // "/super-admin/:path*",
+    // "/settings/:path*" // Assuming settings is also protected
+  ],
+};// END OF FILE: amiddleware.ts
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/api/auth/[...nextauth]/route.ts
 
-import NextAuth, { type NextAuthOptions, User as NextAuthUser } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { authRepository } from '@/lib/data-repo/auth'; // Updated import path
-import { AuthRequest, LoginResponse } from "@/types/auth";
-
-interface ExtendedUser extends Omit<NextAuthUser, 'id' | 'name' | 'email'> {
-  id: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  name?: string | null;
-  email?: string | null;
-  phone_number?: string;
-  email_verified?: boolean;
-  phone_number_verified?: boolean;
-  accessToken: string;
-  roles?: string[];
-  permissions?: string[];
-}
+import { authRepository } from "@/lib/data-repo/auth";
+import { LoginRequest } from "@/types/auth";
+import { User } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
+  // 1. Configure session strategy to use JSON Web Tokens
+  session: {
+    strategy: "jwt",
+  },
+  // 2. Define authentication providers
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Credentials",
+      // Define the fields for your login form
       credentials: {
-        username: { label: "Username, Email or Phone", type: "text" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials): Promise<ExtendedUser | null> {
+      // 3. The authorization logic
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.username || !credentials?.password) {
-          console.error("[NextAuth] Missing credentials in authorize callback");
-          throw new Error("Missing username or password.");
+          throw new Error("Username and password are required.");
         }
 
-        const authRequest: AuthRequest = {
-          username: credentials.username,
-          password: credentials.password,
-        };
-
         try {
-          console.log(`[NextAuth] Attempting login via authRepository for: ${authRequest.username}`);
-          // Use the authRepository to call either local mock API or remote Yowyob API
-          const loginResponse: LoginResponse = await authRepository.login(authRequest);
+          const loginRequest: LoginRequest = {
+            username: credentials.username,
+            password: credentials.password,
+          };
 
-          if (loginResponse && loginResponse.access_token?.token && loginResponse.user) {
-            const backendUser = loginResponse.user;
-            console.log(`[NextAuth] Login via authRepository successful for: ${backendUser.username}`);
+          // Use the repository to login (works for both local and remote)
+          const loginResponse = await authRepository.login(loginRequest);
 
-            const user: ExtendedUser = {
-              id: backendUser.id || `fallback-id-${Date.now()}`,
-              name: `${backendUser.first_name || ""} ${backendUser.last_name || ""}`.trim() || backendUser.username || null,
-              email: backendUser.email || null,
-              username: backendUser.username,
-              first_name: backendUser.first_name,
-              last_name: backendUser.last_name,
-              phone_number: backendUser.phone_number,
-              email_verified: backendUser.email_verified,
-              phone_number_verified: backendUser.phone_number_verified,
-              accessToken: loginResponse.access_token.token,
-              roles: loginResponse.roles,
-              permissions: loginResponse.permissions,
+          if (loginResponse && loginResponse.user) {
+            // If login is successful, map the response to the NextAuth User object
+            // You can add any properties from your API response here
+            return {
+              id: loginResponse.user.id,
+              name: `${loginResponse.user.first_name} ${loginResponse.user.last_name}`,
+              email: loginResponse.user.email,
+              accessToken: loginResponse.access_token, // Custom property
+              roles: loginResponse.user.roles, // Custom property
+              permissions: loginResponse.user.permissions, // Custom property
             };
-            return user;
           } else {
-            console.warn(`[NextAuth] Login via authRepository failed or response malformed for: ${authRequest.username}`, loginResponse);
-            throw new Error("Invalid credentials or malformed response from authentication service.");
+            // If login fails, return null
+            return null;
           }
-        } catch (error: any)  {
-          console.error("[NextAuth] Error during login via authRepository:", error.message || error);
-          throw new Error(error.message || "Authentication failed.");
+        } catch (error: any) {
+          // You can log the error and customize the message
+          console.error("Authorize Error:", error);
+          throw new Error(error.message || "Invalid credentials");
         }
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
-  jwt: {}, // secret handled by NEXTAUTH_SECRET
-  pages: {
-    signIn: "/login",
-  },
+  // 4. Callbacks for JWT and Session management
   callbacks: {
+    // This callback is called whenever a JWT is created or updated.
+    // The `user` object is only passed on initial sign in.
     async jwt({ token, user, account }) {
       if (account && user) {
-        const extendedUser = user as ExtendedUser;
-        token.accessToken = extendedUser.accessToken;
-        token.id = extendedUser.id;
-        token.username = extendedUser.username;
-        token.roles = extendedUser.roles;
-        token.permissions = extendedUser.permissions;
-        token.first_name = extendedUser.first_name;
-        token.last_name = extendedUser.last_name;
-        token.email = extendedUser.email;
-        token.name = extendedUser.name;
-        token.phone_number = extendedUser.phone_number;
-        token.email_verified = extendedUser.email_verified;
-        token.phone_number_verified = extendedUser.phone_number_verified;
+        // Persist the custom properties from the User object to the token
+        token.accessToken = user.accessToken;
+        token.roles = user.roles;
+        token.permissions = user.permissions;
+        token.id = user.id;
       }
       return token;
     },
+    // This callback is called whenever a session is checked.
     async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as ExtendedUser).id = token.id as string;
-        (session.user as ExtendedUser).username = token.username as string;
-        (session.user as ExtendedUser).accessToken = token.accessToken as string;
-        (session.user as ExtendedUser).roles = token.roles as string[];
-        (session.user as ExtendedUser).permissions = token.permissions as string[];
-        (session.user as ExtendedUser).first_name = token.first_name as string;
-        (session.user as ExtendedUser).last_name = token.last_name as string;
-        session.user.email = token.email as string | null | undefined;
-        session.user.name = token.name as string | null | undefined;
-        (session.user as ExtendedUser).phone_number = token.phone_number as string;
-        (session.user as ExtendedUser).email_verified = token.email_verified as boolean;
-        (session.user as ExtendedUser).phone_number_verified = token.phone_number_verified as boolean;
-      }
+      // Pass the properties from the token to the client-side session object
+      session.user.accessToken = token.accessToken as string;
+      session.user.roles = token.roles as string[];
+      session.user.permissions = token.permissions as string[];
+      session.user.id = token.id as string;
+
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  // 5. Define custom pages
+  pages: {
+    signIn: "/login",
+    error: "/login", // Redirect to login page on error
+  },
 };
 
 const handler = NextAuth(authOptions);
@@ -1060,7 +1076,6 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 // import { ContactDto } from '@/types/organization';
 
 // Spec says GET for favorite, which is unusual for a state change.
-// Implementing as PUT for the mock as it&apos;t more conventional for updates.
 export async function PUT(_request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
     const { contactId } = await params;
@@ -1086,7 +1101,6 @@ export async function GET(_request: NextRequest, { params }: { params: { contact
   try {
     const { contactId } = await params;
     // Note: For GET by ID, contactable_type and contactable_id might also be needed for security/scoping in a real API.
-    // For mock, we&apos;el assume contactId is unique enough.
     const contact = dbManager.getItemById('contacts', contactId);
     if (!contact) {
       return NextResponse.json({ message: `Contact with ID ${contactId} not found.` }, { status: 404 });
@@ -1573,7 +1587,6 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     // In a real system, this would link an existing global customer/BA to this agency.
     // For mock, we might check if a customer with this ID exists in a global customer list or BA list,
     // then create/update an entry in 'orgCustomers' linking them.
-    // For simplicity, let&apos;t assume we are updating an existing orgCustomer or creating one if it doesn&apos;n exist.
 
     let customer = dbManager.getItemById('orgCustomers', body.customer_id); // Check if customer record exists
 
@@ -1667,18 +1680,17 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
 
     // This mock assumes the employee_id refers to an existing global user/BA or an employee from the main org.
     // We are "affecting" or linking them to this agency.
-    // In a real system, this might update an existing employee record&apos;d agency_id
     // or create a new employment record linking user to agency.
 
     let employee = dbManager.getItemById('employees', body.employee_id);
     if (!employee) {
-      // If not found as an employee, maybe it&apos;t a BusinessActor to be made an employee
-      // For simplicity, we&apos;el assume it should exist or we create a new one.
+      // If not found as an employee, maybe it a BusinessActor to be made an employee
+      // For simplicity, wel assume it should exist or we create a new one.
       // This mock will simply update/create an employee record with the agency_id.
       return NextResponse.json({ message: `Employee/User with ID ${body.employee_id} not found to affect to agency.` }, { status: 404 });
     }
 
-    // Update the employee&apos;e agency_id (if they were org-level) or just confirm the link
+    // Update the employee agency_id (if they were org-level) or just confirm the link
     const updatedEmployee = dbManager.updateItem('employees', body.employee_id, { agency_id: agencyId, organisation_id: orgId });
 
     if (!updatedEmployee) {
@@ -2222,7 +2234,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId, customerId } = await params;
     const customer = dbManager.getItemById('orgCustomers', customerId);
-    if (!customer || customer.organization_id !== orgId) { // Ensure it&apos;t for THIS org if not agency specific
+    if (!customer || customer.organization_id !== orgId) { // Ensure it for THIS org if not agency specific
       return NextResponse.json({ message: `Customer ${customerId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(customer);
@@ -2266,7 +2278,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId } = await params;
     const allCustomers = dbManager.getCollection('orgCustomers');
-    // Filter for customers directly under the organization (no agency_id or agency_id matches orgId if that&apos;t the convention)
+    // Filter for customers directly under the organization (no agency_id or agency_id matches orgId if that the convention)
     const orgCustomers = allCustomers.filter(c => c.organization_id === orgId && (!c.agency_id || c.agency_id === orgId));
     return NextResponse.json(orgCustomers);
   } catch (error: any)  {
@@ -2507,7 +2519,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId } = await params;
     const allEmployees = dbManager.getCollection('employees');
-    // Filter for employees directly under the organization (agency_id is null or matches orgId if that&apos;t the convention)
+    // Filter for employees directly under the organization (agency_id is null or matches orgId if that the convention)
     const orgEmployees = allEmployees.filter(emp => emp.organisation_id === orgId && (!emp.agency_id || emp.agency_id === orgId));
     return NextResponse.json(orgEmployees);
   } catch (error: any)  {
@@ -3136,7 +3148,7 @@ import { OrganizationTableRow } from '@/types/organization';
 
 export async function GET(_request: Request) {
   // For mock, assume all orgs in organizationsTableRows are for "current user"
-  // In a real app, you&apos;u filter by authenticated user ID.
+  // In a real app, you filter by authenticated user ID.
   try {
     const orgs = dbManager.getCollection('organizationsTableRows');
     return NextResponse.json(orgs);
@@ -3178,10 +3190,10 @@ function getOrCreateUserPreferences(userId: string): UserPreferencesDto {
     //   updated_at: new Date().toISOString(),
     // };
     // The addItem in dbManager now uses 'user_id' as the 'id' for this collection if provided.
-    // Let&apos;t ensure we are consistent. If addItem generates its own 'id', we need to query by user_id.
-    // For simplicity, let&apos;t assume userPreferences items are stored with 'user_id' as their main lookup key.
+    // Let ensure we are consistent. If addItem generates its own 'id', we need to query by user_id.
+    // For simplicity, let assume userPreferences items are stored with 'user_id' as their main lookup key.
     // This means getItemById and updateItem in dbManager might need adjustment for this collection.
-    // OR, we store a separate 'id' and also 'user_id'. Let&apos;t stick to 'user_id' as the primary key here for this collection.
+    // OR, we store a separate 'id' and also 'user_id'. Let stick to 'user_id' as the primary key here for this collection.
 
     // Modified to ensure 'user_id' is the key for this collection.
     const collection = dbManager.getCollection('userPreferences');
@@ -3237,7 +3249,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { userId:
         privacy: { ...defaultPrivacyPrefsForMock },
       };
       collection.push(currentPrefs);
-      itemIndex = collection.length - 1; // It&apos;t now the last item
+      itemIndex = collection.length - 1; // It now the last item
     }
 
     const updatedData: UserPreferencesDto = {
@@ -3257,6 +3269,103 @@ export async function PUT(_request: NextRequest, { params }: { params: { userId:
     return NextResponse.json({ message: error.message || "Failed to update user preferences." }, { status: 500 });
   }
 }// END OF FILE: app/api/mock/user-preferences/[userId]/route.ts
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/api/proxy/[...slug]/route.ts
+
+/**
+ * @file This file defines a generic server-side proxy API route.
+ * @module API_Proxy
+ * @description This route is designed to bypass browser CORS (Cross-Origin Resource Sharing) restrictions
+ * by acting as an intermediary between the client-side application and external APIs.
+ */
+
+import { NextResponse, NextRequest } from 'next/server';
+
+/**
+ * Handles all incoming HTTP requests (GET, POST, PUT, DELETE, etc.) intended for external APIs.
+ *
+ * ### Motivation
+ * Modern web browsers enforce a security measure known as the Same-Origin Policy, which restricts
+ * web pages from making requests to a different domain than the one that served the page. For this application
+ * to communicate with the remote YOWYOB APIs from the client-side, the YOWYOB servers would need to explicitly
+ * permit this via CORS headers. As this external configuration cannot be guaranteed, this proxy provides a robust solution.
+ * It functions by receiving a request from the client, forwarding it from the server environment (which is not subject to CORS),
+ * and then streaming the external API's response back to the client.
+ *
+ * ### Parameters & Usage
+ * It is expected that any client-side request to this proxy includes a specific HTTP header:
+ * - `X-Target-URL`: This header **must** contain the full, absolute URL of the intended external API endpoint.
+ *
+ * The proxy transparently forwards the `Authorization` and `Content-Type` headers from the original
+ * request, ensuring authentication and data formats are correctly handled.
+ *
+ * ### Operational Flow
+ * 1.  The handler receives a request from the client to `/api/proxy/...`.
+ * 2.  It extracts the destination from the `X-Target-URL` header. A 400 error is returned if this header is missing.
+ * 3.  It constructs a new `fetch` request, copying the method, body, and essential headers.
+ * 4.  The `duplex: 'half'` option is critically supplied to the `fetch` call to support streaming request bodies,
+ *     a requirement in modern server runtimes like the one used by Next.js.
+ * 5.  Upon receiving a response from the target server, it streams the status, headers, and body back to the original client.
+ *     It specifically removes headers like `content-encoding` that are managed by the hosting platform to prevent conflicts.
+ * 6.  If the proxy fails to reach the target server, it returns a `502 Bad Gateway` error.
+ *
+ * @param {NextRequest} req - The incoming request object from the Next.js framework.
+ * @returns {Promise<NextResponse>} A promise that resolves to a `NextResponse` object, either streaming the
+ * proxied response or returning a specific error (400 for bad request, 502 for gateway error).
+ */
+async function handler(req: NextRequest): Promise<NextResponse> {
+  const targetUrl = req.headers.get('X-Target-URL');
+
+  if (!targetUrl) {
+    return NextResponse.json(
+      { message: 'X-Target-URL header is missing.' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const headers = new Headers();
+    headers.set('Content-Type', req.headers.get('Content-Type') || 'application/json');
+    if (req.headers.has('Authorization')) {
+      headers.set('Authorization', req.headers.get('Authorization')!);
+    }
+
+    const remoteResponse = await fetch(targetUrl, {
+      method: req.method,
+      headers: headers,
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null,
+      redirect: 'follow',
+      cache: 'no-store',
+      // This option is required for streaming request bodies in modern fetch implementations.
+      // @ts-ignore - 'duplex' is a valid option in the runtime but may not be in the default TS type.
+      duplex: 'half',
+    });
+
+    // Reconstruct the response headers, filtering out those that can cause issues.
+    const responseHeaders = new Headers(remoteResponse.headers);
+    responseHeaders.delete('content-encoding');
+    responseHeaders.delete('content-length');
+
+    // Stream the remote response back to the client.
+    return new NextResponse(remoteResponse.body, {
+      status: remoteResponse.status,
+      statusText: remoteResponse.statusText,
+      headers: responseHeaders,
+    });
+  } catch (error: any) {
+    console.error(`[API PROXY] Error fetching ${targetUrl}:`, error);
+    return NextResponse.json(
+      { message: 'Proxy request failed', error: error.message },
+      { status: 502 } // Bad Gateway
+    );
+  }
+}
+
+/**
+ * Exports the single handler for all common HTTP methods.
+ * This makes the proxy versatile and capable of handling any type of API request.
+ */
+export { handler as GET, handler as POST, handler as PUT, handler as DELETE, handler as PATCH };// END OF FILE: app/api/proxy/[...slug]/route.ts
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/(auth)/forgot-password/page.tsx
 
@@ -3360,7 +3469,7 @@ export default function AgencyDashboardPage() {
         <p>Welcome to the dashboard for {activeAgencyDetails.short_name}.</p>
         <p className="mt-4 p-4 border-2 border-dashed rounded-lg">
           This area will contain charts, KPIs, and summaries specific to this
-          agency&apos;y performance.
+          agency's performance.
         </p>
       </CardContent>
     </Card>
@@ -3405,7 +3514,7 @@ export default function AgencyDashboardPage() {
         <p>Welcome to the dashboard for {activeAgencyDetails.short_name}.</p>
         <p className="mt-4 p-4 border-2 border-dashed rounded-lg">
           This area will contain charts, KPIs, and summaries specific to this
-          agency&apos;y performance.
+          agency performance.
         </p>
       </CardContent>
     </Card>
@@ -3436,7 +3545,7 @@ export default function AgencyProfilePage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will contain a form to edit the active agency&apos;y details.
+          This page will contain a form to edit the active agency's details.
         </p>
       </CardContent>
     </Card>
@@ -3783,7 +3892,7 @@ export default function BusinessActorLandingPage() {
                 Empower Your <span className="text-primary">Structure</span>
               </>
             }
-            description="From a single headquarters to a network of agencies, define your organization&apos;n hierarchy. Manage personnel, assign roles, and build a scalable foundation for growth."
+            description="From a single headquarters to a network of agencies, define your organization's hierarchy. Manage personnel, assign roles, and build a scalable foundation for growth."
             imagePosition="right"
             delay="[animation-delay:600ms]"
             imagePlaceholder={
@@ -4432,7 +4541,7 @@ export default function CreateOrganizationPage() {
     // Set the newly created organization as active
     if (newOrgData.organization_id) {
       await setActiveOrganization(newOrgData.organization_id, newOrgData);
-      // Redirect to the new organization&apos;n profile page
+      // Redirect to the new organization's profile page
       router.push(`/business-actor/org/profile`);
     } else {
       // Fallback if ID is missing
@@ -4897,7 +5006,7 @@ export default function ManageCertificationsPage() {
                     No Certifications Added Yet
                   </h3>
                   <p className="text-sm">
-                    Add your organization&apos;n awards and certifications.
+                    Add your organization awards and certifications.
                   </p>
                   <Button
                     onClick={() => handleOpenFormModal()}
@@ -5454,7 +5563,7 @@ export default function ManageCertificationsPage() {
                     No Certifications Added Yet
                   </h3>
                   <p className="text-sm">
-                    Add your organization&apos;n awards and certifications.
+                    Add your organization's awards and certifications.
                   </p>
                   <Button
                     onClick={() => handleOpenFormModal()}
@@ -5576,7 +5685,7 @@ export default function CustomersPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization&apos;n customers. Coming
+          This page will be used to manage the organization customers. Coming
           soon.
         </p>
       </CardContent>
@@ -6191,7 +6300,7 @@ export default function OrganizationLayout({ children }: OrgLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // If context is initialized and there&apos;e no active org, redirect to selection.
+    // If context is initialized and the're no active org, redirect to selection.
     if (isOrgContextInitialized && !activeOrganizationId) {
       router.replace("/business-actor/dashboard");
     }
@@ -7506,7 +7615,7 @@ export default function OrganizationProfilePage() {
             (addresses.length > 0 ? addresses[0] : null);
           setDefaultAddress(defaultAddr);
         } catch (error: any) {
-          toast.error("Could not load organization&apos;n default address.");
+          toast.error("Could not load organization default address.");
         } finally {
           setIsLoadingAddress(false);
         }
@@ -7567,7 +7676,7 @@ export default function OrganizationProfilePage() {
             <CardHeader>
               <CardTitle>Edit Organization Details</CardTitle>
               <CardDescription>
-                Modify your organization&apos;n core information. Changes are saved
+                Modify your organization core information. Changes are saved
                 upon submission.
               </CardDescription>
             </CardHeader>
@@ -7618,7 +7727,7 @@ export default function OrganizationProfilePage() {
           Organization Settings
         </h1>
         <p className="text-muted-foreground">
-          Manage your organization&apos;n profile, addresses, and contacts.
+          Manage your organization profile, addresses, and contacts.
         </p>
       </div>
       {/* THE FIX: Reordered for mobile-first, adjusted grid spans for large screens */}
@@ -7646,7 +7755,7 @@ export default function ProspectsPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization&apos;n prospects. Coming
+          This page will be used to manage the organization prospects. Coming
           soon.
         </p>
       </CardContent>
@@ -7708,7 +7817,7 @@ export default function SuppliersPage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will be used to manage the organization&apos;n suppliers
+          This page will be used to manage the organization's suppliers
           (providers). Coming soon.
         </p>
       </CardContent>
@@ -7864,7 +7973,7 @@ export default function CustomerDashboardPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 className="text-3xl font-bold tracking-tight">Welcome back, {settings.fullName || "Customer"}!</h1>
-            <p className="text-muted-foreground">Here&apos;e a quick overview of your account.</p>
+            <p className="text-muted-foreground">Here's a quick overview of your account.</p>
         </div>
          {/* CTA to Become Business Actor */}
          {/* TODO: Add logic to hide this if the user is already a BA */}
@@ -8114,8 +8223,8 @@ const faqData = [
   {
     category: "Getting Started",
     questions: [
-      { q: "How do I create an account?", a: "Navigate to the Sign Up page and fill in your details. You&apos;ul receive a confirmation email." },
-      { q: "What&apos;t the difference between Business Actor and Customer roles?", a: "Business Actors manage services, products, and organization details. Customers interact with services, manage their profile, and view bonuses." },
+      { q: "How do I create an account?", a: "Navigate to the Sign Up page and fill in your details. You will receive a confirmation email." },
+      { q: "What's  the difference between Business Actor and Customer roles?", a: "Business Actors manage services, products, and organization details. Customers interact with services, manage their profile, and view bonuses." },
       { q: "How do I navigate the dashboard?", a: "Use the sidebar on the left to access different sections. The top navigation provides quick access to notifications and user settings." },
     ],
   },
@@ -8232,7 +8341,7 @@ export default function HelpPage() {
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl">Contact Support</CardTitle>
-              <CardDescription>Can&apos;n find an answer? Get in touch.</CardDescription>
+              <CardDescription>Cannot find an answer? Get in touch.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                <Button variant="outline" className="w-full justify-start gap-3" onClick={() => handleContactAction('Ticket')}>
@@ -8263,10 +8372,9 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-            {/* What&apos;t New Card */}
             <Card className="shadow-sm">
                 <CardHeader>
-                <CardTitle className="text-xl">What&apos;t New?</CardTitle>
+                <CardTitle className="text-xl">What is New?</CardTitle>
                 <CardDescription>See the latest platform updates.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -9161,7 +9269,7 @@ export default function UnifiedSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="mr-2 h-5 w-5" />
-              What&apos;t New
+              What is New
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -10044,7 +10152,7 @@ export default function UnifiedSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="mr-2 h-5 w-5" />
-              What&apos;t New
+              What is New
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -10338,7 +10446,6 @@ export default function SuperAdminPlatformsPage() {
 import { redirect } from 'next/navigation';
 
 export default function SuperAdminProfilePage() {
-  // Redirecting to the main settings page&apos;e account tab
   // Adjust the target tab if needed (e.g., using query params if implemented)
   redirect('/super-admin/settings');
 
@@ -10380,7 +10487,6 @@ export default function SuperAdminWebhooksPage() {
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/app/globals.css
 
 @import "tailwindcss";
-/* Removed tw-animate-css import as it&apos;t unused; uncomment if needed */
 /* @import "tw-animate-css"; */
 
 /* Define the custom variant for dark mode (unchanged) */
@@ -10814,7 +10920,6 @@ export default function SuperAdminWebhooksPage() {
 }
 
 /* @theme inline - This block seems specific to a build tool/plugin.
-   The core definitions are in :root and .dark, which is what we&apos;el modify.
    Keep this block if your build process relies on it. */
 @theme inline {
   --color-background: var(--background);
@@ -11395,7 +11500,6 @@ const RoleCard: React.FC<RoleCardProps> = ({ icon: Icon, title, description }) =
 );
 interface RoleCardProps { icon: React.ElementType; title: string; description: string;}
 
-// Add this CSS to globals.css if you haven&apos;n already
 /*
 
 */
@@ -11772,15 +11876,15 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-// We won&apos;n call authApi.login directly here, NextAuth&apos;h CredentialsProvider will do it.
+// We won call authApi.login directly here, NextAuth CredentialsProvider will do it.
 
 const LoginSchema = z.object({
-  // According to AuthRequest, it&apos;t 'username', not email.
+  // According to AuthRequest, it 'username', not email.
   // If your backend allows email/phone for username field, this is fine.
   // Otherwise, label should be "Username".
   username: z
     .string()
-    .min(1, { message: "Username, email or phone is required." }),
+    .min(1, { message: "Username" }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -11803,8 +11907,8 @@ export const LoginForm = () => {
     setError(null);
     startTransition(async () => {
       try {
-        // NextAuth&apos;h signIn with 'credentials' will trigger the `authorize` callback
-        // in `[...nextauth]/route.ts`. That&apos;t where we&apos;el call our backend /api/login.
+        // NextAuth signIn with 'credentials' will trigger the `authorize` callback
+        // in `[...nextauth]/route.ts`. That where wel call our backend /api/login.
         const result = await signIn("credentials", {
           redirect: false, // Handle redirect manually after checking result
           username: values.username, // Pass username (which might be email/phone)
@@ -11812,6 +11916,7 @@ export const LoginForm = () => {
           // callbackUrl: callbackUrl || "/business-actor/dashboard" // signIn can handle callbackUrl
         });
 
+        
         if (result?.error) {
           console.error("SignIn Error from NextAuth:", result.error);
           // result.error might be "CredentialsSignin" or a custom error message
@@ -11828,11 +11933,11 @@ export const LoginForm = () => {
           );
         } else if (result?.ok) {
           toast.success("Login successful! Redirecting...");
-          // router.push(callbackUrl || "/business-actor/dashboard"); // Default if signIn doesn&apos;n redirect
+          // router.push(callbackUrl || "/business-actor/dashboard"); // Default if signIn doesn redirect
           // router.refresh(); // Important to update session state everywhere
           // If signIn is configured with redirect: true (default), this manual push might not be needed.
-          // For now, let&apos;t rely on NextAuth&apos;h default redirect or callbackUrl handling if `redirect:false` isn&apos;n used.
-          // If it still doesn&apos;n redirect, we might need a window.location.href = callbackUrl || '/default-path'
+          // For now, let rely on NextAuth default redirect or callbackUrl handling if `redirect:false` isn used.
+          // If it still doesn redirect, we might need a window.location.href = callbackUrl || '/default-path'
           window.location.href = callbackUrl || "/business-actor/dashboard";
         } else {
           setError("An unexpected error occurred during login.");
@@ -11850,7 +11955,7 @@ export const LoginForm = () => {
     <AuthCardWrapper
       title="Welcome Back"
       description="Sign in to access your dashboard"
-      backButtonLabel="Don&apos;n have an account? Sign Up"
+      backButtonLabel="Do not have an account? Sign Up"
       backButtonHref="/signup"
     >
       <Form {...form}>
@@ -11925,7 +12030,7 @@ export const LoginForm = () => {
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Login Failed</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>Something went wrong</AlertDescription>
             </Alert>
           )}
 
@@ -11995,7 +12100,7 @@ const SignUpSchema = z
     phone_number: z.string().optional().or(z.literal("")), // Add validation if needed e.g. .regex(/^\+[1-9]\d{1,14}$/, "Invalid phone number")
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don&apos;n match",
+    message: "Passwords Do not atch",
     path: ["confirmPassword"], // path of error
   });
 
@@ -12046,9 +12151,9 @@ export const SignUpForm = () => {
           router.push("/login");
         }, 2000);
       } catch (err: any) {
-        console.error("Sign Up Error:", err);
+        // console.error("Sign Up Error:", err);
         const apiErrorMessage =
-          err.data?.message ||
+          // err.data?.message ||
           err.message ||
           "An unknown error occurred during sign up.";
         setError(apiErrorMessage);
@@ -12960,7 +13065,7 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation"; // Use App Router&apos;r router
+import { useRouter } from "next/navigation"; // Use App Router router
 import { Building2, User, ShieldAlert } from "lucide-react"; // Icons for roles
 
 import {
@@ -13324,7 +13429,7 @@ export function MainSidebar() {
               alt="Logo"
               width={32}
               height={32}
-              className="h-8 w-8 shrink-0"
+              className=" shrink-0"
               priority
             />
             {!isCollapsed && (
@@ -13522,7 +13627,7 @@ export function MapComponent({
   onToggleFullscreenAction,
 }: MapComponentProps) {
   const handleToggleFullscreen = (e: React.MouseEvent) => {
-    // CRITICAL: Stop the event from bubbling up to the map&apos;p click listener
+    // CRITICAL: Stop the event from bubbling up to the map click listener
     e.stopPropagation();
     if (onToggleFullscreenAction) {
       onToggleFullscreenAction();
@@ -13533,7 +13638,7 @@ export function MapComponent({
     shadowUrl: "/maps/marker-shadow.png",
     iconSize: [22, 32],
     shadowSize: [41, 41], // size of the shadow
-    iconAnchor: [22, 64], // point of the icon which will correspond to marker&apos;r location
+    iconAnchor: [22, 64], // point of the icon which will correspond to marker location
     shadowAnchor: [24, 72], // the same for the shadow
     popupAnchor: [-11, -62], // point from which the popup should open relative to the iconAnchor
   });
@@ -13671,7 +13776,7 @@ export function ModeToggle() {
 "use client"; // <-- Mark as Client Component
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Use App Router&apos;r router
+import { useRouter } from 'next/navigation'; // Use App Router router
 import { ArrowLeft } from 'lucide-react'; // Add ArrowLeft icon
 
 import { Button } from '@/components/ui/button';
@@ -13763,7 +13868,7 @@ const notifications = [
   {
     id: 5,
     title: "New Offer",
-    message: "You&apos;ue eligible for a new savings account with higher interest!",
+    message: "Youe eligible for a new savings account with higher interest!",
     date: "2023-07-11",
     icon: Gift,
     color: "text-purple-500",
@@ -14018,7 +14123,7 @@ export function AddressList({
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-              {/* Note: The OrgAddressForm doesn&apos;n need its own Card wrapper here */}
+              {/* Note: The OrgAddressForm doesnapper here */}
               <OrgAddressForm form={form} title="" description="" />
               <DialogFooter className="mt-6 pt-4 border-t sm:justify-end">
                 <DialogClose asChild>
@@ -14237,7 +14342,7 @@ export function AgencyBasicInfoForm({
               <FormControl>
                 <Textarea
                   rows={4}
-                  placeholder="Describe the agency&apos;y purpose or specialty."
+                  placeholder="Describe the agency purpose or specialty."
                   {...field}
                 />
               </FormControl>
@@ -14310,7 +14415,7 @@ export function AgencyBrandingForm() {
       <CardHeader>
         <CardTitle>Branding & Marketing</CardTitle>
         <CardDescription>
-          Define the agency&apos;y public-facing identity.
+          Define the agency public-facing identity.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -14612,8 +14717,8 @@ const basicInfoSchema = z.object({
   location: z.string().min(2, "Location is required."),
   description: z.string().max(500).optional(),
   business_domains: z
-    .array(z.string())
-    .min(1, "At least one business domain is required."),
+    .array(z.string()),
+    // .min(1, "At least one business domain is required."),
   transferable: z.boolean().default(false),
 });
 const legalSchema = z.object({
@@ -16909,7 +17014,7 @@ export function EmployeeForm({
       <CardHeader>
         <CardTitle>Employee Identity & Role</CardTitle>
         <CardDescription>
-          Enter the employee&apos;e personal and professional details.
+          Enter the employee personal and professional details.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -17627,7 +17732,7 @@ import { BusinessDomainDto } from "@/types/organization";
 export const basicInfoSchema = z.object({
   long_name: z.string().min(3, "Official name is required.").max(100),
   short_name: z.string().min(2, "Short name is required.").max(50),
-  ceo_name: z.string().min(3, "CEO&apos;O name is required.").max(50),
+  ceo_name: z.string().min(3, "CEO name is required.").max(50),
   email: z.string().email("A valid contact email is required."),
   description: z
     .string()
@@ -17640,7 +17745,7 @@ export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 interface BasicInfoFormProps {
   form: any;
   filteredDomains: BusinessDomainDto[];
-  domainSearch: string;
+  domainSearch?: string;
   onDomainSearchChangeAction: (value: string) => void;
 }
 
@@ -17704,7 +17809,7 @@ export function OrgBasicInfoForm({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>CEO&apos;O Name *</FormLabel>
+                <FormLabel>CEO Name *</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -18219,7 +18324,6 @@ const fullOrganizationSchema = basicInfoSchema
   .extend({
     business_domains: z
       .array(z.string())
-      .min(1, "At least one business domain is required."),
   });
 
 type OrganizationFormData = z.infer<typeof fullOrganizationSchema>;
@@ -18406,17 +18510,17 @@ export function OrganizationForm({
     );
 
     let isDomainValid = true;
-    if (currentStep === 0) {
-      if (form.getValues("business_domains").length === 0) {
-        form.setError("business_domains", {
-          type: "manual",
-          message: "At least one business domain is required.",
-        });
-        isDomainValid = false;
-      } else {
-        form.clearErrors("business_domains");
-      }
-    }
+    // if (currentStep === 0) {
+    //   if (form.getValues("business_domains").length === 0) {
+    //     form.setError("business_domains", {
+    //       type: "manual",
+    //       message: "At least one business domain is required.",
+    //     });
+    //     isDomainValid = false;
+    //   } else {
+    //     form.clearErrors("business_domains");
+    //   }
+    // }
     if (isStepValid && isDomainValid) {
       if (currentStep < formSteps.length - 1) {
         const nextStepId = formSteps[currentStep + 1].id;
@@ -18751,7 +18855,7 @@ export function OrganizationSelectorDialog({
       <Briefcase className="h-16 w-16 text-muted-foreground mb-4" />
       <h3 className="text-xl font-semibold">No Organizations Yet</h3>
       <p className="text-muted-foreground mt-2 mb-6 max-w-sm">
-        It looks like you haven&apos;n created or joined an organization. Get started
+        It looks like you have not created or joined an organization. Get started
         by creating your first one.
       </p>
       <Button onClick={handleCreateNew}>
@@ -24426,17 +24530,20 @@ export function useSettings() {
 NEXTAUTH_SECRET=i7Cuf9Io7Y6p0gmI1l6FdUo/WDfrqKCFAq+iWhR2Jo=
 # .env.local
 NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_URL=http://localhost:3000
 
 # Base URLs for REMOTE Yowyob APIs
 NEXT_PUBLIC_YOWYOB_AUTH_SERVICE_BASE_URL=https://gateway.yowyob.com/auth-service
 NEXT_PUBLIC_YOWYOB_ORGANIZATION_SERVICE_BASE_URL=https://gateway.yowyob.com/organization-service
+
 NEXT_PUBLIC_YOWYOB_RESOURCE_SERVICE_BASE_URL=https://gateway.yowyob.com/resource-service
 NEXT_PUBLIC_YOWYOB_PRODUCT_STATE_SERVICE_BASE_URL=https://gateway.yowyob.com/product-management-service
 
 # Client Credentials for Yowyob Auth Service (used by remote auth repository)
 # NEXT_PUBLIC_AUTH_SERVICE_CLIENT_ID=test-client
 # NEXT_PUBLIC_AUTH_SERVICE_CLIENT_SECRET=secret
-NEXT_PUBLIC_AUTH_SERVICE_BEARER_TOKEN=eyJkZXYucmV4aWppZS5zaWduaW5nLmtleSI6ImQ0OWNlYzcyNWI3OGU3YzNjY2EwMzE2ZSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2IiwianRpIjoiTVRjMU1EZzVORGN3TVRZNU9UcGlObVF3WWpFMVlUWmwiLCJraWQiOiIzODdjOWEyOC0zODBlLTRmZWUtYTVjOC0wYTEwMzE2ZTAwNGYifQ.eyJzdWIiOiJ0ZXN0LWNsaWVudCIsImF1ZCI6InRlc3QtY2xpZW50IiwibmJmIjoxNzUwODk0NzAxLCJhdXRoX3RpbWUiOjE3NTA4OTQ3MDEsImlzcyI6Imh0dHA6Ly9hdXRoLXNlcnZpY2U6ODA4MC9vcGVuaWQiLCJzY29wZXMiOlsicmVhZCIsIndyaXRlIiwibWFuYWdlX2FwaSJdLCJleHAiOjE3NTA4OTU2MDEsImlhdCI6MTc1MDg5NDcwMSwianRpIjoiTVRjMU1EZzVORGN3TVRZNU9UcGlObVF3WWpFMVlUWmwifQ.dk8rOSfIYXV-9SSzb-q4uL_4KjwBkSCkOSzjyhqXBIe4BwHk9tCRn7iOrEVMBbO2MMAc3sAKgsXkyI3goYt6lvLz2u2ewoIvoj3Y26DVRZ2UaE2DhvKn8dUr7nhq62LMcYqfolBB9Ik0DGjAjmbCvhbAB2zwvbMW9WsCRjq88Bwvy6ONqumktWw7V2ZE3lSH89iFtdnVnMrQxAAcBVy5xotdGX2XmL7-jgtEKy7CdqriBJO5VKkT49ULYpaGHNJZ-gGn-PfFgKaQtvRgNY46SLOXmoriM7POtN6X-yxJ22n9mHI9K0YwZnaRRy2CB9VV8jHBRcVmjvfv5FUoOchaaw
+NEXT_PUBLIC_AUTH_SERVICE_BEARER_TOKEN="eyJkZXYucmV4aWppZS5zaWduaW5nLmtleSI6ImFiMjQwNWRmNDkxZDRjYTRlYmQyMjA1OSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2IiwianRpIjoiTVRjMU1UTTNPVEE0TnpBeU1EcGhNVGN3TkRZMFpqWXoiLCJraWQiOiIzODdjOWEyOC0zODBlLTRmZWUtYTVjOC0wYTEwMzE2ZTAwNGYifQ.eyJzdWIiOiJ0ZXN0LWNsaWVudCIsImF1ZCI6InRlc3QtY2xpZW50IiwibmJmIjoxNzUxMzc5MDg3LCJhdXRoX3RpbWUiOjE3NTEzNzkwODcsImlzcyI6Imh0dHA6Ly9hdXRoLXNlcnZpY2U6ODA4MC9vcGVuaWQiLCJzY29wZXMiOlsibWFuYWdlX2FwaSIsInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE3NTEzNzk5ODcsImlhdCI6MTc1MTM3OTA4NywianRpIjoiTVRjMU1UTTNPVEE0TnpBeU1EcGhNVGN3TkRZMFpqWXoifQ.g09CBEgyemaGbJDVEl-yv3nAXj1Hqwts5k8t2h9-MB_x2rDg6flpCIbWWUhsQ4Afw9HlAZ4b7her89C09HUHePARELNlLcpLToOwcpj6lx8TwHeYsdTa87fAoVTxV9jPMf2Z5xuzHlwLPGwArI9xXUMVQkXDFOXaXt1d_maX7f3PiPyYpnCf5g97jfxj0PEEIMw0vjT8le-kw5CHRogQGmS4AaJrGcOy1zszJvYRMoxnMSg-Dd9V3GXNsBTWA70cyQLWNkUlzlxCiOwQj90At60n41l-cmKD9D6NSrE2q-j8HRC612Beri6qDccfdAtLnYgEDAM6JJp2qLVL8EkZuQ"
+
 
 # Data Source Configuration
 # 'local' = fetch JSON from /data/* and operate in memory
@@ -24445,8 +24552,7 @@ NEXT_PUBLIC_DATA_SOURCE=remote
 
 NEXT_PUBLIC_API_BASE_URL=https://gateway.yowyob.com
 
-
-Yowyob Creation details
+# Yowyob Creation details
 # curl -X 'POST' \
 #   'https://gateway.yowyob.com/auth-service/api/register' \
 #   -H 'accept: */*' \
@@ -24481,447 +24587,6 @@ const eslintConfig = [
 
 export default eslintConfig;
 // END OF FILE: eslint.config.mjs
-
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/file tree.txt
-
-.
-├── api-docs
-│   ├── auth-service-docs.json
-│   ├── organization-service-docs.json
-│   └── resource-management-service-docs.json
-├── app
-│   ├── api
-│   │   ├── auth
-│   │   │   └── [...nextauth]
-│   │   │       └── route.ts
-│   │   └── mock
-│   │       ├── addresses
-│   │       │   ├── [addressId]
-│   │       │   │   ├── favorite
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── route.ts
-│   │       │   └── route.ts
-│   │       ├── applications
-│   │       │   ├── [applicationId]
-│   │       │   │   └── keys
-│   │       │   │       ├── create
-│   │       │   │       │   └── route.ts
-│   │       │   │       └── route.ts
-│   │       │   └── route.ts
-│   │       ├── auth
-│   │       │   ├── login
-│   │       │   │   └── route.ts
-│   │       │   ├── permissions
-│   │       │   │   ├── [permission_id]
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── route.ts
-│   │       │   ├── register
-│   │       │   │   └── route.ts
-│   │       │   ├── resources
-│   │       │   │   └── save
-│   │       │   │       └── route.ts
-│   │       │   ├── roles
-│   │       │   │   ├── hierarchy
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── [role_id]
-│   │       │   │   │   ├── permissions
-│   │       │   │   │   │   ├── [permission_id]
-│   │       │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── route.ts
-│   │       │   ├── user
-│   │       │   │   └── route.ts
-│   │       │   └── users
-│   │       │       ├── email
-│   │       │       │   └── [email]
-│   │       │       │       └── route.ts
-│   │       │       ├── phone
-│   │       │       │   └── [phone_number]
-│   │       │       │       └── route.ts
-│   │       │       ├── route.ts
-│   │       │       └── username
-│   │       │           └── [username]
-│   │       │               └── route.ts
-│   │       ├── business-actors
-│   │       │   ├── [baId]
-│   │       │   │   └── route.ts
-│   │       │   ├── route.ts
-│   │       │   └── type
-│   │       │       └── [type]
-│   │       │           └── route.ts
-│   │       ├── business-domains
-│   │       │   ├── create
-│   │       │   │   └── route.ts
-│   │       │   ├── [domainId]
-│   │       │   │   └── route.ts
-│   │       │   ├── list
-│   │       │   │   └── route.ts
-│   │       │   └── route.ts
-│   │       ├── contacts
-│   │       │   ├── [contactId]
-│   │       │   │   ├── favorite
-│   │       │   │   │   └── route.ts
-│   │       │   │   └── route.ts
-│   │       │   └── route.ts
-│   │       ├── images
-│   │       │   ├── details
-│   │       │   │   └── [imageId]
-│   │       │   │       └── route.ts
-│   │       │   ├── [imageId]
-│   │       │   └── [orgId]
-│   │       │       └── add
-│   │       │           └── route.ts
-│   │       ├── organization
-│   │       │   ├── all
-│   │       │   │   └── route.ts
-│   │       │   ├── create
-│   │       │   │   └── route.ts
-│   │       │   ├── domain
-│   │       │   │   └── [domainId]
-│   │       │   │       └── route.ts
-│   │       │   ├── [orgId]
-│   │       │   │   ├── agencies
-│   │       │   │   │   ├── [agencyId]
-│   │       │   │   │   │   ├── customers
-│   │       │   │   │   │   │   ├── add
-│   │       │   │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   │   └── [customerId]
-│   │       │   │   │   │   │       └── route.ts
-│   │       │   │   │   │   ├── employees
-│   │       │   │   │   │   │   ├── add
-│   │       │   │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   │   ├── create
-│   │       │   │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   │   ├── [employeeId]
-│   │       │   │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   │   ├── list
-│   │       │   │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   ├── prospects
-│   │       │   │   │   │   │   └── [prospectId]
-│   │       │   │   │   │   │       └── route.ts
-│   │       │   │   │   │   ├── route.ts
-│   │       │   │   │   │   ├── sales-people
-│   │       │   │   │   │   │   ├── route.ts
-│   │       │   │   │   │   │   └── [salesPersonId]
-│   │       │   │   │   │   │       └── route.ts
-│   │       │   │   │   │   ├── status
-│   │       │   │   │   │   │   └── route.ts
-│   │       │   │   │   │   └── suppliers
-│   │       │   │   │   │       ├── add
-│   │       │   │   │   │       │   └── route.ts
-│   │       │   │   │   │       └── [providerId]
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── certifications
-│   │       │   │   │   ├── [certId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   ├── create
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── list
-│   │       │   │   │       └── route.ts
-│   │       │   │   ├── customers
-│   │       │   │   │   ├── [customerId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── delete
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── details
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── domains
-│   │       │   │   │   └── [businessDomainId]
-│   │       │   │   │       ├── add
-│   │       │   │   │       │   └── route.ts
-│   │       │   │   │       └── remove
-│   │       │   │   │           └── route.ts
-│   │       │   │   ├── employees
-│   │       │   │   │   ├── create
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   ├── [employeeId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   ├── list
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── practical-infos
-│   │       │   │   │   ├── create
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   ├── [infoId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── list
-│   │       │   │   │       └── route.ts
-│   │       │   │   ├── proposed-activities
-│   │       │   │   │   ├── [activityId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── prospects
-│   │       │   │   │   ├── [prospectId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── sales-people
-│   │       │   │   │   ├── route.ts
-│   │       │   │   │   └── [salesPersonId]
-│   │       │   │   │       └── route.ts
-│   │       │   │   ├── status
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── suppliers
-│   │       │   │   │   ├── [providerId]
-│   │       │   │   │   │   └── route.ts
-│   │       │   │   │   └── route.ts
-│   │       │   │   ├── third-parties
-│   │       │   │   │   ├── details
-│   │       │   │   │   │   └── [thirdPartyId]
-│   │       │   │   │   │       ├── route.ts
-│   │       │   │   │   │       └── status
-│   │       │   │   │   │           └── route.ts
-│   │       │   │   │   ├── route.ts
-│   │       │   │   │   └── [type]
-│   │       │   │   │       └── route.ts
-│   │       │   │   └── update
-│   │       │   │       └── route.ts
-│   │       │   └── user-orgs
-│   │       │       └── route.ts
-│   │       ├── project_context.txt
-│   │       └── user-preferences
-│   │           └── [userId]
-│   │               └── route.ts
-│   ├── (auth)
-│   │   ├── forgot-password
-│   │   │   └── page.tsx
-│   │   ├── login
-│   │   │   └── page.tsx
-│   │   └── signup
-│   │       └── page.tsx
-│   ├── (dashboard)
-│   │   ├── business-actor
-│   │   │   ├── bonus
-│   │   │   │   └── page.tsx
-│   │   │   ├── business
-│   │   │   │   └── page.tsx
-│   │   │   ├── chat
-│   │   │   │   └── page.tsx
-│   │   │   ├── dashboard
-│   │   │   │   └── page.tsx
-│   │   │   ├── invoices
-│   │   │   │   └── page.tsx
-│   │   │   ├── layout.tsx
-│   │   │   ├── organization
-│   │   │   │   ├── create
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── [orgId]
-│   │   │   │   │   ├── layout.tsx
-│   │   │   │   │   ├── products
-│   │   │   │   │   │   └── page.tsx
-│   │   │   │   │   └── profile
-│   │   │   │   │       └── page.tsx
-│   │   │   │   └── page.tsx
-│   │   │   ├── payments
-│   │   │   │   └── page.tsx
-│   │   │   ├── planning
-│   │   │   │   └── page.tsx
-│   │   │   ├── posts
-│   │   │   │   └── page.tsx
-│   │   │   ├── products
-│   │   │   │   └── page.tsx
-│   │   │   ├── referrals
-│   │   │   │   └── page.tsx
-│   │   │   ├── reservations
-│   │   │   │   └── page.tsx
-│   │   │   ├── reviews
-│   │   │   │   └── page.tsx
-│   │   │   ├── subscription
-│   │   │   │   └── page.tsx
-│   │   │   ├── transactions
-│   │   │   │   └── page.tsx
-│   │   │   ├── wallet
-│   │   │   │   └── page.tsx
-│   │   │   ├── webhooks
-│   │   │   │   └── page.tsx
-│   │   │   └── wishlist
-│   │   │       └── page.tsx
-│   │   ├── customer
-│   │   │   ├── bonus
-│   │   │   │   └── page.tsx
-│   │   │   ├── chat
-│   │   │   │   └── page.tsx
-│   │   │   ├── dashboard
-│   │   │   │   └── page.tsx
-│   │   │   ├── favorites
-│   │   │   │   └── page.tsx
-│   │   │   ├── invite
-│   │   │   │   └── page.tsx
-│   │   │   ├── invoices
-│   │   │   │   └── page.tsx
-│   │   │   └── services
-│   │   │       └── page.tsx
-│   │   ├── help
-│   │   │   └── page.tsx
-│   │   ├── layout.tsx
-│   │   ├── settings
-│   │   │   └── page.tsx
-│   │   └── super-admin
-│   │       ├── bonus
-│   │       │   └── page.tsx
-│   │       ├── business-actors
-│   │       │   └── page.tsx
-│   │       ├── chat
-│   │       │   └── page.tsx
-│   │       ├── customers
-│   │       │   └── page.tsx
-│   │       ├── dashboard
-│   │       │   └── page.tsx
-│   │       ├── platforms
-│   │       │   └── page.tsx
-│   │       ├── profile
-│   │       │   └── page.tsx
-│   │       └── webhooks
-│   │           └── page.tsx
-│   ├── favicon.ico
-│   ├── globals.css
-│   ├── globals.old.css
-│   ├── layout.tsx
-│   ├── not-found.tsx
-│   └── page.tsx
-├── components
-│   ├── auth
-│   │   ├── auth-card-wrapper.tsx
-│   │   ├── forgot-password-form.tsx
-│   │   ├── login-form.tsx
-│   │   └── signup-form.tsx
-│   ├── customer
-│   │   ├── columns.tsx
-│   │   ├── CustomerProductCard.tsx
-│   │   ├── CustomerProductDataTableToolbar.tsx
-│   │   └── ReservationModal.tsx
-│   ├── date-range-picker.tsx
-│   ├── dev
-│   │   └── role-switcher.tsx
-│   ├── mode-toggle.tsx
-│   ├── not-found-buttons.tsx
-│   ├── notifications.tsx
-│   ├── organization
-│   │   ├── address-form.tsx
-│   │   ├── address-list.tsx
-│   │   ├── contact-form.tsx
-│   │   ├── contact-list.tsx
-│   │   ├── organization-detail-view.tsx
-│   │   ├── organization-form.tsx
-│   │   └── organization-switcher.tsx
-│   ├── products
-│   │   ├── columns.tsx
-│   │   ├── data-table-toolbar.tsx
-│   │   ├── ProductCard.tsx
-│   │   ├── ProductDetailView.tsx
-│   │   ├── ProductForm.tsx
-│   │   ├── ProductGridView.tsx
-│   │   └── ProductList.tsx
-│   ├── providers
-│   │   └── session-provider.tsx
-│   ├── shared
-│   ├── sidebar.old.tsx.txt
-│   ├── sidebar.tsx
-│   ├── theme-toggle.tsx
-│   ├── top-nav.tsx
-│   ├── ui
-│   │   ├── accordion.tsx
-│   │   ├── alert.tsx
-│   │   ├── avatar.tsx
-│   │   ├── badge.tsx
-│   │   ├── button.tsx
-│   │   ├── calendar.tsx
-│   │   ├── card.tsx
-│   │   ├── checkbox.tsx
-│   │   ├── command.tsx
-│   │   ├── data-table-column-header.tsx
-│   │   ├── data-table-faceted-filter.tsx
-│   │   ├── data-table-pagination.tsx
-│   │   ├── data-table.tsx
-│   │   ├── dialog.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── form.tsx
-│   │   ├── image-placeholder.tsx
-│   │   ├── image-uploader.tsx
-│   │   ├── input.tsx
-│   │   ├── label.tsx
-│   │   ├── popover.tsx
-│   │   ├── progress.tsx
-│   │   ├── radio-group.tsx
-│   │   ├── scroll-area.tsx
-│   │   ├── select.tsx
-│   │   ├── separator.tsx
-│   │   ├── skeleton.tsx
-│   │   ├── slider.tsx
-│   │   ├── sonner.tsx
-│   │   ├── switch.tsx
-│   │   ├── table.tsx
-│   │   ├── tabs.tsx
-│   │   ├── textarea.tsx
-│   │   └── tooltip.tsx
-│   └── user-nav.tsx
-├── components.json
-├── contexts
-│   ├── active-organization-context.tsx
-│   └── settings-context.tsx
-├── eslint.config.mjs
-├── hooks
-│   └── use-mouse-position.ts
-├── lib
-│   ├── apiClient.ts
-│   ├── data-repo
-│   │   ├── auth
-│   │   │   ├── auth-local-repository.ts
-│   │   │   ├── auth-remote-repository.ts
-│   │   │   ├── auth-repository-interface.ts
-│   │   │   └── index.ts
-│   │   ├── common
-│   │   ├── local-store
-│   │   │   └── json-db-manager.ts
-│   │   ├── organization
-│   │   │   ├── index.ts
-│   │   │   ├── organization-local-repository.ts
-│   │   │   ├── organization-remote-repository.ts
-│   │   │   └── organization-repository-interface.ts
-│   │   ├── product-state
-│   │   ├── resource-management
-│   │   └── user-preferences
-│   │       ├── index.ts
-│   │       ├── user-preferences-local-repository.ts
-│   │       ├── user-preferences-remote-repository.ts
-│   │       └── user-preferences-repository-interface.ts
-│   ├── mock-data
-│   │   └── organization-mocks.ts
-│   ├── utils.ts
-│   └── validators
-│       └── productValidator.ts
-├── middleware.ts
-├── next.config.ts
-├── package.json
-├── pnpm-lock.yaml
-├── postcss.config.mjs
-├── project_context.txt
-├── public
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── logo.svg
-│   ├── next.svg
-│   ├── placeholder.svg
-│   ├── vercel.svg
-│   └── window.svg
-├── README.md
-├── tailwind.config.js
-├── tsconfig.json
-├── types
-│   ├── auth.ts
-│   ├── common.ts
-│   ├── next-auth.d.ts
-│   ├── organization.ts
-│   ├── product.ts
-│   ├── resourceManagement.ts
-│   ├── table.ts
-│   └── user-preferences.ts
-└── user-preferences.json
-
-184 directories, 251 files
-// END OF FILE: file tree.txt
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/.gitignore
 
@@ -24995,7 +24660,6 @@ export function useMousePosition() {
 
 import { getSession } from "next-auth/react";
 
-// import { console } from "sonner";
 import {
   AuthRequest, CreateUserRequest, LoginResponse, UserDto, UserInfo,
   RoleDto, CreateRoleRequest, UpdateRoleRequest,
@@ -25060,15 +24724,18 @@ interface ApiErrorResponse {
   timestamp?: string; status?: number; error?: string; message?: string; path?: string; errors?: Record<string, string>;
 }
 
-const YOWYOB_AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_AUTH_SERVICE_BASE_URL; // Defined in .env.local
-const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_ORGANIZATION_SERVICE_BASE_URL;
+const YOWYOB_AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_AUTH_SERVICE_BASE_URL;
+const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_ORGANIZATION_SERVICE_BASE_URL;
 const CLIENT_BASIC_AUTH_TOKEN = process.env.NEXT_PUBLIC_AUTH_SERVICE_BEARER_TOKEN;
 
+const PROXY_PATH = "/api/proxy"; // All requests go through here
 
 interface YowyobRequestOptions extends RequestInit {
   isFormData?: boolean;
   useClientBasicAuth?: boolean;
 }
+
+
 
 export async function yowyobApiRequest<T = any>(
   serviceBaseUrl: string | undefined,
@@ -25077,19 +24744,29 @@ export async function yowyobApiRequest<T = any>(
   isUserAuthAction: boolean = false
 ): Promise<T> {
   if (!serviceBaseUrl) {
-    console.error("Service base URL is not configured for remote API call. Endpoint:", endpoint, "Options:", options);
+    console.error("Service base URL is not configured for remote API call. Endpoint:", endpoint);
     throw new Error("Service base URL is not configured.");
   }
 
-  const headers: HeadersInit = { ...(options.isFormData ? {} : { "Content-Type": "application/json" }), ...options.headers };
+  const targetUrl = `${serviceBaseUrl}${endpoint}`;
 
-  if (CLIENT_BASIC_AUTH_TOKEN && options.useClientBasicAuth) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
-  } else if (CLIENT_BASIC_AUTH_TOKEN && !options.useClientBasicAuth) {
-    console.error("Client basic auth requested but token is not configured for Yowyob API.");
-  }
+  const headers: HeadersInit = {
+    ...(options.isFormData ? {} : { "Content-Type": "application/json" }),
+    ...options.headers,
+    'X-Target-URL': targetUrl,
+  };
 
-  const fullUrl = `${serviceBaseUrl}${endpoint}`;
+  // const session = await getSession();
+  // if (session?.user?.accessToken) {
+  //   (headers as Record<string, string>)['Authorization'] = `Bearer ${session.user.accessToken}`;
+  // }
+  // else if (CLIENT_BASIC_AUTH_TOKEN) {
+  (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
+  // }
+
+  // THE FIX: The URL for the fetch call must match the dynamic route pattern.
+  // We append a generic slug that doesn't affect logic but satisfies routing.
+  const fullUrl = `${process.env.NEXT_PUBLIC_URL}${PROXY_PATH}/request`;
   const config: RequestInit = { ...options, headers };
 
   try {
@@ -25101,9 +24778,10 @@ export async function yowyobApiRequest<T = any>(
         errorData = await response.json();
         errorMessage = errorData?.message || errorMessage;
         if (errorData?.errors) errorMessage += ` (${Object.values(errorData.errors).join(', ')})`;
-      } catch (error: any) { }
-      console.error(`YOWYOB API Error: ${errorMessage} for ${fullUrl}`, { data: errorData, options: config });
-      if (!(isUserAuthAction && (response.status === 401 || response.status === 403))) console.error(errorMessage);
+      } catch (e: any) { }
+      console.error(`YOWYOB API Error (via proxy): ${errorMessage} for ${targetUrl}`, { data: errorData, options: config });
+      if (!(isUserAuthAction && (response.status === 401 || response.status === 403))) {
+      }
       const error = new Error(errorMessage) as any;
       error.status = response.status; error.data = errorData;
       throw error;
@@ -25113,52 +24791,39 @@ export async function yowyobApiRequest<T = any>(
   } catch (error: any) {
     if (!error.status && !(error instanceof SyntaxError)) {
       console.error("Network or unhandled Yowyob API error:", error);
-      if (!isUserAuthAction) console.error("Network error or Yowyob server unreachable.");
+      if (!isUserAuthAction) {
+      }
     }
     throw error;
   }
 }
-
+// All API objects below remain unchanged, they will automatically use the proxy.
 export const yowyobAuthApi = {
   register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
   getAllUsers: () => yowyobApiRequest<UserDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/users", { method: "GET" }),
   getUserByUsername: (username: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/username/${username}`, { method: "GET" }),
   getUserByPhoneNumber: (phoneNumber: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/phone-number/${phoneNumber}`, { method: "GET" }),
   getUserByEmail: (email: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/email/${email}`, { method: "GET" }),
-
-  // Login & Session
-  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
+  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: false }, true),
   getCurrentUser: () => yowyobApiRequest<UserInfo>(YOWYOB_AUTH_API_BASE_URL, "/api/user", { method: "GET" }),
-
-  // Role Management
   getRoles: () => yowyobApiRequest<RoleDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "GET" }),
   createRole: (data: CreateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "POST", body: JSON.stringify(data) }),
   updateRole: (roleId: string, data: UpdateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteRole: (roleId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "DELETE" }),
-
-  // Permission Management
   getAllPermissions: () => yowyobApiRequest<PermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "GET" }),
   getPermissionById: (permissionId: string) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "GET" }),
   createPermission: (data: CreatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "POST", body: JSON.stringify(data) }),
   updatePermission: (permissionId: string, data: UpdatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "PUT", body: JSON.stringify(data) }),
   deletePermission: (permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "DELETE" }),
-
-  // Role-Permission Assignments
   assignPermissionsToRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<RolePermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "POST", body: JSON.stringify(permissionIds) }),
   removePermissionsFromRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "DELETE", body: JSON.stringify(permissionIds) }),
   assignPermissionToRole: (roleId: string, permissionId: string) => yowyobApiRequest<RolePermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "POST" }),
   removePermissionFromRole: (roleId: string, permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "DELETE" }),
-
-  // RBAC Resource
   createRbacResource: (data: RbacResource) => yowyobApiRequest<ApiResponseBoolean>(YOWYOB_AUTH_API_BASE_URL, "/api/resources/save", { method: "POST", body: JSON.stringify(data) }),
-
-  // Roles Hierarchy
   getRolesHierarchy: () => yowyobApiRequest<string>(YOWYOB_AUTH_API_BASE_URL, "/api/roles/hierarchy", { method: "GET" }),
 };
 
-
 export const yowyobOrganizationApi = {
-  // Organizations
   getMyOrganizations: () => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user"),
   getAllOrganizations: () => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations"),
   getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`),
@@ -25169,38 +24834,28 @@ export const yowyobOrganizationApi = {
   updateOrganizationStatus: (orgId: string, data: UpdateOrganizationStatusRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/status`, { method: "PUT", body: JSON.stringify(data) }),
   addBusinessDomainToOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "PUT" }),
   removeBusinessDomainFromOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "DELETE" }),
-
-  // Contacts
   getContacts: (contactableType: ContactableType, contactableId: string) => yowyobApiRequest<ContactDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`),
-  getContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`), // Assuming path param, adjust if query
+  getContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`),
   createContact: (contactableType: ContactableType, contactableId: string, data: CreateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`, { method: "POST", body: JSON.stringify(data) }),
   updateContact: (contactableType: ContactableType, contactableId: string, contactId: string, data: UpdateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "DELETE" }),
-  markContactAsFavorite: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}/favorite`, { method: "GET" }), // Spec says GET
-
-  // Addresses
+  markContactAsFavorite: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}/favorite`, { method: "GET" }),
   getAddresses: (addressableType: AddressableType, addressableId: string) => yowyobApiRequest<AddressDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`),
-  getAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`), // Assuming path param
+  getAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`),
   createAddress: (addressableType: AddressableType, addressableId: string, data: CreateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`, { method: "POST", body: JSON.stringify(data) }),
   updateAddress: (addressableType: AddressableType, addressableId: string, addressId: string, data: UpdateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "DELETE" }),
   markAddressAsFavorite: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}/favorite`, { method: "GET" }),
-
-  // Practical Information
   getPracticalInformation: (orgId: string, params?: { organizationId: string }) => yowyobApiRequest<PracticalInformationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos${params ? '?' + new URLSearchParams(params).toString() : ''}`),
   createPracticalInformation: (orgId: string, data: CreatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos`, { method: "POST", body: JSON.stringify(data) }),
   getPracticalInformationById: (orgId: string, infoId: string) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`),
   updatePracticalInformation: (orgId: string, infoId: string, data: UpdatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "PUT", body: JSON.stringify(data) }),
   deletePracticalInformation: (orgId: string, infoId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "DELETE" }),
-
-  // Certifications
   getCertifications: (orgId: string) => yowyobApiRequest<CertificationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`),
   createCertification: (orgId: string, data: CreateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`, { method: "POST", body: JSON.stringify(data) }),
   getCertificationById: (orgId: string, certId: string) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`),
   updateCertification: (orgId: string, certId: string, data: UpdateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteCertification: (orgId: string, certId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "DELETE" }),
-
-  // Business Domains
   getAllBusinessDomains: (params?: GetBusinessDomainRequest) => {
     const queryParams = params ? `?${new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString()}` : "";
     return yowyobApiRequest<BusinessDomainDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains${queryParams}`);
@@ -25209,8 +24864,6 @@ export const yowyobOrganizationApi = {
   createBusinessDomain: (data: CreateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains`, { method: "POST", body: JSON.stringify(data) }),
   updateBusinessDomain: (domainId: string, data: UpdateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteBusinessDomain: (domainId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "DELETE" }),
-
-  // Agencies
   getAgencies: (orgId: string, active?: boolean) => {
     let endpoint = `/organizations/${orgId}/agencies`;
     if (active !== undefined) endpoint += `?active=${active}`;
@@ -25221,124 +24874,83 @@ export const yowyobOrganizationApi = {
   updateAgency: (orgId: string, agencyId: string, data: UpdateAgencyRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgency: (orgId: string, agencyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "DELETE" }),
   updateAgencyStatus: (orgId: string, agencyId: string, data: UpdateAgencyStatusRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/status`, { method: "PUT", body: JSON.stringify(data) }),
-
-  // Employees (Organization-scoped)
   getOrgEmployees: (orgId: string) => yowyobApiRequest<EmployeeDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees`),
   createOrgEmployee: (orgId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees`, { method: "POST", body: JSON.stringify(data) }),
   getOrgEmployeeById: (orgId: string, employeeId: string) => yowyobApiRequest<EmployeeDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`),
   updateOrgEmployee: (orgId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgEmployee: (orgId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "DELETE" }),
-
-  // Employees (Agency-scoped)
   getAgencyEmployees: (orgId: string, agencyId: string) => yowyobApiRequest<EmployeeDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees`),
   createAgencyEmployee: (orgId: string, agencyId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees`, { method: "POST", body: JSON.stringify(data) }),
   getAgencyEmployeeById: (orgId: string, agencyId: string, employeeId: string) => yowyobApiRequest<EmployeeDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`),
   updateAgencyEmployee: (orgId: string, agencyId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencyEmployee: (orgId: string, agencyId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "DELETE" }),
   affectEmployeeToAgency: (orgId: string, agencyId: string, data: AffectEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/add`, { method: "POST", body: JSON.stringify(data) }),
-
-  // SalesPersons (Organization-scoped)
   getOrgSalesPersons: (orgId: string) => yowyobApiRequest<SalesPersonDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people`),
   createOrgSalesPerson: (orgId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people`, { method: "POST", body: JSON.stringify(data) }),
   getOrgSalesPersonById: (orgId: string, salesPersonId: string) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`),
   updateOrgSalesPerson: (orgId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgSalesPerson: (orgId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "DELETE" }),
-
-  // SalesPersons (Agency-scoped)
   getAgencySalesPersons: (orgId: string, agencyId: string) => yowyobApiRequest<SalesPersonDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people`),
   createAgencySalesPerson: (orgId: string, agencyId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people`, { method: "POST", body: JSON.stringify(data) }),
   getAgencySalesPersonById: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`),
   updateAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "DELETE" }),
-
-  // Customers (Organization-linked)
   getOrgCustomers: (orgId: string) => yowyobApiRequest<CustomerOrgDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`),
   createOrgCustomer: (orgId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`, { method: "POST", body: JSON.stringify(data) }),
   getOrgCustomerById: (orgId: string, customerId: string) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`),
   updateOrgCustomer: (orgId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgCustomer: (orgId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "DELETE" }),
-
-  // Customers (Agency-scoped)
   getAgencyCustomers: (orgId: string, agencyId: string) => yowyobApiRequest<CustomerOrgDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`),
   createAgencyCustomer: (orgId: string, agencyId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`, { method: "POST", body: JSON.stringify(data) }),
   getAgencyCustomerById: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`),
   updateAgencyCustomer: (orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencyCustomer: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "DELETE" }),
   affectCustomerToAgency: (orgId: string, agencyId: string, data: AffectCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/add`, { method: "POST", body: JSON.stringify(data) }),
-
-  // Suppliers (Providers) (Organization-scoped)
   getOrgSuppliers: (orgId: string) => yowyobApiRequest<ProviderDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`),
   createOrgSupplier: (orgId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`, { method: "POST", body: JSON.stringify(data) }),
   getOrgSupplierById: (orgId: string, providerId: string) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`),
   updateOrgSupplier: (orgId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgSupplier: (orgId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "DELETE" }),
-
-  // Suppliers (Providers) (Agency-scoped)
   getAgencySuppliers: (orgId: string, agencyId: string) => yowyobApiRequest<ProviderDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers`),
   createAgencySupplier: (orgId: string, agencyId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers`, { method: "POST", body: JSON.stringify(data) }),
   getAgencySupplierById: (orgId: string, agencyId: string, providerId: string) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`),
   updateAgencySupplier: (orgId: string, agencyId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencySupplier: (orgId: string, agencyId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "DELETE" }),
   affectSupplierToAgency: (orgId: string, agencyId: string, data: AffectProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/add`, { method: "POST", body: JSON.stringify(data) }),
-
-  // Prospects (Org-scoped)
   getOrgProspects: (orgId: string) => yowyobApiRequest<ProspectDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects`),
   createOrgProspect: (orgId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects`, { method: "POST", body: JSON.stringify(data) }),
   getOrgProspectById: (orgId: string, prospectId: string) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`),
   updateOrgProspect: (orgId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgProspect: (orgId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "DELETE" }),
-
-  // Prospects (Agency-scoped)
   getAgencyProspects: (orgId: string, agencyId: string) => yowyobApiRequest<ProspectDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects`),
   createAgencyProspect: (orgId: string, agencyId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects`, { method: "POST", body: JSON.stringify(data) }),
   getAgencyProspectById: (orgId: string, agencyId: string, prospectId: string) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`),
   updateAgencyProspect: (orgId: string, agencyId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencyProspect: (orgId: string, agencyId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "DELETE" }),
-
-  // Business Actors
   getAllBusinessActors: () => yowyobApiRequest<BusinessActorDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/business-actors"),
   createBusinessActor: (data: CreateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/business-actors", { method: "POST", body: JSON.stringify(data) }),
   getBusinessActorById: (baId: string) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`),
   updateBusinessActor: (baId: string, data: UpdateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteBusinessActor: (baId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "DELETE" }),
   getBusinessActorsByType: (type: BusinessActorType) => yowyobApiRequest<BusinessActorDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/types/${type}`),
-
-  // Images
   uploadOrganizationImages: (orgId: string, formData: FormData) => yowyobApiRequest<ImageDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${orgId}/add`, { method: "PUT", body: formData, isFormData: true }),
   getOrganizationImageInfo: (imageId: string) => yowyobApiRequest<ImageDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${imageId}`),
-
-  // ThirdParty
   getThirdParties: (orgId: string, params: GetThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties?${new URLSearchParams(params as any).toString()}`),
   createThirdParty: (orgId: string, type: ThirdPartyType, data: CreateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${type}`, { method: "POST", body: JSON.stringify(data) }),
   getThirdPartyById: (orgId: string, thirdPartyId: string) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`),
   updateThirdParty: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "PUT", body: JSON.stringify(data) }),
-  deleteThirdParty: (orgId: string, thirdPartyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "DELETE" }), // Spec says 204
+  deleteThirdParty: (orgId: string, thirdPartyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "DELETE" }),
   updateThirdPartyStatus: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyStatusRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}/status`, { method: "PUT", body: JSON.stringify(data) }),
-
-  // Proposed Activities
   getProposedActivities: (orgId: string, params: { organizationId: string }) => yowyobApiRequest<ProposedActivityDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities?${new URLSearchParams(params).toString()}`),
   createProposedActivity: (orgId: string, data: CreateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities`, { method: "POST", body: JSON.stringify(data) }),
   getProposedActivityById: (orgId: string, activityId: string) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`),
   updateProposedActivity: (orgId: string, activityId: string, data: UpdateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteProposedActivity: (orgId: string, activityId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "DELETE" }),
-
-  // Applications & Keys
   getAllApplications: () => yowyobApiRequest<ApplicationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/applications"),
   createApplication: (data: CreateApplicationRequest) => yowyobApiRequest<ApplicationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/applications", { method: "POST", body: JSON.stringify(data) }),
   getApplicationKeys: (applicationId: string) => yowyobApiRequest<ApplicationKeyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/applications/${applicationId}/keys`),
   createApiKey: (applicationId: string) => yowyobApiRequest<ApplicationKeyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/applications/${applicationId}/keys/create`, { method: "POST" }),
-};
-
-// export const yowyobResourceManagementApi = {
-//   getResources: (orgId: string) => yowyobApiRequest<ResourceDto[]>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/resources`, { method: "GET" }, false),
-//   createResource: (orgId: string, data: CreateResourceRequest) => yowyobApiRequest<ResourceDto>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/resources`, { method: "POST", body: JSON.stringify(data) }, false),
-//   getServices: (orgId: string) => yowyobApiRequest<ServiceDto[]>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/services`, { method: "GET" }, false),
-//   createService: (orgId: string, data: CreateServiceRequest) => yowyobApiRequest<ServiceDto>(YOWYOB_RESOURCE_API_BASE_URL, `/${orgId}/services`, { method: "POST", body: JSON.stringify(data) }, false),
-// };
-// export const yowyobProductStateApi = {
-//   updateResourceState: (resourceId: string, data: { currentState: string }) => yowyobApiRequest(YOWYOB_PRODUCT_STATE_API_BASE_URL, `/api/resource/${resourceId}`, { method: "PUT", body: JSON.stringify(data) }, false),
-//   updateServiceState: (serviceId: string, data: { currentState: string }) => yowyobApiRequest(YOWYOB_PRODUCT_STATE_API_BASE_URL, `/api/service/${serviceId}`, { method: "PUT", body: JSON.stringify(data) }, false),
-// };// END OF FILE: lib/apiClient.ts
+};// END OF FILE: lib/apiClient.ts
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/lib/data-repo/auth/auth-local-repository.ts
 
@@ -25371,7 +24983,7 @@ export class AuthLocalRepository implements IAuthRepository {
     if (!response.ok) {
       const errorPayload = responseData || { message: `Request to ${endpoint} failed` };
       console.error(`[AuthLocalRepo] Mock API Error: ${response.status}`, errorPayload);
-      toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
+      // toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
       throw { status: response.status, message: errorPayload.message, data: errorPayload };
     }
     return responseData as T;
@@ -25560,7 +25172,7 @@ export interface IAuthRepository {
   getUserByUsername(username: string): Promise<UserDto | null>;
   getUserByPhoneNumber(phoneNumber: string): Promise<UserDto | null>;
   getUserByEmail(email: string): Promise<UserDto | null>;
-  // (Update/Delete user methods might be via user&apos;r own profile or admin panel elsewhere)
+  // (Update/Delete user methods might be via user own profile or admin panel elsewhere)
 
   // Login & Session
   login(data: AuthRequest): Promise<LoginResponse>;
@@ -25594,20 +25206,19 @@ export interface IAuthRepository {
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/lib/data-repo/auth/index.ts
 
-// lib/data-repositories/auth/index.ts
-import { IAuthRepository } from '@/lib/data-repo/auth/auth-repository-interface';
-import { AuthLocalRepository } from '@/lib/data-repo/auth/auth-local-repository';
-import { AuthRemoteRepository } from '@/lib/data-repo/auth/auth-remote-repository';
+import { IAuthRepository } from './auth-repository-interface';
+import { AuthLocalRepository } from './auth-local-repository';
+import { AuthRemoteRepository } from './auth-remote-repository';
 
 let authRepositoryInstance: IAuthRepository;
 
 const dataSource = process.env.NEXT_PUBLIC_DATA_SOURCE;
 
 if (dataSource === 'local') {
-  console.log("INFO: Using Local Auth Repository (fetches /data/*.json)");
+  console.log("INFO: Using Local Auth Repository (fetches from /api/mock/*)");
   authRepositoryInstance = new AuthLocalRepository();
 } else {
-  console.log("INFO: Using Remote Auth Repository (Yowyob API)");
+  console.log("INFO: Using Remote Auth Repository (Yowyob Auth API via Proxy)");
   authRepositoryInstance = new AuthRemoteRepository();
 }
 
@@ -25885,7 +25496,7 @@ export class MapLocalRepository implements IMapRepository {
     const response = await fetch(`${MOCK_GEO_API_BASE}${endpoint}`);
     if (!response.ok) {
       const error = new Error(`Mock Geo API Error: ${response.statusText}`);
-      toast.error("Mock map service failed.");
+      // toast.error("Mock map service failed.");
       throw error;
     }
     return response.json();
@@ -25927,7 +25538,7 @@ export class MapRemoteRepository implements IMapRepository {
       return await response.json() as T;
     } catch (error: any)  {
       console.error("Nominatim API request failed:", error);
-      toast.error("Could not reach map service. Please check your connection.");
+      // toast.error("Could not reach map service. Please check your connection.");
       throw error;
     }
   }
@@ -26993,8 +26604,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     formData: FormData
   ): Promise<ImageDto[]> {
-    // For FormData with mock API routes, you&apos;u typically have a specific route.
-    // This simple fetch won&apos;n send FormData correctly to a generic mock handler without special parsing on the route side.
+    // For FormData with mock API routes, you typically have a specific route.
+    // This simple fetch won send FormData correctly to a generic mock handler without special parsing on the route side.
     // For now, returning a placeholder:
     console.warn(
       "uploadOrganizationImages mock in local repo needs a dedicated mock API route for FormData."
@@ -27530,7 +27141,6 @@ export interface IOrganizationRepository {
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/lib/data-repo/user-preferences/index.ts
 
-// lib/data-repo/user-preferences/index.ts
 import { IUserPreferencesRepository } from './user-preferences-repository-interface';
 import { UserPreferencesLocalRepository } from './user-preferences-local-repository';
 import { UserPreferencesRemoteRepository } from './user-preferences-remote-repository';
@@ -27540,10 +27150,10 @@ let userPreferencesRepository: IUserPreferencesRepository;
 const dataSource = process.env.NEXT_PUBLIC_DATA_SOURCE;
 
 if (dataSource === 'local') {
-  console.log("INFO: Using Local UserPreferences Repository (via Next.js Mock API Routes)");
+  console.log("INFO: Using Local UserPreferences Repository (fetches from /api/mock/*)");
   userPreferencesRepository = new UserPreferencesLocalRepository();
 } else {
-  console.log("INFO: Using Remote UserPreferences Repository");
+  console.log("INFO: Using Remote UserPreferences Repository (via Proxy)");
   userPreferencesRepository = new UserPreferencesRemoteRepository();
 }
 
@@ -27574,7 +27184,7 @@ export class UserPreferencesLocalRepository implements IUserPreferencesRepositor
     if (!response.ok) {
       const errorPayload = responseData || { message: `Request to ${endpoint} failed` };
       console.error(`[UserPrefsLocalRepo] Mock API Error: ${response.status}`, errorPayload);
-      toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
+      // toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
       throw { status: response.status, message: errorPayload.message, data: errorPayload };
     }
     return responseData as T;
@@ -27883,61 +27493,6 @@ export const fullProductFormSchema = coreProductFieldsSchema
 // Type inferred from the Zod schema
 export type ProductFormData = z.infer<typeof fullProductFormSchema>;// END OF FILE: lib/validators/productValidator.ts
 
-//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/middleware.ts
-
-// FILE: middleware.ts
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-
-export default withAuth(
-  // `withAuth` augments your `Request` with the user&apos;r token.
-  function middleware(req) {
-    // console.log("Token in middleware: ", req.nextauth.token);
-
-    // Example: Role-based access (implement later)
-    // if (req.nextUrl.pathname.startsWith("/admin") && req.nextauth.token?.role !== "admin") {
-    //   return NextResponse.rewrite(new URL("/denied", req.url));
-    // }
-
-    // If no specific rules, just let authorized users pass
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      // This callback determines if the user is authorized *at all*.
-      // If it returns false, the user is redirected to the login page.
-      authorized: ({ token }) => !!token, // Allow if token exists (user is logged in)
-    },
-    // Redirect users to custom login page if `authorized` callback fails
-    pages: {
-      signIn: "/login",
-      // error: "/auth-error", // Optional error page
-    },
-  }
-);
-
-// Configure which paths are protected by this middleware
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - login, signup, forgot-password (auth pages)
-     * - The root landing page '/'
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|auth|signup|data|forgot-password|$).*)", // Protects everything else including dashboard routes
-    // "/.*", // Protects everything else including dashboard routes
-    // Or be more specific:
-    // "/business-actor/:path*",
-    // "/customer/:path*",
-    // "/super-admin/:path*",
-    // "/settings/:path*" // Assuming settings is also protected
-  ],
-};// END OF FILE: middleware.ts
-
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/next.config.ts
 
 // next.config.js or next.config.ts
@@ -27995,6 +27550,11 @@ export default config;
 
 [Non-text file (e.g., binary, data, compressed) - Contents omitted]
 // END OF FILE: public/logo.svg
+
+//---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/public/logo.svg.old
+
+[Non-text file (e.g., binary, data, compressed) - Contents omitted]
+// END OF FILE: public/logo.svg.old
 
 //---> PATH: /home/sih/Documents/GI/l4_s2/networks/projects/dashboard-template/public/next.svg
 
@@ -28311,8 +27871,8 @@ export interface CreatePermissionRequest {
 }
 
 export interface AuthRequest {
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
 }
 
 export interface AccessToken {
@@ -28339,9 +27899,9 @@ export interface LoginResponse {
   permissions?: string[];
 }
 
-// Generic API response for some endpoints that don&apos;n return specific DTOs directly
+// Generic API response for some endpoints that Do not eturn specific DTOs directly
 // but wrap it in an ApiResponse. For example, a GET that might return 400.
-// This is a placeholder; you&apos;u refine this based on actual error structures if needed.
+// This is a placeholder; you refine this based on actual error structures if needed.
 export interface GenericApiResponse<T = any> {
   status?: "SUCCESS" | "FAILED" | "UNKNOWN";
   message?: string;
@@ -28369,7 +27929,7 @@ export type ViewMode = "list" | "grid";// END OF FILE: types/common.ts
 
 // types/map.ts
 
-// Simplified structure for Nominatim&apos;m reverse geocoding response
+// Simplified structure for Nominatim reverse geocoding response
 export interface ReverseGeocodeResponse {
   place_id: number;
   licence: string;
@@ -28393,7 +27953,7 @@ export interface ReverseGeocodeResponse {
   boundingbox: string[];
 }
 
-// Simplified structure for Nominatim&apos;m forward geocoding (search) response
+// Simplified structure for Nominatim forward geocoding (search) response
 export interface GeocodeResponse {
   place_id: number;
   licence: string;
@@ -28417,7 +27977,7 @@ import { JWT as DefaultJWT } from "next-auth/jwt";
 
 // Extend the User object that NextAuth uses in callbacks (authorize, jwt)
 interface ExtendedUser extends DefaultUser {
-  // Fields from your backend&apos;d UserInfo/LoginResponse that you add in authorize
+  // Fields from your backend UserInfo/LoginResponse that you add in authorize
   username?: string;
   first_name?: string;
   last_name?: string;
@@ -28427,7 +27987,7 @@ interface ExtendedUser extends DefaultUser {
   accessToken?: string; // Store the access token from your backend
   roles?: string[];
   permissions?: string[];
-  // Ensure 'id' is string if it&apos;t always present from your backend
+  // Ensure 'id' is string if it always present from your backend
   id: string;
 }
 
@@ -28704,7 +28264,7 @@ export interface AgencyDto extends Auditable {
   tax_number?: string;
   keywords?: string[];
   is_public?: boolean;
-  is_business?: boolean; // What&apos;t diff from is_individual_business?
+  is_business?: boolean; // What diff from is_individual_business?
   operation_time_plan?: Record<string, string>; // e.g. {"monday": "9am-5pm"}
   total_affiliated_customers?: number; // int32
 }
@@ -28772,7 +28332,7 @@ export interface EmployeeDto extends Auditable {
   short_description?: string; // e.g., "Senior Developer"
   long_description?: string;  // e.g., "Responsible for backend services..."
   location_id?: string;       // Office Address ID
-  logo?: string;              // Employee&apos;e professional photo
+  logo?: string;              // Employee professional photo
   is_manager?: boolean;
   contact_info?: string; // Could be an email or phone from ContactDto
   address?: string; // Simple address string, or link to AddressDto
@@ -29072,7 +28632,7 @@ export interface CreateBusinessDomainRequest {
 export interface UpdateBusinessDomainRequest extends Partial<CreateBusinessDomainRequest> { }
 export interface BusinessDomainDto extends Auditable {
   id?: string; //uuid
-  organization_id?: string; //uuid (indicates if it&apos;t custom to an org, or global if null)
+  organization_id?: string; //uuid (indicates if it custom to an org, or global if null)
   parent_domain_id?: string | null; //uuid
   name?: string;
   image?: string;
@@ -29173,7 +28733,7 @@ export interface ProductListItemData {
   tags?: string[];
   additionnalInfo?: JSON;
   // additional custom attributes relevant for customer display
-  // For example, if it&apos;t a "ConsultationSlot"
+  // For example, if it a "ConsultationSlot"
   // duration?: string;
   // location?: string;
 }
@@ -29628,7 +29188,7 @@ export interface UserDisplayPreferences {
   theme: "light" | "dark" | "system";
   layout: "default" | "compact" | "expanded";
   timezone?: string;
-  profilePhotoUrl?: string; // NEW: For user&apos;r uploaded photo
+  profilePhotoUrl?: string; // NEW: For user uploaded photo
 }
 
 export interface UserPreferencesDto {

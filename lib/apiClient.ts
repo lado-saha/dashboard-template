@@ -58,6 +58,7 @@ import {
   UpdateThirdPartyRequest,
   UpdateThirdPartyStatusRequest
 } from "@/types/organization";
+import { MediaDto, MediaType, ServiceType, UploadMediaResponse, UploadRequest } from "@/types/media";
 
 
 interface ApiErrorResponse {
@@ -67,6 +68,7 @@ interface ApiErrorResponse {
 const YOWYOB_AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_AUTH_SERVICE_BASE_URL;
 const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_ORGANIZATION_SERVICE_BASE_URL;
 const CLIENT_BASIC_AUTH_TOKEN = process.env.NEXT_PUBLIC_AUTH_SERVICE_BEARER_TOKEN;
+const YOWYOB_MEDIA_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_MEDIA_SERVICE_BASE_URL; // Add media service URLconst YOWYOB_MEDIA_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_MEDIA_SERVICE_BASE_URL; // Add media service URL
 
 const PROXY_PATH = "/api/proxy"; // All requests go through here
 
@@ -137,7 +139,79 @@ export async function yowyobApiRequest<T = any>(
     throw error;
   }
 }
-// All API objects below remain unchanged, they will automatically use the proxy.
+
+// NEW: Media Service API object
+export const yowyobMediaApi = {
+    uploadFile: (
+        service: ServiceType,
+        type: MediaType,
+        path: string,
+        resourceId: string | null,
+        file: File,
+        uploadRequest?: UploadRequest
+    ) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (uploadRequest) {
+            formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
+        }
+        
+        const endpoint = resourceId
+            ? `/media/${service}/${type}/${path}/${resourceId}`
+            : `/media/${service}/${type}/${path}`;
+        
+        return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+            method: "POST",
+            body: formData,
+            isFormData: true, // This is the key change for multipart requests
+        });
+    },
+
+    updateFile: (
+        service: ServiceType,
+        type: MediaType,
+        path: string,
+        filename: string,
+        file: File,
+        uploadRequest?: UploadRequest
+    ) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (uploadRequest) {
+            formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
+        }
+        const endpoint = `/media/${service}/${type}/${path}/${filename}`;
+        return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+            method: "PUT",
+            body: formData,
+            isFormData: true,
+        });
+    },
+
+    deleteFile: (
+        service: ServiceType,
+        type: MediaType,
+        path: string,
+        filename: string
+    ) => {
+        const endpoint = `/media/${service}/${type}/${path}/${filename}`;
+        return yowyobApiRequest<boolean>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+            method: "DELETE",
+        });
+    },
+
+    getMediaForResource: (
+        service: ServiceType,
+        type: MediaType,
+        path: string,
+        resourceId: string
+    ) => {
+        const endpoint = `/media/infos/${service}/${type}/${path}/${resourceId}`;
+        return yowyobApiRequest<MediaDto[]>(YOWYOB_MEDIA_API_BASE_URL, endpoint, { method: "GET" });
+    },
+};
+
+
 export const yowyobAuthApi = {
   register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
   getAllUsers: () => yowyobApiRequest<UserDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/users", { method: "GET" }),

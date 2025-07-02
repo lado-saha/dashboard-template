@@ -1,3 +1,5 @@
+// types/auth.ts
+
 // --- Schemas from OpenAPI ---
 export interface UpdateRoleRequest {
   name: string;
@@ -127,15 +129,4 @@ export interface LoginResponse {
   user?: UserInfo;
   roles?: string[];
   permissions?: string[];
-}
-
-// Generic API response for some endpoints that Do not eturn specific DTOs directly
-// but wrap it in an ApiResponse. For example, a GET that might return 400.
-// This is a placeholder; you refine this based on actual error structures if needed.
-export interface GenericApiResponse<T = any> {
-  status?: "SUCCESS" | "FAILED" | "UNKNOWN";
-  message?: string;
-  data?: T;
-  errors?: Record<string, string>;
-  ok?: boolean;
 }

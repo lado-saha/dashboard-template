@@ -109,7 +109,6 @@ export interface UpdateOrganizationStatusRequest {
   status: OrganizationStatus;
 }
 
-
 // --- Contacts ---
 export interface CreateContactRequest {
   first_name?: string;
@@ -140,7 +139,6 @@ export interface ContactDto extends Auditable {
   secondary_email?: string;
   verified_at?: string | null; // format: date-time
 }
-
 
 // --- Addresses ---
 export interface CreateAddressRequest {

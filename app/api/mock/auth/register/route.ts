@@ -28,7 +28,6 @@ export async function POST(_request: Request) {
 
     const hashedPassword = await bcrypt.hash(body.password, SALT_ROUNDS);
 
-    // The dbManager.addItem will generate the 'id' field
     const newUserPartial: Omit<UserDto, 'id' | 'created_at' | 'updated_at'> = {
       username: body.username,
       email: body.email,
@@ -36,19 +35,18 @@ export async function POST(_request: Request) {
       first_name: body.first_name,
       last_name: body.last_name,
       phone_number: body.phone_number,
-      is_enabled: true,
-      email_verified: true,
-      phone_number_verified: !!body.phone_number,
+      is_enabled: true, // New users are enabled by default in mock
+      email_verified: false, // Email starts as unverified
+      phone_number_verified: false,
     };
 
     const createdUser = dbManager.addItem('authUsers', newUserPartial);
 
-    // Return UserDto fields, excluding password_hash
     const { password_hash, ...userDtoFields } = createdUser;
 
     return NextResponse.json(userDtoFields, { status: 201 });
 
-  } catch (error: any)  {
+  } catch (error: any) {
     console.error("[MOCK API /auth/register ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to register user." }, { status: 500 });
   }

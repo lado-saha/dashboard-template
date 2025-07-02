@@ -11,6 +11,7 @@ import {
 } from "@/types/organization";
 // import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
 import { UserPreferencesDto } from "@/types/user-preferences";
+import { MediaDto } from "@/types/media";
 
 export type CollectionName =
   | "authUsers"
@@ -19,7 +20,7 @@ export type CollectionName =
   | "agencies" | "employees" | "salesPersons" | "orgCustomers" | "providers" | "userPreferences"
   | "prospects" | "practicalInformation" | "certifications" | "businessDomains"
   | "organizationImages" | "thirdParties" | "proposedActivities" | "businessActors"
-  | "applicationsData" | "applicationKeysData"
+  | "applicationsData" | "applicationKeysData" | "media"
 // | "resources" 
 // | "services";
 
@@ -30,7 +31,7 @@ export interface LocalJsonDBCollections {
   orgCustomers: CustomerOrgDto[]; providers: ProviderDto[]; prospects: ProspectDto[]; practicalInformation: PracticalInformationDto[];
   certifications: CertificationDto[]; businessDomains: BusinessDomainDto[]; organizationImages: ImageDto[]; thirdParties: ThirdPartyDto[];
   proposedActivities: ProposedActivityDto[]; businessActors: BusinessActorDto[]; applicationsData: ApplicationDto[];
-  applicationKeysData: ApplicationKeyDto[];
+  applicationKeysData: ApplicationKeyDto[]; media: MediaDto[]
   // resources: ResourceDto[];
   //  services: ServiceDto[];
 }
@@ -45,8 +46,7 @@ const collectionFileMap: Record<CollectionName, string> = {
   certifications: "certifications.json", businessDomains: "business-domains.json", organizationImages: "organization-images.json",
   thirdParties: "third-parties.json", proposedActivities: "proposed-activities.json", businessActors: "business-actors.json",
   applicationsData: "applications-data.json", applicationKeysData: "application-keys.json",
-  // resources: "resources.json",
-  // services: "services.json",
+  media: "media.json"
 };
 
 // NEW: Explicit mapping of collection name to its primary ID field.
@@ -76,8 +76,7 @@ const collectionIdMap: Record<CollectionName, string> = {
   businessActors: "business_actor_id",
   applicationsData: "id",
   applicationKeysData: "public_key",
-  // resources: "resource_id",
-  // services: "service_id",
+  media: "id"
 };
 
 
