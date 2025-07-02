@@ -193,7 +193,7 @@ export function AddressList({
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-              {/* Note: The OrgAddressForm doesn&apos;n need its own Card wrapper here */}
+              {/* Note: The OrgAddressForm doesnapper here */}
               <OrgAddressForm form={form} title="" description="" />
               <DialogFooter className="mt-6 pt-4 border-t sm:justify-end">
                 <DialogClose asChild>

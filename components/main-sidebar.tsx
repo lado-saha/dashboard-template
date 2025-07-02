@@ -288,7 +288,7 @@ export function MainSidebar() {
               alt="Logo"
               width={32}
               height={32}
-              className="h-8 w-8 shrink-0"
+              className=" shrink-0"
               priority
             />
             {!isCollapsed && (

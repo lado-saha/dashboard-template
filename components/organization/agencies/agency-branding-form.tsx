@@ -34,7 +34,7 @@ export function AgencyBrandingForm() {
       <CardHeader>
         <CardTitle>Branding & Marketing</CardTitle>
         <CardDescription>
-          Define the agency&apos;y public-facing identity.
+          Define the agency public-facing identity.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

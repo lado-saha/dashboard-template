@@ -15,18 +15,17 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
 
     // This mock assumes the employee_id refers to an existing global user/BA or an employee from the main org.
     // We are "affecting" or linking them to this agency.
-    // In a real system, this might update an existing employee record&apos;d agency_id
     // or create a new employment record linking user to agency.
 
     let employee = dbManager.getItemById('employees', body.employee_id);
     if (!employee) {
-      // If not found as an employee, maybe it&apos;t a BusinessActor to be made an employee
-      // For simplicity, we&apos;el assume it should exist or we create a new one.
+      // If not found as an employee, maybe it a BusinessActor to be made an employee
+      // For simplicity, wel assume it should exist or we create a new one.
       // This mock will simply update/create an employee record with the agency_id.
       return NextResponse.json({ message: `Employee/User with ID ${body.employee_id} not found to affect to agency.` }, { status: 404 });
     }
 
-    // Update the employee&apos;e agency_id (if they were org-level) or just confirm the link
+    // Update the employee agency_id (if they were org-level) or just confirm the link
     const updatedEmployee = dbManager.updateItem('employees', body.employee_id, { agency_id: agencyId, organisation_id: orgId });
 
     if (!updatedEmployee) {

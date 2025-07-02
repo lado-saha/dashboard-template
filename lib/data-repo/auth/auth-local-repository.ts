@@ -27,7 +27,7 @@ export class AuthLocalRepository implements IAuthRepository {
     if (!response.ok) {
       const errorPayload = responseData || { message: `Request to ${endpoint} failed` };
       console.error(`[AuthLocalRepo] Mock API Error: ${response.status}`, errorPayload);
-      toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
+      // toast.error(errorPayload.message || `Mock API request failed: ${response.status}`);
       throw { status: response.status, message: errorPayload.message, data: errorPayload };
     }
     return responseData as T;

@@ -21,15 +21,15 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-// We won&apos;n call authApi.login directly here, NextAuth&apos;h CredentialsProvider will do it.
+// We won call authApi.login directly here, NextAuth CredentialsProvider will do it.
 
 const LoginSchema = z.object({
-  // According to AuthRequest, it&apos;t 'username', not email.
+  // According to AuthRequest, it 'username', not email.
   // If your backend allows email/phone for username field, this is fine.
   // Otherwise, label should be "Username".
   username: z
     .string()
-    .min(1, { message: "Username, email or phone is required." }),
+    .min(1, { message: "Username" }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -52,8 +52,8 @@ export const LoginForm = () => {
     setError(null);
     startTransition(async () => {
       try {
-        // NextAuth&apos;h signIn with 'credentials' will trigger the `authorize` callback
-        // in `[...nextauth]/route.ts`. That&apos;t where we&apos;el call our backend /api/login.
+        // NextAuth signIn with 'credentials' will trigger the `authorize` callback
+        // in `[...nextauth]/route.ts`. That where wel call our backend /api/login.
         const result = await signIn("credentials", {
           redirect: false, // Handle redirect manually after checking result
           username: values.username, // Pass username (which might be email/phone)
@@ -61,6 +61,7 @@ export const LoginForm = () => {
           // callbackUrl: callbackUrl || "/business-actor/dashboard" // signIn can handle callbackUrl
         });
 
+        
         if (result?.error) {
           console.error("SignIn Error from NextAuth:", result.error);
           // result.error might be "CredentialsSignin" or a custom error message
@@ -77,11 +78,11 @@ export const LoginForm = () => {
           );
         } else if (result?.ok) {
           toast.success("Login successful! Redirecting...");
-          // router.push(callbackUrl || "/business-actor/dashboard"); // Default if signIn doesn&apos;n redirect
+          // router.push(callbackUrl || "/business-actor/dashboard"); // Default if signIn doesn redirect
           // router.refresh(); // Important to update session state everywhere
           // If signIn is configured with redirect: true (default), this manual push might not be needed.
-          // For now, let&apos;t rely on NextAuth&apos;h default redirect or callbackUrl handling if `redirect:false` isn&apos;n used.
-          // If it still doesn&apos;n redirect, we might need a window.location.href = callbackUrl || '/default-path'
+          // For now, let rely on NextAuth default redirect or callbackUrl handling if `redirect:false` isn used.
+          // If it still doesn redirect, we might need a window.location.href = callbackUrl || '/default-path'
           window.location.href = callbackUrl || "/business-actor/dashboard";
         } else {
           setError("An unexpected error occurred during login.");
@@ -99,7 +100,7 @@ export const LoginForm = () => {
     <AuthCardWrapper
       title="Welcome Back"
       description="Sign in to access your dashboard"
-      backButtonLabel="Don&apos;n have an account? Sign Up"
+      backButtonLabel="Do not have an account? Sign Up"
       backButtonHref="/signup"
     >
       <Form {...form}>
@@ -174,7 +175,7 @@ export const LoginForm = () => {
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Login Failed</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>Something went wrong</AlertDescription>
             </Alert>
           )}
 

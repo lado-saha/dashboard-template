@@ -6,7 +6,7 @@ import { OrganizationTableRow } from '@/types/organization';
 
 export async function GET(_request: Request) {
   // For mock, assume all orgs in organizationsTableRows are for "current user"
-  // In a real app, you&apos;u filter by authenticated user ID.
+  // In a real app, you filter by authenticated user ID.
   try {
     const orgs = dbManager.getCollection('organizationsTableRows');
     return NextResponse.json(orgs);

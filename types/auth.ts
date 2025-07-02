@@ -101,8 +101,8 @@ export interface CreatePermissionRequest {
 }
 
 export interface AuthRequest {
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
 }
 
 export interface AccessToken {
@@ -129,9 +129,9 @@ export interface LoginResponse {
   permissions?: string[];
 }
 
-// Generic API response for some endpoints that don&apos;n return specific DTOs directly
+// Generic API response for some endpoints that Do not eturn specific DTOs directly
 // but wrap it in an ApiResponse. For example, a GET that might return 400.
-// This is a placeholder; you&apos;u refine this based on actual error structures if needed.
+// This is a placeholder; you refine this based on actual error structures if needed.
 export interface GenericApiResponse<T = any> {
   status?: "SUCCESS" | "FAILED" | "UNKNOWN";
   message?: string;

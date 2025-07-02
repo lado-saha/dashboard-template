@@ -47,7 +47,7 @@ const SignUpSchema = z
     phone_number: z.string().optional().or(z.literal("")), // Add validation if needed e.g. .regex(/^\+[1-9]\d{1,14}$/, "Invalid phone number")
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don&apos;n match",
+    message: "Passwords Do not atch",
     path: ["confirmPassword"], // path of error
   });
 
@@ -88,9 +88,6 @@ export const SignUpForm = () => {
           ...(values.phone_number && { phone_number: values.phone_number }),
         };
 
-        const roles = await authRepository.getRoles()
-        console.log(`My ${roles} r`)
-
         const registeredUser = await authRepository.register(requestPayload);
         toast.success(
           `Account for ${registeredUser.username} created! Redirecting to login...`
@@ -101,9 +98,9 @@ export const SignUpForm = () => {
           router.push("/login");
         }, 2000);
       } catch (err: any) {
-        console.error("Sign Up Error:", err);
+        // console.error("Sign Up Error:", err);
         const apiErrorMessage =
-          err.data?.message ||
+          // err.data?.message ||
           err.message ||
           "An unknown error occurred during sign up.";
         setError(apiErrorMessage);

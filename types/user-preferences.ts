@@ -27,7 +27,7 @@ export interface UserDisplayPreferences {
   theme: "light" | "dark" | "system";
   layout: "default" | "compact" | "expanded";
   timezone?: string;
-  profilePhotoUrl?: string; // NEW: For user&apos;r uploaded photo
+  profilePhotoUrl?: string; // NEW: For user uploaded photo
 }
 
 export interface UserPreferencesDto {

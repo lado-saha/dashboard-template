@@ -88,7 +88,7 @@ export function MapComponent({
   onToggleFullscreenAction,
 }: MapComponentProps) {
   const handleToggleFullscreen = (e: React.MouseEvent) => {
-    // CRITICAL: Stop the event from bubbling up to the map&apos;p click listener
+    // CRITICAL: Stop the event from bubbling up to the map click listener
     e.stopPropagation();
     if (onToggleFullscreenAction) {
       onToggleFullscreenAction();
@@ -99,7 +99,7 @@ export function MapComponent({
     shadowUrl: "/maps/marker-shadow.png",
     iconSize: [22, 32],
     shadowSize: [41, 41], // size of the shadow
-    iconAnchor: [22, 64], // point of the icon which will correspond to marker&apos;r location
+    iconAnchor: [22, 64], // point of the icon which will correspond to marker location
     shadowAnchor: [24, 72], // the same for the shadow
     popupAnchor: [-11, -62], // point from which the popup should open relative to the iconAnchor
   });

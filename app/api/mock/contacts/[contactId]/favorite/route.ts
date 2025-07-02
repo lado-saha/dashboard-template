@@ -4,7 +4,6 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 // import { ContactDto } from '@/types/organization';
 
 // Spec says GET for favorite, which is unusual for a state change.
-// Implementing as PUT for the mock as it&apos;t more conventional for updates.
 export async function PUT(_request: NextRequest, { params }: { params: { contactId: string } }) {
   try {
     const { contactId } = await params;

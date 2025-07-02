@@ -175,7 +175,7 @@ export function EmployeeForm({
       <CardHeader>
         <CardTitle>Employee Identity & Role</CardTitle>
         <CardDescription>
-          Enter the employee&apos;e personal and professional details.
+          Enter the employee personal and professional details.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

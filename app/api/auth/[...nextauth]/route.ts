@@ -1,123 +1,92 @@
-import NextAuth, { type NextAuthOptions, User as NextAuthUser } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { authRepository } from '@/lib/data-repo/auth'; // Updated import path
-import { AuthRequest, LoginResponse } from "@/types/auth";
-
-interface ExtendedUser extends Omit<NextAuthUser, 'id' | 'name' | 'email'> {
-  id: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  name?: string | null;
-  email?: string | null;
-  phone_number?: string;
-  email_verified?: boolean;
-  phone_number_verified?: boolean;
-  accessToken: string;
-  roles?: string[];
-  permissions?: string[];
-}
+import { authRepository } from "@/lib/data-repo/auth";
+import { LoginRequest } from "@/types/auth";
+import { User } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
+  // 1. Configure session strategy to use JSON Web Tokens
+  session: {
+    strategy: "jwt",
+  },
+  // 2. Define authentication providers
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Credentials",
+      // Define the fields for your login form
       credentials: {
-        username: { label: "Username, Email or Phone", type: "text" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials): Promise<ExtendedUser | null> {
+      // 3. The authorization logic
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.username || !credentials?.password) {
-          console.error("[NextAuth] Missing credentials in authorize callback");
-          throw new Error("Missing username or password.");
+          throw new Error("Username and password are required.");
         }
 
-        const authRequest: AuthRequest = {
-          username: credentials.username,
-          password: credentials.password,
-        };
-
         try {
-          console.log(`[NextAuth] Attempting login via authRepository for: ${authRequest.username}`);
-          // Use the authRepository to call either local mock API or remote Yowyob API
-          const loginResponse: LoginResponse = await authRepository.login(authRequest);
+          const loginRequest: LoginRequest = {
+            username: credentials.username,
+            password: credentials.password,
+          };
 
-          if (loginResponse && loginResponse.access_token?.token && loginResponse.user) {
-            const backendUser = loginResponse.user;
-            console.log(`[NextAuth] Login via authRepository successful for: ${backendUser.username}`);
+          // Use the repository to login (works for both local and remote)
+          const loginResponse = await authRepository.login(loginRequest);
 
-            const user: ExtendedUser = {
-              id: backendUser.id || `fallback-id-${Date.now()}`,
-              name: `${backendUser.first_name || ""} ${backendUser.last_name || ""}`.trim() || backendUser.username || null,
-              email: backendUser.email || null,
-              username: backendUser.username,
-              first_name: backendUser.first_name,
-              last_name: backendUser.last_name,
-              phone_number: backendUser.phone_number,
-              email_verified: backendUser.email_verified,
-              phone_number_verified: backendUser.phone_number_verified,
-              accessToken: loginResponse.access_token.token,
-              roles: loginResponse.roles,
-              permissions: loginResponse.permissions,
+          if (loginResponse && loginResponse.user) {
+            // If login is successful, map the response to the NextAuth User object
+            // You can add any properties from your API response here
+            return {
+              id: loginResponse.user.id,
+              name: `${loginResponse.user.first_name} ${loginResponse.user.last_name}`,
+              email: loginResponse.user.email,
+              accessToken: loginResponse.access_token, // Custom property
+              roles: loginResponse.user.roles, // Custom property
+              permissions: loginResponse.user.permissions, // Custom property
             };
-            return user;
           } else {
-            console.warn(`[NextAuth] Login via authRepository failed or response malformed for: ${authRequest.username}`, loginResponse);
-            throw new Error("Invalid credentials or malformed response from authentication service.");
+            // If login fails, return null
+            return null;
           }
-        } catch (error: any)  {
-          console.error("[NextAuth] Error during login via authRepository:", error.message || error);
-          throw new Error(error.message || "Authentication failed.");
+        } catch (error: any) {
+          // You can log the error and customize the message
+          console.error("Authorize Error:", error);
+          throw new Error(error.message || "Invalid credentials");
         }
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
-  jwt: {}, // secret handled by NEXTAUTH_SECRET
-  pages: {
-    signIn: "/login",
-  },
+  // 4. Callbacks for JWT and Session management
   callbacks: {
+    // This callback is called whenever a JWT is created or updated.
+    // The `user` object is only passed on initial sign in.
     async jwt({ token, user, account }) {
       if (account && user) {
-        const extendedUser = user as ExtendedUser;
-        token.accessToken = extendedUser.accessToken;
-        token.id = extendedUser.id;
-        token.username = extendedUser.username;
-        token.roles = extendedUser.roles;
-        token.permissions = extendedUser.permissions;
-        token.first_name = extendedUser.first_name;
-        token.last_name = extendedUser.last_name;
-        token.email = extendedUser.email;
-        token.name = extendedUser.name;
-        token.phone_number = extendedUser.phone_number;
-        token.email_verified = extendedUser.email_verified;
-        token.phone_number_verified = extendedUser.phone_number_verified;
+        // Persist the custom properties from the User object to the token
+        token.accessToken = user.accessToken;
+        token.roles = user.roles;
+        token.permissions = user.permissions;
+        token.id = user.id;
       }
       return token;
     },
+    // This callback is called whenever a session is checked.
     async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as ExtendedUser).id = token.id as string;
-        (session.user as ExtendedUser).username = token.username as string;
-        (session.user as ExtendedUser).accessToken = token.accessToken as string;
-        (session.user as ExtendedUser).roles = token.roles as string[];
-        (session.user as ExtendedUser).permissions = token.permissions as string[];
-        (session.user as ExtendedUser).first_name = token.first_name as string;
-        (session.user as ExtendedUser).last_name = token.last_name as string;
-        session.user.email = token.email as string | null | undefined;
-        session.user.name = token.name as string | null | undefined;
-        (session.user as ExtendedUser).phone_number = token.phone_number as string;
-        (session.user as ExtendedUser).email_verified = token.email_verified as boolean;
-        (session.user as ExtendedUser).phone_number_verified = token.phone_number_verified as boolean;
-      }
+      // Pass the properties from the token to the client-side session object
+      session.user.accessToken = token.accessToken as string;
+      session.user.roles = token.roles as string[];
+      session.user.permissions = token.permissions as string[];
+      session.user.id = token.id as string;
+
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  // 5. Define custom pages
+  pages: {
+    signIn: "/login",
+    error: "/login", // Redirect to login page on error
+  },
 };
 
 const handler = NextAuth(authOptions);

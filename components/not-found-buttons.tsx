@@ -2,7 +2,7 @@
 "use client"; // <-- Mark as Client Component
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Use App Router&apos;r router
+import { useRouter } from 'next/navigation'; // Use App Router router
 import { ArrowLeft } from 'lucide-react'; // Add ArrowLeft icon
 
 import { Button } from '@/components/ui/button';

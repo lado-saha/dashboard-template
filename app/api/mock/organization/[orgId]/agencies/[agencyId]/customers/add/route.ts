@@ -15,7 +15,6 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     // In a real system, this would link an existing global customer/BA to this agency.
     // For mock, we might check if a customer with this ID exists in a global customer list or BA list,
     // then create/update an entry in 'orgCustomers' linking them.
-    // For simplicity, let&apos;t assume we are updating an existing orgCustomer or creating one if it doesn&apos;n exist.
 
     let customer = dbManager.getItemById('orgCustomers', body.customer_id); // Check if customer record exists
 

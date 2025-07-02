@@ -8,7 +8,6 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     const { orgId } = await params;
     // Actual FormData parsing is complex in Next.js Edge/Node runtime for API routes.
     // This mock will just assume success and return some dummy ImageDto objects.
-    // In a real scenario, you&apos;u parse formData, save files, and generate URLs.
     console.warn("Mock image upload for org:", orgId, "- returning dummy data.");
 
     const dummyImages: ImageDto[] = [

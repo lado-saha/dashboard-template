@@ -49,7 +49,7 @@ export default function OrganizationProfilePage() {
             (addresses.length > 0 ? addresses[0] : null);
           setDefaultAddress(defaultAddr);
         } catch (error: any) {
-          toast.error("Could not load organization&apos;n default address.");
+          toast.error("Could not load organization default address.");
         } finally {
           setIsLoadingAddress(false);
         }
@@ -110,7 +110,7 @@ export default function OrganizationProfilePage() {
             <CardHeader>
               <CardTitle>Edit Organization Details</CardTitle>
               <CardDescription>
-                Modify your organization&apos;n core information. Changes are saved
+                Modify your organization core information. Changes are saved
                 upon submission.
               </CardDescription>
             </CardHeader>
@@ -161,7 +161,7 @@ export default function OrganizationProfilePage() {
           Organization Settings
         </h1>
         <p className="text-muted-foreground">
-          Manage your organization&apos;n profile, addresses, and contacts.
+          Manage your organization profile, addresses, and contacts.
         </p>
       </div>
       {/* THE FIX: Reordered for mobile-first, adjusted grid spans for large screens */}

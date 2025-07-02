@@ -65,7 +65,7 @@ interface ApiErrorResponse {
 }
 
 const YOWYOB_AUTH_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_AUTH_SERVICE_BASE_URL;
-const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_ORGANIZATION_SERVICE_BASE_URL;
+const YOWYOB_ORGANIZATION_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_ORGANIZATION_SERVICE_BASE_URL;
 const CLIENT_BASIC_AUTH_TOKEN = process.env.NEXT_PUBLIC_AUTH_SERVICE_BEARER_TOKEN;
 
 const PROXY_PATH = "/api/proxy"; // All requests go through here
@@ -74,6 +74,9 @@ interface YowyobRequestOptions extends RequestInit {
   isFormData?: boolean;
   useClientBasicAuth?: boolean;
 }
+
+
+
 export async function yowyobApiRequest<T = any>(
   serviceBaseUrl: string | undefined,
   endpoint: string,
@@ -93,17 +96,17 @@ export async function yowyobApiRequest<T = any>(
     'X-Target-URL': targetUrl,
   };
 
-  const session = await getSession();
-  if (session?.user?.accessToken) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${session.user.accessToken}`;
-  }
-  else if (CLIENT_BASIC_AUTH_TOKEN) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
-  }
+  // const session = await getSession();
+  // if (session?.user?.accessToken) {
+  //   (headers as Record<string, string>)['Authorization'] = `Bearer ${session.user.accessToken}`;
+  // }
+  // else if (CLIENT_BASIC_AUTH_TOKEN) {
+  (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
+  // }
 
   // THE FIX: The URL for the fetch call must match the dynamic route pattern.
   // We append a generic slug that doesn't affect logic but satisfies routing.
-  const fullUrl = `${process.env.NEXTAUTH_URL}${PROXY_PATH}/request`;
+  const fullUrl = `${process.env.NEXT_PUBLIC_URL}${PROXY_PATH}/request`;
   const config: RequestInit = { ...options, headers };
 
   try {
@@ -134,7 +137,6 @@ export async function yowyobApiRequest<T = any>(
     throw error;
   }
 }
-
 // All API objects below remain unchanged, they will automatically use the proxy.
 export const yowyobAuthApi = {
   register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
@@ -142,7 +144,7 @@ export const yowyobAuthApi = {
   getUserByUsername: (username: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/username/${username}`, { method: "GET" }),
   getUserByPhoneNumber: (phoneNumber: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/phone-number/${phoneNumber}`, { method: "GET" }),
   getUserByEmail: (email: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/email/${email}`, { method: "GET" }),
-  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: true }, true),
+  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), useClientBasicAuth: false }, true),
   getCurrentUser: () => yowyobApiRequest<UserInfo>(YOWYOB_AUTH_API_BASE_URL, "/api/user", { method: "GET" }),
   getRoles: () => yowyobApiRequest<RoleDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "GET" }),
   createRole: (data: CreateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "POST", body: JSON.stringify(data) }),

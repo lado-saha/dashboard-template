@@ -29,10 +29,10 @@ function getOrCreateUserPreferences(userId: string): UserPreferencesDto {
     //   updated_at: new Date().toISOString(),
     // };
     // The addItem in dbManager now uses 'user_id' as the 'id' for this collection if provided.
-    // Let&apos;t ensure we are consistent. If addItem generates its own 'id', we need to query by user_id.
-    // For simplicity, let&apos;t assume userPreferences items are stored with 'user_id' as their main lookup key.
+    // Let ensure we are consistent. If addItem generates its own 'id', we need to query by user_id.
+    // For simplicity, let assume userPreferences items are stored with 'user_id' as their main lookup key.
     // This means getItemById and updateItem in dbManager might need adjustment for this collection.
-    // OR, we store a separate 'id' and also 'user_id'. Let&apos;t stick to 'user_id' as the primary key here for this collection.
+    // OR, we store a separate 'id' and also 'user_id'. Let stick to 'user_id' as the primary key here for this collection.
 
     // Modified to ensure 'user_id' is the key for this collection.
     const collection = dbManager.getCollection('userPreferences');
@@ -88,7 +88,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { userId:
         privacy: { ...defaultPrivacyPrefsForMock },
       };
       collection.push(currentPrefs);
-      itemIndex = collection.length - 1; // It&apos;t now the last item
+      itemIndex = collection.length - 1; // It now the last item
     }
 
     const updatedData: UserPreferencesDto = {

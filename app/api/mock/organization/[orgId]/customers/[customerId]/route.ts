@@ -7,7 +7,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId, customerId } = await params;
     const customer = dbManager.getItemById('orgCustomers', customerId);
-    if (!customer || customer.organization_id !== orgId) { // Ensure it&apos;t for THIS org if not agency specific
+    if (!customer || customer.organization_id !== orgId) { // Ensure it for THIS org if not agency specific
       return NextResponse.json({ message: `Customer ${customerId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(customer);

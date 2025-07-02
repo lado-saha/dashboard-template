@@ -11,7 +11,7 @@ export class MapLocalRepository implements IMapRepository {
     const response = await fetch(`${MOCK_GEO_API_BASE}${endpoint}`);
     if (!response.ok) {
       const error = new Error(`Mock Geo API Error: ${response.statusText}`);
-      toast.error("Mock map service failed.");
+      // toast.error("Mock map service failed.");
       throw error;
     }
     return response.json();

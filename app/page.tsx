@@ -219,7 +219,6 @@ const RoleCard: React.FC<RoleCardProps> = ({ icon: Icon, title, description }) =
 );
 interface RoleCardProps { icon: React.ElementType; title: string; description: string;}
 
-// Add this CSS to globals.css if you haven&apos;n already
 /*
 
 */

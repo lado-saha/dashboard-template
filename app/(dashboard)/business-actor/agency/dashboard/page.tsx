@@ -33,7 +33,7 @@ export default function AgencyDashboardPage() {
         <p>Welcome to the dashboard for {activeAgencyDetails.short_name}.</p>
         <p className="mt-4 p-4 border-2 border-dashed rounded-lg">
           This area will contain charts, KPIs, and summaries specific to this
-          agency&apos;y performance.
+          agency's performance.
         </p>
       </CardContent>
     </Card>

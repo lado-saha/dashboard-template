@@ -32,8 +32,8 @@ const basicInfoSchema = z.object({
   location: z.string().min(2, "Location is required."),
   description: z.string().max(500).optional(),
   business_domains: z
-    .array(z.string())
-    .min(1, "At least one business domain is required."),
+    .array(z.string()),
+    // .min(1, "At least one business domain is required."),
   transferable: z.boolean().default(false),
 });
 const legalSchema = z.object({

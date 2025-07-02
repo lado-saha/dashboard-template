@@ -842,7 +842,7 @@ export default function UnifiedSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Info className="mr-2 h-5 w-5" />
-              What&apos;t New
+              What is New
             </CardTitle>
           </CardHeader>
           <CardContent>

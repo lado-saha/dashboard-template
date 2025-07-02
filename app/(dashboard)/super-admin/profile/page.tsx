@@ -2,7 +2,6 @@
 import { redirect } from 'next/navigation';
 
 export default function SuperAdminProfilePage() {
-  // Redirecting to the main settings page&apos;e account tab
   // Adjust the target tab if needed (e.g., using query params if implemented)
   redirect('/super-admin/settings');
 

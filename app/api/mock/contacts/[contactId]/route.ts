@@ -7,7 +7,6 @@ export async function GET(_request: NextRequest, { params }: { params: { contact
   try {
     const { contactId } = await params;
     // Note: For GET by ID, contactable_type and contactable_id might also be needed for security/scoping in a real API.
-    // For mock, we&apos;el assume contactId is unique enough.
     const contact = dbManager.getItemById('contacts', contactId);
     if (!contact) {
       return NextResponse.json({ message: `Contact with ID ${contactId} not found.` }, { status: 404 });

@@ -7,7 +7,7 @@ export default function AgencyProfilePage() {
       </CardHeader>
       <CardContent>
         <p>
-          This page will contain a form to edit the active agency&apos;y details.
+          This page will contain a form to edit the active agency's details.
         </p>
       </CardContent>
     </Card>

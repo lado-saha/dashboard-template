@@ -16,7 +16,7 @@ export default function CreateOrganizationPage() {
     // Set the newly created organization as active
     if (newOrgData.organization_id) {
       await setActiveOrganization(newOrgData.organization_id, newOrgData);
-      // Redirect to the new organization&apos;n profile page
+      // Redirect to the new organization's profile page
       router.push(`/business-actor/org/profile`);
     } else {
       // Fallback if ID is missing

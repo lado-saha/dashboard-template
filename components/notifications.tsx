@@ -42,7 +42,7 @@ const notifications = [
   {
     id: 5,
     title: "New Offer",
-    message: "You&apos;ue eligible for a new savings account with higher interest!",
+    message: "Youe eligible for a new savings account with higher interest!",
     date: "2023-07-11",
     icon: Gift,
     color: "text-purple-500",

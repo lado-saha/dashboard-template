@@ -442,7 +442,7 @@ export default function ManageCertificationsPage() {
                     No Certifications Added Yet
                   </h3>
                   <p className="text-sm">
-                    Add your organization&apos;n awards and certifications.
+                    Add your organization's awards and certifications.
                   </p>
                   <Button
                     onClick={() => handleOpenFormModal()}

@@ -1,6 +1,6 @@
 // types/map.ts
 
-// Simplified structure for Nominatim&apos;m reverse geocoding response
+// Simplified structure for Nominatim reverse geocoding response
 export interface ReverseGeocodeResponse {
   place_id: number;
   licence: string;
@@ -24,7 +24,7 @@ export interface ReverseGeocodeResponse {
   boundingbox: string[];
 }
 
-// Simplified structure for Nominatim&apos;m forward geocoding (search) response
+// Simplified structure for Nominatim forward geocoding (search) response
 export interface GeocodeResponse {
   place_id: number;
   licence: string;

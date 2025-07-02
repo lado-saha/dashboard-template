@@ -41,7 +41,6 @@ const fullOrganizationSchema = basicInfoSchema
   .extend({
     business_domains: z
       .array(z.string())
-      .min(1, "At least one business domain is required."),
   });
 
 type OrganizationFormData = z.infer<typeof fullOrganizationSchema>;
@@ -228,17 +227,17 @@ export function OrganizationForm({
     );
 
     let isDomainValid = true;
-    if (currentStep === 0) {
-      if (form.getValues("business_domains").length === 0) {
-        form.setError("business_domains", {
-          type: "manual",
-          message: "At least one business domain is required.",
-        });
-        isDomainValid = false;
-      } else {
-        form.clearErrors("business_domains");
-      }
-    }
+    // if (currentStep === 0) {
+    //   if (form.getValues("business_domains").length === 0) {
+    //     form.setError("business_domains", {
+    //       type: "manual",
+    //       message: "At least one business domain is required.",
+    //     });
+    //     isDomainValid = false;
+    //   } else {
+    //     form.clearErrors("business_domains");
+    //   }
+    // }
     if (isStepValid && isDomainValid) {
       if (currentStep < formSteps.length - 1) {
         const nextStepId = formSteps[currentStep + 1].id;

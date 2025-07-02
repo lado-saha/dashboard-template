@@ -1,5 +1,4 @@
 @import "tailwindcss";
-/* Removed tw-animate-css import as it&apos;t unused; uncomment if needed */
 /* @import "tw-animate-css"; */
 
 /* Define the custom variant for dark mode (unchanged) */

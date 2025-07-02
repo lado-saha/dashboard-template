@@ -7,7 +7,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId } = await params;
     const allCustomers = dbManager.getCollection('orgCustomers');
-    // Filter for customers directly under the organization (no agency_id or agency_id matches orgId if that&apos;t the convention)
+    // Filter for customers directly under the organization (no agency_id or agency_id matches orgId if that the convention)
     const orgCustomers = allCustomers.filter(c => c.organization_id === orgId && (!c.agency_id || c.agency_id === orgId));
     return NextResponse.json(orgCustomers);
   } catch (error: any)  {
