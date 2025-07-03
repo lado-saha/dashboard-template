@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardUI } from "@/components/dashboard-ui";
+import { MainSidebar } from "@/components/main-sidebar"; // THE FIX: Using the dynamic sidebar directly
 import { TopNav } from "@/components/top-nav";
 import { ActiveOrganizationProvider } from "@/contexts/active-organization-context";
 
@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <ActiveOrganizationProvider>
       <div className="flex min-h-screen">
-        <DashboardUI />
+        <MainSidebar /> {/* THE FIX: Sidebar is now dynamic and handles role logic itself */}
 
         <div className="flex flex-1 flex-col overflow-x-hidden">
           <TopNav />

@@ -38,7 +38,7 @@ interface ImageUploaderProps {
 export function ImageUploader({
   currentImageUrl,
   onImageSelectedAction,
-  label = "Profile Photo",
+  label = "",
   aspectRatio = "square",
   fallbackName = "User",
   className,

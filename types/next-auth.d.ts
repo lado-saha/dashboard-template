@@ -13,6 +13,7 @@ interface ExtendedUser extends DefaultUser {
   accessToken?: string;
   roles?: string[];
   permissions?: string[];
+  businessActorId?: string | null;
 }
 
 declare module "next-auth" {

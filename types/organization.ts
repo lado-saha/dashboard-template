@@ -311,7 +311,9 @@ export interface EmployeeDto extends Auditable {
 
 // --- Business Actor (as per Organization Service Spec) ---
 export type BusinessActorType = "PROVIDER" | "CUSTOMER" | "SALESPERSON" | "CLIENT" | "FREELANCE_DRIVER" | "FARMER" | "AGENCY" | "VEHICLE_RENTAL" | "GUEST";
+export const BusinessActorTypeValues: [BusinessActorType, ...BusinessActorType[]] = ["PROVIDER", "CUSTOMER", "SALESPERSON", "CLIENT", "FREELANCE_DRIVER", "FARMER", "AGENCY", "VEHICLE_RENTAL", "GUEST"];
 export type Gender = "MALE" | "FEMALE";
+export const GenderValues: [Gender, ...Gender[]] = ["MALE", "FEMALE"];
 
 export interface CreateBusinessActorRequest { // Used for POST /business-actors
   first_name: string;
@@ -327,7 +329,6 @@ export interface CreateBusinessActorRequest { // Used for POST /business-actors
   profession?: string;
   biography?: string;
   type?: BusinessActorType; // Role within this service context
-  // user_id?: string; // To link to User from Auth Service
 }
 export interface UpdateBusinessActorRequest extends Partial<Omit<CreateBusinessActorRequest, 'user_id'>> { }
 

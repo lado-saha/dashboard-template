@@ -1,8 +1,9 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authRepository } from "@/lib/data-repo/auth";
-import { LoginRequest } from "@/types/auth";
+import { AuthRequest } from "@/types/auth";
 import { User } from "next-auth";
+import { organizationRepository } from "@/lib/data-repo/organization";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -21,15 +22,32 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Username and password are required.");
         }
         try {
-          const loginRequest: LoginRequest = {
+          const loginRequest: AuthRequest = {
             username: credentials.username,
             password: credentials.password,
           };
           const loginResponse = await authRepository.login(loginRequest);
+
           if (loginResponse && loginResponse.user && loginResponse.access_token) {
-            // Map the nested user and token info to the NextAuth User object
+            const userId = loginResponse.user.id;
+            if (!userId) {
+              throw new Error("User ID is missing from login response.");
+            }
+
+            // **NEW LOGIC**: Check if user is a Business Actor
+            let businessActorProfile = null;
+            try {
+              businessActorProfile = await organizationRepository.getBusinessActorById(userId);
+            } catch (error: any) {
+              // A 404 is expected for normal users, so we ignore it.
+              // Any other error should be logged but not block login.
+              if (error.status !== 404) {
+                console.error("Error fetching Business Actor profile during login:", error.message);
+              }
+            }
+
             return {
-              id: loginResponse.user.id!,
+              id: userId,
               name: `${loginResponse.user.first_name} ${loginResponse.user.last_name}`,
               email: loginResponse.user.email,
               username: loginResponse.user.username,
@@ -41,6 +59,8 @@ export const authOptions: NextAuthOptions = {
               accessToken: loginResponse.access_token.token,
               roles: loginResponse.roles,
               permissions: loginResponse.permissions,
+              // **"POISON" THE SESSION HERE**
+              businessActorId: businessActorProfile?.business_actor_id || null,
             };
           }
           return null;
@@ -53,7 +73,6 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // The `user` object is the one returned from `authorize` on initial sign in.
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -65,11 +84,12 @@ export const authOptions: NextAuthOptions = {
         token.phone_number = user.phone_number;
         token.email_verified = user.email_verified;
         token.phone_number_verified = user.phone_number_verified;
+        // **Pass the new property to the token**
+        token.businessActorId = user.businessActorId;
       }
       return token;
     },
     async session({ session, token }) {
-      // Pass all the properties from the token to the client-side session object.
       if (token) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
@@ -81,6 +101,8 @@ export const authOptions: NextAuthOptions = {
         session.user.phone_number = token.phone_number as string;
         session.user.email_verified = token.email_verified as boolean;
         session.user.phone_number_verified = token.phone_number_verified as boolean;
+        // **Pass the new property to the session**
+        session.user.businessActorId = token.businessActorId as string | null;
       }
       return session;
     },

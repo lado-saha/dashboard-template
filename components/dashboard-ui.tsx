@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { MainSidebar } from "@/components/main-sidebar";
 import { AgencySidebar } from "@/components/organization/agencies/agency-sidebar";
+// import { Sidebar } from "@/components/main-sidebar";
 
 export function DashboardUI() {
   const pathname = usePathname();

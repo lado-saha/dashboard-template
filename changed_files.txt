@@ -1,0 +1,948 @@
+diff --git a/app/(dashboard)/business-actor/agency/status/page.tsx b/app/(dashboard)/business-actor/agency/status/page.tsx
+deleted file mode 100644
+index 6d1d3da..0000000
+--- a/app/(dashboard)/business-actor/agency/status/page.tsx
++++ /dev/null
+@@ -1,16 +0,0 @@
+-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+-export default function AgencyStatusPage() {
+-  return (
+-    <Card>
+-      <CardHeader>
+-        <CardTitle>Agency Status Management</CardTitle>
+-      </CardHeader>
+-      <CardContent>
+-        <p>
+-          This page will allow managing the active/inactive status and other
+-          operational states of the agency.
+-        </p>
+-      </CardContent>
+-    </Card>
+-  );
+-}
+diff --git a/app/api/auth/[...nextauth]/route.ts b/app/api/auth/[...nextauth]/route.ts
+index a45c73a..5264b3e 100644
+--- a/app/api/auth/[...nextauth]/route.ts
++++ b/app/api/auth/[...nextauth]/route.ts
+@@ -1,7 +1,7 @@
+ import NextAuth, { NextAuthOptions } from "next-auth";
+ import CredentialsProvider from "next-auth/providers/credentials";
+ import { authRepository } from "@/lib/data-repo/auth";
+-import { LoginRequest } from "@/types/auth";
++import { AuthRequest } from "@/types/auth";
+ import { User } from "next-auth";
+ 
+ export const authOptions: NextAuthOptions = {
+@@ -21,11 +21,11 @@ export const authOptions: NextAuthOptions = {
+           throw new Error("Username and password are required.");
+         }
+         try {
+-          const loginRequest: LoginRequest = {
++          const AuthRequest: AuthRequest = {
+             username: credentials.username,
+             password: credentials.password,
+           };
+-          const loginResponse = await authRepository.login(loginRequest);
++          const loginResponse = await authRepository.login(AuthRequest);
+           if (loginResponse && loginResponse.user && loginResponse.access_token) {
+             // Map the nested user and token info to the NextAuth User object
+             return {
+diff --git a/app/api/mock/media/[service]/[type]/[path]/[filename]/route.ts b/app/api/mock/media/[service]/[type]/[path]/[filename]/route.ts
+deleted file mode 100644
+index fc33eb7..0000000
+--- a/app/api/mock/media/[service]/[type]/[path]/[filename]/route.ts
++++ /dev/null
+@@ -1,23 +0,0 @@
+-// For DELETE
+-import { NextResponse, NextRequest } from 'next/server';
+-import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
+-import { MediaDto, ServiceType, MediaType } from '@/types/media';
+-
+-interface RouteParams {
+-    params: { service: ServiceType; type: MediaType; path: string; filename: string; }
+-}
+-
+-export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+-    const allMedia = dbManager.getCollection('media');
+-    const locationToDelete = `${params.path}/${params.filename}`;
+-
+-    const initialLength = allMedia.length;
+-    const filteredMedia = allMedia.filter(m => m.location !== locationToDelete);
+-
+-    if (filteredMedia.length < initialLength) {
+-        dbManager.saveCollection('media', filteredMedia);
+-        return NextResponse.json(true, { status: 200 });
+-    } else {
+-        return NextResponse.json({ message: "File not found" }, { status: 404 });
+-    }
+-}
+\ No newline at end of file
+diff --git a/app/api/mock/media/[service]/[type]/[path]/[resource_id]/route.ts b/app/api/mock/media/[service]/[type]/[path]/[resource_id]/route.ts
+index cac74e3..7b3f7ee 100644
+--- a/app/api/mock/media/[service]/[type]/[path]/[resource_id]/route.ts
++++ b/app/api/mock/media/[service]/[type]/[path]/[resource_id]/route.ts
+@@ -1,53 +1,85 @@
+-// For POST (upload metadata) and GET (get metadata list)
+ import { NextResponse, NextRequest } from 'next/server';
+ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
+ import { MediaDto, UploadMediaResponse, ServiceType, MediaType } from '@/types/media';
+ 
+ interface RouteParams {
+-    params: { service: ServiceType; type: MediaType; path: string; resource_id: string; }
++    params: { 
++        service: ServiceType; 
++        type: MediaType; 
++        path: string; 
++        resource_id: string; // This segment can be a resource_id for GET/POST or a filename for DELETE
++    }
+ }
+ 
+ // GET /media/infos/{service}/{type}/{path}/{resource_id}
+-export async function GET(_req: NextRequest, { params }: RouteParams) {
+-    const allMedia = dbManager.getCollection('media');
+-    const resourceMedia = allMedia.filter(m => 
+-        m.resource_id === params.resource_id &&
+-        m.service === params.service &&
+-        m.type === params.type &&
+-        m.location?.startsWith(params.path)
+-    );
+-    return NextResponse.json(resourceMedia);
++export async function GET(req: NextRequest, { params }: RouteParams) {
++    const { resource_id, service, type, path } = params;
++    try {
++        const allMedia = dbManager.getCollection('media');
++        const resourceMedia = allMedia.filter(m => 
++            m.resource_id === resource_id &&
++            m.service === service &&
++            m.type === type &&
++            m.location?.startsWith(path)
++        );
++        return NextResponse.json(resourceMedia);
++    } catch (error: any) {
++        return NextResponse.json({ message: "Failed to get media info", error: error.message }, { status: 500 });
++    }
+ }
+ 
+ // POST /media/{service}/{type}/{path}/{resource_id}
+ export async function POST(req: NextRequest, { params }: RouteParams) {
+     const { resource_id, service, type, path } = params;
+-    // In mock, we get metadata, not the actual file blob
+-    const body = await req.json(); 
++    try {
++        const body = await req.json(); 
++
++        const newMedia: Omit<MediaDto, 'id' | 'created_at' | 'updated_at'> = {
++            name: body.fileName,
++            real_name: `mock_${Date.now()}_${body.fileName}`,
++            size: body.fileSize,
++            mime: body.fileType,
++            extension: body.fileName.split('.').pop() || '',
++            is_primary: body.isPrimary || false,
++            description: body.description,
++            location: `${path}/mock_${Date.now()}_${body.fileName}`,
++            resource_id,
++            service,
++            type,
++        };
++        const createdMedia = dbManager.addItem('media', newMedia);
++        
++        const response: UploadMediaResponse = {
++            id: createdMedia.id,
++            resourceId: createdMedia.resource_id,
++            url: `https://picsum.photos/seed/${createdMedia.id}/400/300`, 
++            uri: `/media/${createdMedia.service}/${createdMedia.type}${createdMedia.location}`,
++        };
+ 
+-    const newMedia: Omit<MediaDto, 'id' | 'created_at' | 'updated_at'> = {
+-        name: body.fileName,
+-        real_name: `mock_${Date.now()}_${body.fileName}`,
+-        size: body.fileSize,
+-        mime: body.fileType,
+-        extension: body.fileName.split('.').pop() || '',
+-        is_primary: body.isPrimary || false,
+-        description: body.description,
+-        location: `${path}/${`mock_${Date.now()}_${body.fileName}`}`,
+-        resource_id,
+-        service,
+-        type,
+-    };
++        return NextResponse.json(response, { status: 200 });
++    } catch (error: any) {
++        return NextResponse.json({ message: "Failed to upload media", error: error.message }, { status: 500 });
++    }
++}
+ 
+-    const createdMedia = dbManager.addItem('media', newMedia);
+-    
+-    const response: UploadMediaResponse = {
+-        id: createdMedia.id,
+-        resourceId: createdMedia.resource_id,
+-        // The mock URL points to a placeholder
+-        url: `https://picsum.photos/seed/${createdMedia.id}/400/300`, 
+-        uri: `/media/${createdMedia.service}/${createdMedia.type}${createdMedia.location}`,
+-    };
++// DELETE /media/{service}/{type}/{path}/{filename}
++// The {filename} from the API spec is mapped to the {resource_id} parameter here.
++export async function DELETE(req: NextRequest, { params }: RouteParams) {
++    const { service, type, path, resource_id: filename } = params; // Treat param as filename
++    try {
++        const allMedia = dbManager.getCollection('media');
++        const locationToDelete = `${path}/${filename}`;
++        
++        const initialLength = allMedia.length;
++        const filteredMedia = allMedia.filter(m => m.location !== locationToDelete);
+ 
+-    return NextResponse.json(response, { status: 200 });
++        if (filteredMedia.length < initialLength) {
++            dbManager.saveCollection('media', filteredMedia);
++            return NextResponse.json(true, { status: 200 });
++        } else {
++            return NextResponse.json({ message: "File not found for deletion" }, { status: 404 });
++        }
++    } catch (error: any) {
++        return NextResponse.json({ message: "Failed to delete media", error: error.message }, { status: 500 });
++    }
+ }
+\ No newline at end of file
+diff --git a/components/auth/login-form.tsx b/components/auth/login-form.tsx
+index 981deda..1bcd3f5 100644
+--- a/components/auth/login-form.tsx
++++ b/components/auth/login-form.tsx
+@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
+ import { zodResolver } from "@hookform/resolvers/zod";
+ import * as z from "zod";
+ import { signIn } from "next-auth/react";
+-import { useRouter, useSearchParams } from "next/navigation";
++import { useSearchParams } from "next/navigation";
+ import Link from "next/link";
+ import { AuthCardWrapper } from "./auth-card-wrapper";
+ import { Button } from "@/components/ui/button";
+@@ -21,22 +21,15 @@ import {
+ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+ import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react";
+ import { toast } from "sonner";
+-// We won call authApi.login directly here, NextAuth CredentialsProvider will do it.
+ 
+ const LoginSchema = z.object({
+-  // According to AuthRequest, it 'username', not email.
+-  // If your backend allows email/phone for username field, this is fine.
+-  // Otherwise, label should be "Username".
+-  username: z
+-    .string()
+-    .min(1, { message: "Username" }),
++  username: z.string().min(1, { message: "Username, email or phone is required." }),
+   password: z.string().min(1, { message: "Password is required." }),
+ });
+ 
+ type LoginFormValues = z.infer<typeof LoginSchema>;
+ 
+ export const LoginForm = () => {
+-  // const router = useRouter();
+   const searchParams = useSearchParams();
+   const callbackUrl = searchParams.get("callbackUrl");
+   const [error, setError] = useState<string | null>(null);
+@@ -52,44 +45,25 @@ export const LoginForm = () => {
+     setError(null);
+     startTransition(async () => {
+       try {
+-        // NextAuth signIn with 'credentials' will trigger the `authorize` callback
+-        // in `[...nextauth]/route.ts`. That where wel call our backend /api/login.
+         const result = await signIn("credentials", {
+-          redirect: false, // Handle redirect manually after checking result
+-          username: values.username, // Pass username (which might be email/phone)
++          redirect: false,
++          username: values.username,
+           password: values.password,
+-          // callbackUrl: callbackUrl || "/business-actor/dashboard" // signIn can handle callbackUrl
+         });
+ 
+-        
+         if (result?.error) {
+-          console.error("SignIn Error from NextAuth:", result.error);
+-          // result.error might be "CredentialsSignin" or a custom error message
+-          // from your authorize callback.
+-          setError(
+-            result.error === "CredentialsSignin"
+-              ? "Invalid username or password."
+-              : result.error
+-          );
+-          toast.error(
+-            result.error === "CredentialsSignin"
+-              ? "Invalid username or password."
+-              : result.error
+-          );
++          const errorMessage = result.error === "CredentialsSignin" ? "Invalid username or password." : result.error;
++          setError(errorMessage);
++          toast.error(errorMessage);
+         } else if (result?.ok) {
+           toast.success("Login successful! Redirecting...");
+-          // router.push(callbackUrl || "/business-actor/dashboard"); // Default if signIn doesn redirect
+-          // router.refresh(); // Important to update session state everywhere
+-          // If signIn is configured with redirect: true (default), this manual push might not be needed.
+-          // For now, let rely on NextAuth default redirect or callbackUrl handling if `redirect:false` isn used.
+-          // If it still doesn redirect, we might need a window.location.href = callbackUrl || '/default-path'
+-          window.location.href = callbackUrl || "/business-actor/dashboard";
++          // THE FIX: Always redirect to /dashboard. It will handle the final destination.
++          window.location.href = callbackUrl || "/dashboard";
+         } else {
+           setError("An unexpected error occurred during login.");
+           toast.error("An unexpected login error occurred.");
+         }
+       } catch (err) {
+-        console.error("Login Submit Catch Error:", err);
+         setError("An unexpected error occurred. Please try again.");
+         toast.error("An unexpected error occurred.");
+       }
+@@ -100,93 +74,22 @@ export const LoginForm = () => {
+     <AuthCardWrapper
+       title="Welcome Back"
+       description="Sign in to access your dashboard"
+-      backButtonLabel="Do not have an account? Sign Up"
++      backButtonLabel="Don't have an account? Sign Up"
+       backButtonHref="/signup"
+     >
+       <Form {...form}>
+         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+           <div className="space-y-4">
+-            <FormField
+-              control={form.control}
+-              name="username"
+-              render={({ field }) => (
+-                <FormItem>
+-                  <FormLabel>Username, Email or Phone</FormLabel>
+-                  <FormControl>
+-                    <Input
+-                      placeholder="yourusername / you@example.com"
+-                      {...field}
+-                      disabled={isPending}
+-                    />
+-                  </FormControl>
+-                  <FormMessage />
+-                </FormItem>
+-              )}
+-            />
+-            <FormField
+-              control={form.control}
+-              name="password"
+-              render={({ field }) => (
+-                <FormItem>
+-                  <div className="flex justify-between items-center">
+-                    <FormLabel>Password</FormLabel>
+-                    <Button
+-                      size="sm"
+-                      variant="link"
+-                      asChild
+-                      className="px-0 font-normal text-xs h-auto text-muted-foreground hover:text-primary"
+-                    >
+-                      <Link href="/forgot-password" tabIndex={-1}>
+-                        Forgot password?
+-                      </Link>
+-                    </Button>
+-                  </div>
+-                  <FormControl>
+-                    <div className="relative">
+-                      <Input
+-                        type={showPassword ? "text" : "password"}
+-                        placeholder="••••••••"
+-                        {...field}
+-                        disabled={isPending}
+-                      />
+-                      <Button
+-                        type="button"
+-                        variant="ghost"
+-                        size="icon"
+-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+-                        onClick={() => setShowPassword(!showPassword)}
+-                        tabIndex={-1}
+-                      >
+-                        {showPassword ? (
+-                          <EyeOff className="h-4 w-4" />
+-                        ) : (
+-                          <Eye className="h-4 w-4" />
+-                        )}
+-                      </Button>
+-                    </div>
+-                  </FormControl>
+-                  <FormMessage />
+-                </FormItem>
+-              )}
+-            />
++            <FormField control={form.control} name="username" render={({ field }) => (<FormItem><FormLabel>Username, Email or Phone</FormLabel><FormControl><Input placeholder="yourusername" {...field} disabled={isPending} /></FormControl><FormMessage /></FormItem>)} />
++            <FormField control={form.control} name="password" render={({ field }) => (<FormItem>
++              <div className="flex justify-between items-center"><FormLabel>Password</FormLabel><Button size="sm" variant="link" asChild className="px-0 font-normal text-xs h-auto text-muted-foreground hover:text-primary"><Link href="/forgot-password" tabIndex={-1}>Forgot password?</Link></Button></div>
++              <FormControl><div className="relative"><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} disabled={isPending} /><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}>{showPassword ? (<EyeOff className="h-4 w-4" />) : (<Eye className="h-4 w-4" />)}</Button></div></FormControl>
++              <FormMessage />
++            </FormItem>
++            )} />
+           </div>
+-
+-          {error && (
+-            <Alert variant="destructive">
+-              <AlertTriangle className="h-4 w-4" />
+-              <AlertTitle>Login Failed</AlertTitle>
+-              <AlertDescription>Something went wrong</AlertDescription>
+-            </Alert>
+-          )}
+-
+-          <Button
+-            type="submit"
+-            className="w-full transition-all hover:brightness-110 active:scale-[0.98]"
+-            disabled={isPending}
+-          >
+-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+-            {isPending ? "Signing In..." : "Sign In"}
+-          </Button>
++          {error && (<Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Login Failed</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>)}
++          <Button type="submit" className="w-full" disabled={isPending}>{isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isPending ? "Signing In..." : "Sign In"}</Button>
+         </form>
+       </Form>
+     </AuthCardWrapper>
+diff --git a/components/dashboard-ui.tsx b/components/dashboard-ui.tsx
+index beeffc5..977d652 100644
+--- a/components/dashboard-ui.tsx
++++ b/components/dashboard-ui.tsx
+@@ -1,8 +1,9 @@
+ "use client";
+ 
+ import { usePathname } from "next/navigation";
+-import { MainSidebar } from "@/components/main-sidebar";
++// import { MainSidebar } from "@/components/main-sidebar";
+ import { AgencySidebar } from "@/components/organization/agencies/agency-sidebar";
++import { Sidebar } from "@/components/main-sidebar";
+ 
+ export function DashboardUI() {
+   const pathname = usePathname();
+@@ -13,5 +14,5 @@ export function DashboardUI() {
+   }
+ 
+   // Default to the main sidebar for all other dashboard routes.
+-  return <MainSidebar />;
++  return <Sidebar/>;
+ }
+diff --git a/components/main-sidebar.tsx b/components/main-sidebar.tsx
+index eb53e9d..2c3f3f5 100644
+--- a/components/main-sidebar.tsx
++++ b/components/main-sidebar.tsx
+@@ -1,394 +1,158 @@
+ "use client";
+ 
+-import React, { useState } from "react";
++import { useState } from "react";
+ import Link from "next/link";
+ import Image from "next/image";
+ import { usePathname } from "next/navigation";
+ import {
+-  Award,
+-  Briefcase,
+-  Building,
+-  Combine,
+-  FileText,
+-  FolderHeart,
+-  HandCoins,
+-  HelpCircle,
+-  ImageIcon,
+-  Info,
+-  LayoutGrid,
+-  Lightbulb,
+-  LogOut,
+-  Landmark,
+-  Menu,
+-  MessagesSquare,
+-  Package,
+-  Server,
+-  Settings,
+-  Share2,
+-  SidebarClose,
+-  Truck,
+-  UserCheck,
+-  Users,
+-  Users2,
+-  UsersRound,
+-  Wallet,
+-  Webhook,
++  Award, Briefcase, Building, Combine, FileText, FolderHeart, HandCoins, HelpCircle,
++  ImageIcon as ImageIconLucide, Info, LayoutGrid, Lightbulb, LogOut, Landmark, Menu,
++  MessagesSquare, Package, Server, Settings, Share2, SidebarClose, Truck, UserCheck,
++  Users, Users2, UsersRound, Wallet, Webhook,
+ } from "lucide-react";
+-import { signOut } from "next-auth/react";
++import { signOut, useSession } from "next-auth/react";
+ import { cn } from "@/lib/utils";
+ import { Button } from "@/components/ui/button";
+-import {
+-  Tooltip,
+-  TooltipContent,
+-  TooltipProvider,
+-  TooltipTrigger,
+-} from "@/components/ui/tooltip";
++import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+ import { OrganizationSwitcher } from "@/components/organization/organization-switcher";
+ import { useActiveOrganization } from "@/contexts/active-organization-context";
+ 
+-// ... (Navigation arrays remain the same)
++// For Business Actors
+ const baNavigation = [
+-  { name: "Org. Dashboard", href: "/dashboard", icon: LayoutGrid },
+-  { name: "Org. Profile", href: "/profile", icon: Landmark },
+-  { name: "Products", href: "/products", icon: Package },
+-  { name: "Services", href: "/services", icon: Combine },
+-  { name: "Agencies", href: "/agencies", icon: Users2 },
+-  { name: "Employees", href: "/employees", icon: Users },
+-  { name: "Customers", href: "/customers", icon: UsersRound },
+-  { name: "Suppliers", href: "/suppliers", icon: Truck },
+-  { name: "Sales People", href: "/sales-people", icon: UserCheck },
+-  { name: "Prospects", href: "/prospects", icon: Lightbulb },
+-  { name: "Third Parties", href: "/third-parties", icon: Briefcase },
+-  { name: "Certifications", href: "/certifications", icon: Award },
+-  { name: "Images", href: "/images", icon: ImageIcon },
+-  { name: "Practical Info", href: "/practical-info", icon: Info },
+-  { name: "Wallet", href: "/wallet", icon: Wallet, isGlobal: true },
+-  { name: "Bonus Config", href: "/bonus", icon: HandCoins, isGlobal: true },
+-  { name: "Webhooks", href: "/webhooks", icon: Webhook, isGlobal: true },
+-  { name: "Chat", href: "/chat", icon: MessagesSquare, isGlobal: true },
++  { name: "Org. Dashboard", href: "/org/dashboard", icon: LayoutGrid, isOrgSpecific: true },
++  { name: "Org. Profile", href: "/org/profile", icon: Landmark, isOrgSpecific: true },
++  { name: "Products", href: "/org/products", icon: Package, isOrgSpecific: true },
++  { name: "Services", href: "/org/services", icon: Combine, isOrgSpecific: true },
++  { name: "Agencies", href: "/org/agencies", icon: Users2, isOrgSpecific: true },
++  { name: "Employees", href: "/org/employees", icon: Users, isOrgSpecific: true },
++  { name: "Customers", href: "/org/customers", icon: UsersRound, isOrgSpecific: true },
++  { name: "Suppliers", href: "/org/suppliers", icon: Truck, isOrgSpecific: true },
++  { name: "Sales People", href: "/org/sales-people", icon: UserCheck, isOrgSpecific: true },
++  { name: "Prospects", href: "/org/prospects", icon: Lightbulb, isOrgSpecific: true },
++  { name: "Third Parties", href: "/org/third-parties", icon: Briefcase, isOrgSpecific: true },
++  { name: "Certifications", href: "/org/certifications", icon: Award, isOrgSpecific: true },
++  { name: "Images", href: "/org/images", icon: ImageIconLucide, isOrgSpecific: true },
++  { name: "Practical Info", href: "/org/practical-info", icon: Info, isOrgSpecific: true },
++  { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
++  { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
++  { name: "Webhooks", href: "/business-actor/webhooks", icon: Webhook },
++  { name: "Chat", href: "/business-actor/chat", icon: MessagesSquare },
+ ];
+-const customerNavigation = [
+-  {
+-    name: "Dashboard",
+-    href: "/customer/dashboard",
+-    icon: LayoutGrid,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Services",
+-    href: "/customer/services",
+-    icon: Briefcase,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Invoices",
+-    href: "/customer/invoices",
+-    icon: FileText,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "My Bonus",
+-    href: "/customer/bonus",
+-    icon: HandCoins,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Favorites",
+-    href: "/customer/favorites",
+-    icon: FolderHeart,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Invite Friends",
+-    href: "/customer/invite",
+-    icon: Share2,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Chat",
+-    href: "/customer/chat",
+-    icon: MessagesSquare,
+-    isGlobal: true,
+-  },
++
++// For Normal Users (in /account context)
++const userNavigation = [
++  { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
++  { name: "Services", href: "/services", icon: Briefcase }, // Announcements/Offers & Transactions/Wishlist
++  { name: "Invoices", href: "/invoices", icon: FileText },
++  { name: "My Bonus", href: "/bonus", icon: HandCoins },
++  { name: "Favorites", href: "/favorites", icon: FolderHeart },
++  { name: "Invite Friends", href: "//invite", icon: Share2 }, // Referrals page
++  { name: "Chat", href: "/customer/chat", icon: MessagesSquare },
++  // Add other user-specific links here if they are created, e.g., My Favorites
+ ];
++
+ const superAdminNavigation = [
+-  {
+-    name: "Dashboard",
+-    href: "/super-admin/dashboard",
+-    icon: LayoutGrid,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Platforms",
+-    href: "/super-admin/platforms",
+-    icon: Server,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Business Actors",
+-    href: "/super-admin/business-actors",
+-    icon: Building,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Customers",
+-    href: "/super-admin/customers",
+-    icon: Users,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Webhooks Config",
+-    href: "/super-admin/webhooks",
+-    icon: Webhook,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Bonus Overview",
+-    href: "/super-admin/bonus",
+-    icon: HandCoins,
+-    isGlobal: true,
+-  },
+-  {
+-    name: "Admin Comm.",
+-    href: "/super-admin/chat",
+-    icon: MessagesSquare,
+-    isGlobal: true,
+-  },
++  { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
++  { name: "Platforms", href: "/super-admin/platforms", icon: Server },
++  { name: "Business Actors", href: "/super-admin/business-actors", icon: Building },
++  { name: "Customers", href: "/super-admin/customers", icon: Users },
++  { name: "Webhooks Config", href: "/super-admin/webhooks", icon: Webhook },
++  { name: "Bonus Overview", href: "/super-admin/bonus", icon: HandCoins },
++  { name: "Admin Comm.", href: "/super-admin/chat", icon: MessagesSquare },
+ ];
++
+ const bottomNavigation = [
+   { name: "Help & Support", href: "/help", icon: HelpCircle },
+   { name: "Settings", href: "/settings", icon: Settings },
+ ];
+ 
+-export function MainSidebar() {
++export function Sidebar() {
++  const { data: session } = useSession();
+   const pathname = usePathname();
+   const [isCollapsed, setIsCollapsed] = useState(false);
+   const [isMobileOpen, setIsMobileOpen] = useState(false);
+   const { activeOrganizationId } = useActiveOrganization();
+ 
+-  const pathSegments = pathname.split("/").filter(Boolean);
+-  let currentRolePrefix = "/business-actor";
+-  if (
+-    pathSegments.length > 0 &&
+-    ["customer", "super-admin", "business-actor"].includes(pathSegments[0])
+-  ) {
+-    currentRolePrefix = `/${pathSegments[0]}`;
+-  }
+-  const isBaContext = currentRolePrefix === "/business-actor";
+-  let sidebarTitle = "BA Workspace";
+-  let currentNavigation = baNavigation;
+-  let activeRoleDashboardLink = "/business-actor/dashboard";
+-  if (currentRolePrefix === "/customer") {
+-    sidebarTitle = "My Account";
+-    currentNavigation = customerNavigation;
+-    activeRoleDashboardLink = "/customer/dashboard";
+-  } else if (currentRolePrefix === "/super-admin") {
+-    sidebarTitle = "Platform Admin";
++  const isBusinessActor = session?.user.roles?.includes('BUSINESS_ACTOR_ROLE');
++  const isSuperAdmin = session?.user.roles?.includes('SUPER_ADMIN_ROLE');
++
++  // Determine which navigation set and title to use
++  let currentNavigation = userNavigation;
++  let sidebarTitle = "My Account";
++  let homeLink = "/dashboard";
++
++  if (isSuperAdmin) {
+     currentNavigation = superAdminNavigation;
+-    activeRoleDashboardLink = "/super-admin/dashboard";
++    sidebarTitle = "Platform Admin";
++    homeLink = "/super-admin/dashboard";
++  } else if (isBusinessActor) {
++    currentNavigation = baNavigation;
++    sidebarTitle = "BA Workspace";
++    homeLink = "/business-actor/dashboard";
+   }
+-  const handleLogout = async () => {
+-    await signOut({ callbackUrl: "/login" });
+-  };
+ 
+-  const NavItem = ({
+-    item,
+-  }: {
+-    item: {
+-      name: string;
+-      href: string;
+-      icon: React.ElementType;
+-      isGlobal?: boolean;
+-    };
+-  }) => {
++  const handleLogout = async () => await signOut({ callbackUrl: "/login" });
++
++  const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType; isOrgSpecific?: boolean; } }) => {
+     let finalHref = item.href;
+     let isDisabled = false;
+-    if (isBaContext && !item.isGlobal) {
+-      finalHref = activeOrganizationId
+-        ? `/business-actor/org${item.href}`
+-        : "#";
++
++    if (isBusinessActor && item.isOrgSpecific) {
++      finalHref = activeOrganizationId ? `/business-actor${item.href}` : "#";
+       isDisabled = !activeOrganizationId;
+-    } else {
+-      finalHref = item.isGlobal
+-        ? `${currentRolePrefix}${item.href}`
+-        : item.href;
+     }
++
+     const isActive = finalHref !== "#" && pathname.startsWith(finalHref);
++
+     return (
+       <Tooltip delayDuration={0}>
+         <TooltipTrigger asChild>
+-          <Link
+-            href={isDisabled ? "#" : finalHref}
+-            className={cn(
+-              "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors h-9",
+-              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+-              !isDisabled &&
+-                !isActive &&
+-                "text-sidebar-foreground hover:bg-sidebar-accent/80",
+-              isDisabled && "cursor-not-allowed text-muted-foreground/50",
+-              isCollapsed && "justify-center px-2"
+-            )}
+-            onClick={() =>
+-              isMobileOpen && !isDisabled && setIsMobileOpen(false)
+-            }
+-            aria-disabled={isDisabled}
+-            tabIndex={isDisabled ? -1 : undefined}
+-          >
+-            <item.icon
+-              className={cn(
+-                "h-[18px] w-[18px] shrink-0",
+-                !isCollapsed && "mr-3"
+-              )}
+-            />
++          <Link href={isDisabled ? "#" : finalHref} className={cn("flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors h-9", isActive && "bg-sidebar-accent text-sidebar-accent-foreground", !isDisabled && !isActive && "text-sidebar-foreground hover:bg-sidebar-accent/80 hover:text-sidebar-accent-foreground", isDisabled && "cursor-not-allowed text-muted-foreground/50", isCollapsed && "justify-center px-2")} onClick={() => isMobileOpen && !isDisabled && setIsMobileOpen(false)} aria-disabled={isDisabled} tabIndex={isDisabled ? -1 : undefined}>
++            <item.icon className={cn("h-[18px] w-[18px] shrink-0", !isCollapsed && "mr-3")} />
+             {!isCollapsed && <span className="truncate">{item.name}</span>}
+           </Link>
+         </TooltipTrigger>
+-        {isCollapsed && (
+-          <TooltipContent side="right">{item.name}</TooltipContent>
+-        )}
++        {isCollapsed && (<TooltipContent side="right">{item.name}</TooltipContent>)}
+       </Tooltip>
+     );
+   };
+ 
+   return (
+-    <>
+-      <Button
+-        variant="outline"
+-        size="icon"
+-        className="lg:hidden fixed top-4 left-4 z-[60] rounded-md shadow-md bg-background/80 backdrop-blur-sm"
+-        onClick={() => setIsMobileOpen(!isMobileOpen)}
+-        aria-label="Toggle sidebar"
+-      >
+-        <Menu className="h-5 w-5" />
+-      </Button>
+-      <div
+-        className={cn(
+-          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background text-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen",
+-          isCollapsed ? "w-[72px]" : "w-64",
+-          isMobileOpen
+-            ? "translate-x-0 shadow-xl"
+-            : "-translate-x-full lg:translate-x-0"
+-        )}
+-        data-collapsed={isCollapsed}
+-      >
+-        <div
+-          className={cn(
+-            "flex h-16 shrink-0 items-center border-b",
+-            isCollapsed ? "justify-center px-2" : "justify-between px-4"
+-          )}
+-        >
+-          <Link
+-            href={activeRoleDashboardLink}
+-            className={cn("flex items-center gap-2 font-semibold")}
+-            onClick={() => isMobileOpen && setIsMobileOpen(false)}
+-            aria-label={sidebarTitle}
+-          >
+-            <Image
+-              src="/logo.svg"
+-              alt="Logo"
+-              width={32}
+-              height={32}
+-              className=" shrink-0"
+-              priority
+-            />
+-            {!isCollapsed && (
+-              <span className="text-lg truncate">{sidebarTitle}</span>
+-            )}
++    <TooltipProvider>
++      <Button variant="outline" size="icon" className="lg:hidden fixed top-4 left-4 z-[60] rounded-md shadow-md bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileOpen(!isMobileOpen)} aria-label="Toggle sidebar"><Menu className="h-5 w-5" /></Button>
++      <div className={cn("fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen", isCollapsed ? "w-[72px]" : "w-64", isMobileOpen ? "translate-x-0 shadow-xl" : "-translate-x-full lg:translate-x-0")} data-collapsed={isCollapsed}>
++        <div className={cn("flex h-16 shrink-0 items-center border-b border-sidebar-border", isCollapsed ? "justify-center px-2" : "justify-between px-4")}>
++          <Link href={homeLink} className={cn("flex items-center gap-2 font-semibold")} onClick={() => isMobileOpen && setIsMobileOpen(false)} aria-label={sidebarTitle}>
++            <Image src="/logo.svg" alt={`${sidebarTitle} Logo`} width={64} height={64} className=" shrink-0" priority />
++            {!isCollapsed && <span className="text-lg truncate">{sidebarTitle}</span>}
+           </Link>
+-          <Button
+-            variant="ghost"
+-            size="icon"
+-            className={cn(
+-              "hidden h-8 w-8 lg:flex",
+-              isCollapsed ? "" : "ml-auto"
+-            )}
+-            onClick={() => setIsCollapsed(!isCollapsed)}
+-            aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+-          >
+-            <SidebarClose
+-              className={cn(
+-                "h-4 w-4 transition-transform",
+-                isCollapsed && "rotate-180"
+-              )}
+-            />
+-          </Button>
+-          {isMobileOpen && (
+-            <Button
+-              variant="ghost"
+-              size="icon"
+-              className="ml-auto h-8 w-8 lg:hidden"
+-              onClick={() => setIsMobileOpen(false)}
+-              aria-label="Close Sidebar"
+-            >
+-              <SidebarClose className="h-4 w-4" />
+-            </Button>
+-          )}
++          <Button variant="ghost" size="icon" className={cn("hidden h-8 w-8 lg:flex", isCollapsed ? "" : "ml-auto")} onClick={() => setIsCollapsed(!isCollapsed)} aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}><SidebarClose className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} /></Button>
++          {isMobileOpen && <Button variant="ghost" size="icon" className="ml-auto h-8 w-8 lg:hidden" onClick={() => setIsMobileOpen(false)} aria-label="Close Sidebar"><SidebarClose className="h-4 w-4" /></Button>}
+         </div>
+-        <TooltipProvider>
+-          {/* {isBaContext && <OrganizationSwitcher isCollapsed={isCollapsed} />} */}
+-          <div
+-            className={cn(
+-              "border-b",
+-              isCollapsed && "py-3 flex justify-center items-center"
+-            )}
+-          >
+-            <OrganizationSwitcher isCollapsed={isCollapsed} />
+-          </div>
+-          <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+-            <nav
+-              className={cn(
+-                "flex-1 space-y-1 py-4",
+-                isCollapsed ? "px-2" : "px-4",
+-                isBaContext && !isCollapsed && "pt-2"
+-              )}
+-            >
+-              {currentNavigation.map((item) => (
+-                <NavItem key={item.name} item={item} />
+-              ))}
+-            </nav>
+-            <div
+-              className={cn("mt-auto border-t", isCollapsed ? "px-2" : "px-4")}
+-            >
+-              <div className="space-y-1 py-4">
+-                {bottomNavigation.map((item) => (
+-                  <NavItem key={item.name} item={{ ...item, isGlobal: true }} />
+-                ))}
+-                <Tooltip delayDuration={0}>
+-                  <TooltipTrigger asChild>
+-                    <Button
+-                      variant="ghost"
+-                      className={cn(
+-                        "flex items-center w-full rounded-md px-3 py-2 text-sm font-medium transition-colors h-9",
+-                        "text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive",
+-                        isCollapsed ? "justify-center px-2" : "justify-start"
+-                      )}
+-                      onClick={handleLogout}
+-                    >
+-                      <LogOut
+-                        className={cn(
+-                          "h-[18px] w-[18px] shrink-0",
+-                          !isCollapsed && "mr-3"
+-                        )}
+-                      />
+-                      {!isCollapsed && <span className="truncate">Logout</span>}
+-                    </Button>
+-                  </TooltipTrigger>
+-                  {isCollapsed && (
+-                    <TooltipContent side="right">Logout</TooltipContent>
+-                  )}
+-                </Tooltip>
+-              </div>
++
++        {isBusinessActor && <OrganizationSwitcher isCollapsed={isCollapsed} />}
++
++        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
++          <nav className={cn("flex-1 space-y-1 py-4", isCollapsed ? "px-2" : "px-4", isBusinessActor && !isCollapsed && "pt-0")}>
++            {currentNavigation.map((item) => <NavItem key={item.name} item={item} />)}
++          </nav>
++          <div className={cn("mt-auto border-t border-sidebar-border", isCollapsed ? "px-2" : "px-4")}>
++            <div className="space-y-1 py-4">
++              {bottomNavigation.map((item) => <NavItem key={item.name} item={{ ...item, href: item.href }} />)}
++              <Tooltip delayDuration={0}>
++                <TooltipTrigger asChild>
++                  <Button variant="ghost" className={cn("flex items-center w-full rounded-md px-3 py-2 text-sm font-medium transition-colors h-9", "text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive", isCollapsed ? "justify-center px-2" : "justify-start")} onClick={() => { handleLogout(); if (isMobileOpen) setIsMobileOpen(false); }}>
++                    <LogOut className={cn("h-[18px] w-[18px] shrink-0", !isCollapsed && "mr-3")} />
++                    {!isCollapsed && <span className="truncate">Logout</span>}
++                  </Button>
++                </TooltipTrigger>
++                {isCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
++              </Tooltip>
+             </div>
+           </div>
+-        </TooltipProvider>
++        </div>
+       </div>
+-      {isMobileOpen && (
+-        <div
+-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+-          aria-hidden="true"
+-          onClick={() => setIsMobileOpen(false)}
+-        />
+-      )}
+-    </>
++      {isMobileOpen && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" aria-hidden="true" onClick={() => setIsMobileOpen(false)} />}
++    </TooltipProvider>
+   );
+ }
+diff --git a/types/organization.ts b/types/organization.ts
+index 6db0a1d..a92a8a8 100644
+--- a/types/organization.ts
++++ b/types/organization.ts
+@@ -311,7 +311,10 @@ export interface EmployeeDto extends Auditable {
+ 
+ // --- Business Actor (as per Organization Service Spec) ---
+ export type BusinessActorType = "PROVIDER" | "CUSTOMER" | "SALESPERSON" | "CLIENT" | "FREELANCE_DRIVER" | "FARMER" | "AGENCY" | "VEHICLE_RENTAL" | "GUEST";
++export const BusinessActorTypeValues: [BusinessActorType, ...BusinessActorType[]] = ["PROVIDER", "CUSTOMER", "SALESPERSON", "CLIENT", "FREELANCE_DRIVER", "FARMER", "AGENCY", "VEHICLE_RENTAL", "GUEST"];
++
+ export type Gender = "MALE" | "FEMALE";
++export const GenderValues: [Gender, ...Gender[]] = ["MALE", "FEMALE"];
+ 
+ export interface CreateBusinessActorRequest { // Used for POST /business-actors
+   first_name: string;
+@@ -327,7 +330,6 @@ export interface CreateBusinessActorRequest { // Used for POST /business-actors
+   profession?: string;
+   biography?: string;
+   type?: BusinessActorType; // Role within this service context
+-  // user_id?: string; // To link to User from Auth Service
+ }
+ export interface UpdateBusinessActorRequest extends Partial<Omit<CreateBusinessActorRequest, 'user_id'>> { }
+ 
