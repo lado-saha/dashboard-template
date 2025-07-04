@@ -107,9 +107,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
         `[OrgLocalRepo] Mock API Error: ${response.status}`,
         errorPayload
       );
-      toast.error(
-        errorPayload.message || `Mock API request failed: ${response.status}`
-      );
+
       throw {
         status: response.status,
         message: errorPayload.message,

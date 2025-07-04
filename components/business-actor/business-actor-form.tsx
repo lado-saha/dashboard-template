@@ -78,8 +78,8 @@ const contactAndMediaSchema = z.object({
   phone_number: z.string().optional().or(z.literal("")),
   avatarFile: z.instanceof(File).optional(),
   profileFile: z.instanceof(File).optional(),
-  avatar_picture: z.string().url().optional().or(z.literal("")), // To hold existing URL
-  profile_picture: z.string().url().optional().or(z.literal("")), // To hold existing URL
+  avatar_picture: z.string().url().nullable(), // To hold existing URL
+  profile_picture: z.string().url().nullable(), // To hold existing URL
 });
 
 const fullBASchema = personalInfoSchema
@@ -142,8 +142,8 @@ export function BusinessActorForm({
       email: initialData?.email || session?.user.email || "",
       phone_number:
         initialData?.phone_number || session?.user.phone_number || "",
-      avatar_picture: initialData?.avatar_picture || "",
-      profile_picture: initialData?.profile_picture || "",
+      avatar_picture: initialData?.avatar_picture || null,
+      profile_picture: initialData?.profile_picture || null,
     },
   });
 
@@ -160,7 +160,7 @@ export function BusinessActorForm({
   };
 
   const onInvalid = (errors: FieldErrors<BAFormData>) => {
-    toast.error("Please fix the errors before submitting.");
+    toast.error(`Please fix the errors before submitting.${errors ? " " + Object.values(errors).map(e => e.message).join(", ") : ""}`);
     for (const [index, step] of formSteps.entries()) {
       if (step.fields.some((field) => Object.keys(errors).includes(field))) {
         setCurrentStep(index);
@@ -218,8 +218,8 @@ export function BusinessActorForm({
         type: data.type,
         profession: data.profession,
         biography: data.biography,
-        avatar_picture: avatarUrl,
-        profile_picture: profileUrl,
+        avatar_picture: avatarUrl ?? '',
+        profile_picture: profileUrl ?? '',
       };
 
       if (mode === "edit" && initialData?.business_actor_id) {
