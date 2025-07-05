@@ -5,7 +5,7 @@ import {
   UserDto, RoleDto, PermissionDto, RolePermissionDto, RbacResource,
 } from "@/types/auth";
 import {
-  OrganizationDto, OrganizationTableRow, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto,
+ OrganizationDto, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto,
   ImageDto, ThirdPartyDto, ProposedActivityDto, SalesPersonDto, CustomerOrgDto, ProviderDto, ProspectDto,
   PracticalInformationDto, CertificationDto, ApplicationDto, ApplicationKeyDto, BusinessActorDto,
 } from "@/types/organization";
@@ -16,7 +16,7 @@ import { MediaDto } from "@/types/media";
 export type CollectionName =
   | "authUsers"
   | "authRoles" | "authPermissions" | "authRolePermissions" | "authRbacResources"
-  | "organizationsTableRows" | "organizationsDetails" | "contacts" | "addresses"
+  | "organizationsDetails" | "contacts" | "addresses"
   | "agencies" | "employees" | "salesPersons" | "orgCustomers" | "providers" | "userPreferences"
   | "prospects" | "practicalInformation" | "certifications" | "businessDomains"
   | "organizationImages" | "thirdParties" | "proposedActivities" | "businessActors"
@@ -26,7 +26,7 @@ export type CollectionName =
 
 export interface LocalJsonDBCollections {
   authUsers: UserDto[]; authRoles: RoleDto[]; authPermissions: PermissionDto[]; authRolePermissions: RolePermissionDto[]; authRbacResources: RbacResource[];
-  organizationsTableRows: OrganizationTableRow[]; organizationsDetails: OrganizationDto[]; contacts: ContactDto[]; addresses: AddressDto[];
+  organizationsDetails: OrganizationDto[]; contacts: ContactDto[]; addresses: AddressDto[];
   userPreferences: UserPreferencesDto[]; agencies: AgencyDto[]; employees: EmployeeDto[]; salesPersons: SalesPersonDto[];
   orgCustomers: CustomerOrgDto[]; providers: ProviderDto[]; prospects: ProspectDto[]; practicalInformation: PracticalInformationDto[];
   certifications: CertificationDto[]; businessDomains: BusinessDomainDto[]; organizationImages: ImageDto[]; thirdParties: ThirdPartyDto[];
@@ -39,7 +39,7 @@ export interface LocalJsonDBCollections {
 const collectionFileMap: Record<CollectionName, string> = {
   authUsers: "auth-users.json", authRoles: "auth-roles.json", authPermissions: "auth-permissions.json",
   authRolePermissions: "auth-role-permissions.json", authRbacResources: "auth-rbac-resources.json",
-  organizationsTableRows: "organizations-table-rows.json", organizationsDetails: "organizations-details.json",
+  organizationsDetails: "organizations-details.json",
   contacts: "contacts.json", addresses: "addresses.json", agencies: "agencies.json", employees: "employees.json",
   salesPersons: "sales-persons.json", orgCustomers: "org-customers.json", providers: "providers.json",
   userPreferences: "user-preferences.json", prospects: "prospects.json", practicalInformation: "practical-information.json",
@@ -56,7 +56,6 @@ const collectionIdMap: Record<CollectionName, string> = {
   authPermissions: "id",
   authRolePermissions: "id", // Composite key, but we need one for the manager. 'id' will be auto-generated.
   authRbacResources: "id", // Auto-generated
-  organizationsTableRows: "organization_id",
   organizationsDetails: "organization_id",
   contacts: "contact_id",
   addresses: "address_id",

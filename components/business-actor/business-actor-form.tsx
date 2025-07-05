@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,6 +13,7 @@ import {
   BusinessActorTypeValues,
   GenderValues,
   BusinessActorDto,
+  UpdateBusinessActorRequest,
 } from "@/types/organization";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +54,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isValid } from "date-fns";
-import { useRouter } from "next/navigation";
+import { Switch } from "../ui/switch";
+import { embedId } from "@/lib/id-parser";
 
 const personalInfoSchema = z.object({
   first_name: z.string().min(2, "First name is required."),
@@ -63,6 +65,7 @@ const personalInfoSchema = z.object({
     .date({ required_error: "Date of birth is required." })
     .max(new Date(), "Date of birth cannot be in the future."),
   nationality: z.string().min(2, "Nationality is required."),
+  is_individual: z.boolean().default(true),
 });
 
 const professionalInfoSchema = z.object({
@@ -76,10 +79,20 @@ const professionalInfoSchema = z.object({
 const contactAndMediaSchema = z.object({
   email: z.string().email("A valid contact email is required."),
   phone_number: z.string().optional().or(z.literal("")),
-  avatarFile: z.instanceof(File).optional(),
-  profileFile: z.instanceof(File).optional(),
-  avatar_picture: z.string().url().nullable(), // To hold existing URL
-  profile_picture: z.string().url().nullable(), // To hold existing URL
+  avatarFile: z.any().optional(),
+  profileFile: z.any().optional(),
+  avatar_picture: z
+    .string()
+    .url("Invalid URL")
+    .or(z.literal(""))
+    .nullable()
+    .optional(),
+  profile_picture: z
+    .string()
+    .url("Invalid URL")
+    .or(z.literal(""))
+    .nullable()
+    .optional(),
 });
 
 const fullBASchema = personalInfoSchema
@@ -120,7 +133,6 @@ export function BusinessActorForm({
   onSuccessAction,
 }: BusinessActorFormProps) {
   const { data: session } = useSession();
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -142,8 +154,8 @@ export function BusinessActorForm({
       email: initialData?.email || session?.user.email || "",
       phone_number:
         initialData?.phone_number || session?.user.phone_number || "",
-      avatar_picture: initialData?.avatar_picture || null,
-      profile_picture: initialData?.profile_picture || null,
+      avatar_picture: initialData?.avatar_picture || "",
+      profile_picture: initialData?.profile_picture || "",
     },
   });
 
@@ -160,7 +172,16 @@ export function BusinessActorForm({
   };
 
   const onInvalid = (errors: FieldErrors<BAFormData>) => {
-    toast.error(`Please fix the errors before submitting.${errors ? " " + Object.values(errors).map(e => e.message).join(", ") : ""}`);
+    toast.error(
+      `Please fix the errors before submitting.${
+        errors
+          ? " " +
+            Object.values(errors)
+              .map((e) => e.message)
+              .join(", ")
+          : ""
+      }`
+    );
     for (const [index, step] of formSteps.entries()) {
       if (step.fields.some((field) => Object.keys(errors).includes(field))) {
         setCurrentStep(index);
@@ -176,11 +197,13 @@ export function BusinessActorForm({
     }
     setIsLoading(true);
 
-    let avatarUrl: string | undefined = initialData?.avatar_picture;
-    let profileUrl: string | undefined = initialData?.profile_picture;
+    let avatarUrl: string | undefined =
+      form.getValues("avatar_picture") || undefined;
+    let profileUrl: string | undefined =
+      form.getValues("profile_picture") || undefined;
 
     try {
-      if (data.avatarFile) {
+      if (data.avatarFile instanceof File) {
         toast.loading("Uploading avatar...");
         const response = await mediaRepository.uploadFile(
           "business-actor",
@@ -191,8 +214,11 @@ export function BusinessActorForm({
         );
         avatarUrl = response.url;
         toast.dismiss();
+      } else if (data.avatar_picture === null) {
+        avatarUrl = undefined;
       }
-      if (data.profileFile) {
+
+      if (data.profileFile instanceof File) {
         toast.loading("Uploading profile picture...");
         const response = await mediaRepository.uploadFile(
           "business-actor",
@@ -203,11 +229,18 @@ export function BusinessActorForm({
         );
         profileUrl = response.url;
         toast.dismiss();
+      } else if (data.profile_picture === null) {
+        profileUrl = undefined;
       }
 
-      const payload:
-        | CreateBusinessActorRequest
-        | Omit<CreateBusinessActorRequest, "user_id"> = {
+      // THE FIX: Embed the user_id into the biography before sending to the backend.
+      const biographyWithId = embedId(
+        data.biography,
+        "user_id",
+        session.user.id
+      );
+
+      const payload: CreateBusinessActorRequest | UpdateBusinessActorRequest = {
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
@@ -217,9 +250,10 @@ export function BusinessActorForm({
         nationality: data.nationality,
         type: data.type,
         profession: data.profession,
-        biography: data.biography,
-        avatar_picture: avatarUrl ?? '',
-        profile_picture: profileUrl ?? '',
+        biography: biographyWithId,
+        avatar_picture: avatarUrl,
+        profile_picture: profileUrl,
+        user_id: session.user.id, // Ensure we link to the current user
       };
 
       if (mode === "edit" && initialData?.business_actor_id) {
@@ -372,9 +406,30 @@ export function BusinessActorForm({
                       <FormItem>
                         <FormLabel>Nationality *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Cameroonian" {...field} />
+                          <Input placeholder="e.g., American" {...field} />
                         </FormControl>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="is_individual"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>Individual Actor</FormLabel>
+                          <FormDescription>
+                            Is this profile for an individual or a company
+                            entity?
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -509,9 +564,10 @@ export function BusinessActorForm({
                           <FormControl>
                             <ImageUploader
                               currentImageUrl={form.getValues("avatar_picture")}
-                              onImageSelectedAction={(file) =>
-                                field.onChange(file)
-                              }
+                              onImageSelectedAction={(file, url) => {
+                                field.onChange(file);
+                                form.setValue("avatar_picture", url);
+                              }}
                               aspectRatio="square"
                               fallbackName={form.getValues("first_name")}
                             />
@@ -531,9 +587,10 @@ export function BusinessActorForm({
                               currentImageUrl={form.getValues(
                                 "profile_picture"
                               )}
-                              onImageSelectedAction={(file) =>
-                                field.onChange(file)
-                              }
+                              onImageSelectedAction={(file, url) => {
+                                field.onChange(file);
+                                form.setValue("profile_picture", url);
+                              }}
                               aspectRatio="landscape"
                               fallbackName={form.getValues("first_name")}
                             />
@@ -568,7 +625,9 @@ export function BusinessActorForm({
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}{" "}
-                  Finish & Submit Profile
+                  {mode === "create"
+                    ? "Finish & Submit Profile"
+                    : "Save Changes"}
                 </Button>
               )}
             </div>

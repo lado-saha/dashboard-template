@@ -7,7 +7,7 @@ import {
   RolePermissionDto, RbacResource, ApiResponseBoolean
 } from "@/types/auth";
 import {
-  CreateOrganizationRequest, OrganizationDto, OrganizationTableRow, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
+  CreateOrganizationRequest,OrganizationDto, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
   AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest,
   AffectEmployeeRequest,
   AgencyDto,
@@ -238,9 +238,9 @@ export const yowyobAuthApi = {
 };
 
 export const yowyobOrganizationApi = {
-  getMyOrganizations: () => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user"),
-  getAllOrganizations: () => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations"),
-  getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationTableRow[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`),
+  getMyOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user"),
+  getAllOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations"),
+  getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`),
   getOrganizationById: (orgId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`),
   createOrganization: (data: CreateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "POST", body: JSON.stringify(data) }),
   updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data) }),

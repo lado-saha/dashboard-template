@@ -21,7 +21,7 @@ export class MapRemoteRepository implements IMapRepository {
         throw new Error(`Nominatim API error: ${response.status} - ${errorText}`);
       }
       return await response.json() as T;
-    } catch (error: any)  {
+    } catch (error: any) {
       console.error("Nominatim API request failed:", error);
       // toast.error("Could not reach map service. Please check your connection.");
       throw error;

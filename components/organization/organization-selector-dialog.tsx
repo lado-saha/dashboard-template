@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { OrganizationDto, OrganizationTableRow } from "@/types/organization";
+import {OrganizationDto } from "@/types/organization";
 import { cn } from "@/lib/utils";
 import {
   DialogHeader,
@@ -63,11 +63,11 @@ export function OrganizationSelectorDialog({
     );
   }, [userOrganizations, searchQuery]);
 
-  const handleSelectAndClose = (org: OrganizationTableRow) => {
+  const handleSelectAndClose = (org: OrganizationDto) => {
     if (!org.organization_id) return;
     setActiveOrganization(org.organization_id, org as OrganizationDto).then(
       () => {
-        router.push(`/business-actor/org/dashboard`);
+        router.push(`/business-actor/dashboard`);
         onCloseAction();
       }
     );
@@ -109,7 +109,7 @@ export function OrganizationSelectorDialog({
             <Input
               placeholder="Search organizations..."
               value={searchQuery}
-              onChange= {(e)  => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-10"
             />
           </div>
@@ -155,7 +155,7 @@ export function OrganizationSelectorDialog({
                       className={cn(
                         "cursor-pointer hover:shadow-lg transition-shadow hover:border-primary/50 relative group",
                         activeOrganizationId === org.organization_id &&
-                          "border-2 border-primary shadow-lg"
+                        "border-2 border-primary shadow-lg"
                       )}
                     >
                       <CardHeader>
@@ -202,7 +202,7 @@ export function OrganizationSelectorDialog({
                         className={cn(
                           "flex items-center p-3 rounded-lg border hover:bg-accent cursor-pointer",
                           activeOrganizationId === org.organization_id &&
-                            "bg-accent border-primary/50"
+                          "bg-accent border-primary/50"
                         )}
                       >
                         <div className="flex items-center gap-4 flex-1 min-w-0">

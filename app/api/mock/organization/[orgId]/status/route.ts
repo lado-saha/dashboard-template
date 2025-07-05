@@ -1,7 +1,7 @@
 // app/api/mock/organization/[orgId]/status/route.ts
 import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { UpdateOrganizationStatusRequest, OrganizationDto, OrganizationTableRow } from '@/types/organization';
+import { UpdateOrganizationStatusRequest,OrganizationDto } from '@/types/organization';
 
 export async function PUT(_request: Request, { params }: { params: { orgId: string } }) {
   try {
@@ -12,7 +12,7 @@ export async function PUT(_request: Request, { params }: { params: { orgId: stri
     if (!updatedOrg) {
       return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
     }
-    dbManager.updateItem('organizationsTableRows', orgId, { status: body.status });
+    dbManager.updateItem('organizationsDetails', orgId, { status: body.status });
 
     return NextResponse.json(updatedOrg, { status: 200 });
   } catch (error: any)  {

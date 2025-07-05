@@ -8,34 +8,27 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import {
-  OrganizationDto,
-  OrganizationTableRow,
-  AgencyDto,
-} from "@/types/organization";
+import { OrganizationDto, AgencyDto } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-
-// Define keys for localStorage to avoid typos
-const ORG_ID_STORAGE_KEY = "yowyob_activeOrganizationId";
-const AGENCY_ID_STORAGE_KEY = "yowyob_activeAgencyId";
+import { extractId } from "@/lib/id-parser";
 
 interface ActiveOrganizationContextType {
   activeOrganizationId: string | null;
   activeOrganizationDetails: OrganizationDto | null;
+
   isLoadingOrgDetails: boolean;
-  userOrganizations: OrganizationTableRow[];
+  userOrganizations: OrganizationDto[];
+
   isLoadingUserOrgs: boolean;
   isOrgContextInitialized: boolean;
   setActiveOrganization: (
     orgId: string | null,
     orgDetails?: OrganizationDto
   ) => Promise<void>;
-  fetchAndSetOrganizationDetails: (
-    id: string
-  ) => Promise<OrganizationDto | null>;
-  fetchUserOrganizationsList: () => Promise<void>;
+
+  fetchUserOrganizationsList: (businessActorId: string) => Promise<void>;
   activeAgencyId: string | null;
   activeAgencyDetails: AgencyDto | null;
   isLoadingAgencyDetails: boolean;
@@ -45,8 +38,7 @@ interface ActiveOrganizationContextType {
   ) => Promise<void>;
   agenciesForCurrentOrg: AgencyDto[];
   isLoadingAgencies: boolean;
-  fetchAgenciesForCurrentOrg: () => Promise<void>;
-  clearActiveAgency: () => void;
+  clearActiveEntities: () => void;
 }
 
 const ActiveOrganizationContext = createContext<
@@ -60,88 +52,67 @@ export const ActiveOrganizationProvider = ({
 }) => {
   const { data: session, status: sessionStatus } = useSession();
 
-  // --- State Initialization with localStorage ---
-  // On initial load, try to "rehydrate" the active IDs from localStorage.
-  // The function passed to useState runs only once, preventing issues with server-rendering.
   const [activeOrganizationId, setActiveOrganizationIdState] = useState<
     string | null
-  >(() => {
-    if (typeof window === "undefined") return null;
-    return window.localStorage.getItem(ORG_ID_STORAGE_KEY) || null;
-  });
+  >(null);
 
-  const [activeAgencyId, setActiveAgencyIdState] = useState<string | null>(
-    () => {
-      if (typeof window === "undefined") return null;
-      return window.localStorage.getItem(AGENCY_ID_STORAGE_KEY) || null;
-    }
-  );
-
-  // Other state variables remain the same
   const [activeOrganizationDetails, setActiveOrganizationDetailsState] =
     useState<OrganizationDto | null>(null);
   const [isLoadingOrgDetails, setIsLoadingOrgDetails] =
     useState<boolean>(false);
-  const [userOrganizations, setUserOrganizations] = useState<
-    OrganizationTableRow[]
-  >([]);
+
+  const [userOrganizations, setUserOrganizations] = useState<OrganizationDto[]>(
+    []
+  );
   const [isLoadingUserOrgs, setIsLoadingUserOrgs] = useState<boolean>(true);
   const [isOrgContextInitialized, setIsOrgContextInitialized] =
     useState<boolean>(false);
+
+  const [activeAgencyId, setActiveAgencyIdState] = useState<string | null>(
+    null
+  );
   const [activeAgencyDetails, setActiveAgencyDetailsState] =
     useState<AgencyDto | null>(null);
   const [isLoadingAgencyDetails, setIsLoadingAgencyDetails] = useState(false);
+
   const [agenciesForCurrentOrg, setAgenciesForCurrentOrg] = useState<
     AgencyDto[]
   >([]);
-  const [isLoadingAgencies, setIsLoadingAgencies] = useState(true);
+  const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
 
-  // --- Core Functions with localStorage Persistence ---
-
-  const clearActiveAgency = useCallback(() => {
+  const clearActiveEntities = useCallback(() => {
+    setActiveOrganizationIdState(null);
+    setActiveOrganizationDetailsState(null);
     setActiveAgencyIdState(null);
     setActiveAgencyDetailsState(null);
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(AGENCY_ID_STORAGE_KEY);
-    }
+    setAgenciesForCurrentOrg([]);
   }, []);
 
   const internalFetchAndSetOrgDetails = useCallback(
     async (id: string): Promise<OrganizationDto | null> => {
-      // This function implicitly validates the stored ID. If the API fails
-      // (e.g., user no longer has access), the context will be cleared.
       setIsLoadingOrgDetails(true);
       try {
         const details = await organizationRepository.getOrganizationById(id);
         setActiveOrganizationDetailsState(details);
         return details;
       } catch (error) {
-        toast.error("Could not load organization. It may have been removed.");
-        // If stored ID is invalid, clear it from state and localStorage
-        setActiveOrganizationIdState(null);
-        if (typeof window !== 'undefined') window.localStorage.removeItem(ORG_ID_STORAGE_KEY);
-        clearActiveAgency();
+        toast.error("Could not load organization details.");
+        clearActiveEntities();
         return null;
       } finally {
         setIsLoadingOrgDetails(false);
       }
     },
-    [clearActiveAgency]
+    [clearActiveEntities]
   );
 
   const setActiveOrganization = useCallback(
     async (orgId: string | null, orgDetails?: OrganizationDto) => {
-      clearActiveAgency(); // Switching orgs always clears the agency
+      setActiveAgencyIdState(null);
+      setActiveAgencyDetailsState(null);
+      setAgenciesForCurrentOrg([]);
+
       setActiveOrganizationIdState(orgId);
-
-      if (typeof window !== "undefined") {
-        if (orgId) {
-          window.localStorage.setItem(ORG_ID_STORAGE_KEY, orgId);
-        } else {
-          window.localStorage.removeItem(ORG_ID_STORAGE_KEY);
-        }
-      }
-
       if (orgDetails && orgId === orgDetails.organization_id) {
         setActiveOrganizationDetailsState(orgDetails);
       } else if (orgId) {
@@ -150,25 +121,36 @@ export const ActiveOrganizationProvider = ({
         setActiveOrganizationDetailsState(null);
       }
     },
-    [internalFetchAndSetOrgDetails, clearActiveAgency]
+    [internalFetchAndSetOrgDetails]
   );
+
+  const fetchAgenciesForCurrentOrg = useCallback(async () => {
+    if (!activeOrganizationId) return;
+    setIsLoadingAgencies(true);
+    try {
+      const agencies = await organizationRepository.getAgencies(
+        activeOrganizationId
+      );
+      setAgenciesForCurrentOrg(agencies || []);
+    } catch (error) {
+      toast.error("Could not load agencies for this organization.");
+    } finally {
+      setIsLoadingAgencies(false);
+    }
+  }, [activeOrganizationId]);
 
   const fetchAndSetAgencyDetails = useCallback(
     async (agencyId: string) => {
       if (!activeOrganizationId) return;
       setIsLoadingAgencyDetails(true);
       try {
-        const details = await organizationRepository.getAgencyById(activeOrganizationId, agencyId);
+        const details = await organizationRepository.getAgencyById(
+          activeOrganizationId,
+          agencyId
+        );
         setActiveAgencyDetailsState(details);
-        if (!details) {
-          toast.error(`Could not load details for the selected agency.`);
-          setActiveAgencyIdState(null);
-          if (typeof window !== 'undefined') window.localStorage.removeItem(AGENCY_ID_STORAGE_KEY);
-        }
       } catch (error) {
         toast.error("Failed to fetch agency details.");
-        setActiveAgencyIdState(null);
-        if (typeof window !== 'undefined') window.localStorage.removeItem(AGENCY_ID_STORAGE_KEY);
       } finally {
         setIsLoadingAgencyDetails(false);
       }
@@ -179,15 +161,6 @@ export const ActiveOrganizationProvider = ({
   const setActiveAgency = useCallback(
     async (agencyId: string | null, agencyDetails?: AgencyDto) => {
       setActiveAgencyIdState(agencyId);
-
-      if (typeof window !== "undefined") {
-        if (agencyId) {
-          window.localStorage.setItem(AGENCY_ID_STORAGE_KEY, agencyId);
-        } else {
-          window.localStorage.removeItem(AGENCY_ID_STORAGE_KEY);
-        }
-      }
-
       if (agencyDetails && agencyId === agencyDetails.agency_id) {
         setActiveAgencyDetailsState(agencyDetails);
       } else if (agencyId) {
@@ -200,25 +173,45 @@ export const ActiveOrganizationProvider = ({
   );
 
   const fetchUserOrganizationsList = useCallback(async () => {
-    // ... function unchanged
-  }, [sessionStatus]);
+    if (!session?.user.businessActorId) {
+      // No need to fetch if the user is not a BA.
+      setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
+      return;
+    }
+    setIsLoadingUserOrgs(true);
+    try {
+      // In this workaround, we have to fetch ALL orgs and filter on the client.
+      const allOrgs = await organizationRepository.getAllOrganizations();
+      const myOrgs = allOrgs.filter(
+        (org) => org.business_actor_id === session.user.businessActorId
+      );
+      setUserOrganizations(myOrgs || []);
 
-  // --- Effects to Fetch Data on Load ---
+      setUserOrganizations(myOrgs || []);
+      // setOrganiz
+    } catch (error) {
+      toast.error("Could not load your organizations.");
+      setUserOrganizations([]);
+    } finally {
+      setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
+    }
+  }, [session]);
 
   useEffect(() => {
-    // When the context first loads, if there's a stored org ID, fetch its details.
-    if (activeOrganizationId && !activeOrganizationDetails) {
-      internalFetchAndSetOrgDetails(activeOrganizationId);
+    if (sessionStatus === "authenticated" && session.user.businessActorId) {
+      fetchUserOrganizationsList();
+    } else {
+      setIsLoadingUserOrgs(false);
+      setIsOrgContextInitialized(true);
     }
-    // If there's a stored agency ID, fetch its details.
-    if (activeAgencyId && !activeAgencyDetails) {
-      fetchAndSetAgencyDetails(activeAgencyId);
-    }
-  }, [activeOrganizationId, activeAgencyId, activeOrganizationDetails, activeAgencyDetails, internalFetchAndSetOrgDetails, fetchAndSetAgencyDetails]);
-
-  const fetchAgenciesForCurrentOrg = useCallback(async () => {
-    // ... function unchanged
-  }, [activeOrganizationId]);
+  }, [
+    sessionStatus,
+    session,
+    isOrgContextInitialized,
+    fetchUserOrganizationsList,
+  ]);
 
   useEffect(() => {
     if (activeOrganizationId) {
@@ -228,26 +221,26 @@ export const ActiveOrganizationProvider = ({
     }
   }, [activeOrganizationId, fetchAgenciesForCurrentOrg]);
 
-  useEffect(() => {
-    if (sessionStatus === "authenticated" && !isOrgContextInitialized) {
-      fetchUserOrganizationsList();
-    } else if (sessionStatus === "unauthenticated") {
-      // On logout, clear everything including localStorage
-      setActiveOrganizationIdState(null);
-      setActiveOrganizationDetailsState(null);
-      clearActiveAgency();
-      if (typeof window !== "undefined") {
-        window.localStorage.removeItem(ORG_ID_STORAGE_KEY);
-      }
-      setUserOrganizations([]);
-      setIsLoadingUserOrgs(false);
-      setIsOrgContextInitialized(false);
-    }
-  }, [sessionStatus, fetchUserOrganizationsList, clearActiveAgency, isOrgContextInitialized]);
-
-
   return (
-    <ActiveOrganizationContext.Provider value={{ activeOrganizationId, setActiveOrganization, activeOrganizationDetails, fetchAndSetOrganizationDetails: internalFetchAndSetOrgDetails, isLoadingOrgDetails, userOrganizations, fetchUserOrganizationsList, isLoadingUserOrgs, isOrgContextInitialized, activeAgencyId, activeAgencyDetails, isLoadingAgencyDetails, setActiveAgency, clearActiveAgency, agenciesForCurrentOrg, isLoadingAgencies, fetchAgenciesForCurrentOrg }}>
+    <ActiveOrganizationContext.Provider
+      value={{
+        activeOrganizationId,
+        activeOrganizationDetails,
+        isLoadingOrgDetails,
+        userOrganizations,
+        isLoadingUserOrgs,
+        isOrgContextInitialized,
+        setActiveOrganization,
+        fetchUserOrganizationsList,
+        activeAgencyId,
+        activeAgencyDetails,
+        isLoadingAgencyDetails,
+        setActiveAgency,
+        agenciesForCurrentOrg,
+        isLoadingAgencies,
+        clearActiveEntities,
+      }}
+    >
       {children}
     </ActiveOrganizationContext.Provider>
   );
@@ -256,7 +249,9 @@ export const ActiveOrganizationProvider = ({
 export const useActiveOrganization = (): ActiveOrganizationContextType => {
   const context = useContext(ActiveOrganizationContext);
   if (context === undefined) {
-    throw new Error("useActiveOrganization must be used within an ActiveOrganizationProvider");
+    throw new Error(
+      "useActiveOrganization must be used within an ActiveOrganizationProvider"
+    );
   }
   return context;
 };

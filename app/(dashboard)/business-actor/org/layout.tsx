@@ -4,29 +4,18 @@ import React, { useEffect } from "react";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
-interface OrgLayoutProps {
+export default function OrganizationLayout({
+  children,
+}: {
   children: React.ReactNode;
-}
-
-export default function OrganizationLayout({ children }: OrgLayoutProps) {
-  const { activeOrganizationId, isLoadingOrgDetails, isOrgContextInitialized } =
+}) {
+  const { activeOrganizationId } =
     useActiveOrganization();
-  const router = useRouter();
 
-  useEffect(() => {
-    // If context is initialized and the're no active org, redirect to selection.
-    if (isOrgContextInitialized && !activeOrganizationId) {
-      router.replace("/business-actor/dashboard");
-    }
-  }, [activeOrganizationId, isOrgContextInitialized, router]);
-
-  // While context is loading or if redirecting, show a loading skeleton.
-  if (
-    !isOrgContextInitialized ||
-    !activeOrganizationId ||
-    isLoadingOrgDetails
-  ) {
+  // Show a loading skeleton while waiting for an active organization to be confirmed.
+  if (!activeOrganizationId) {
     return (
       <div className="space-y-6">
         <div className="grid md:grid-cols-4 gap-8">
@@ -41,6 +30,6 @@ export default function OrganizationLayout({ children }: OrgLayoutProps) {
     );
   }
 
-  // Render the page content directly without any extra header or wrapper.
+  // If an organization is active, render the page.
   return <div className="w-full">{children}</div>;
 }

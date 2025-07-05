@@ -1,6 +1,6 @@
 // lib/data-repo/organization/organization-repository-interface.ts
 import {
-  OrganizationTableRow, OrganizationDto, CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
+ OrganizationDto, CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
   ContactDto, CreateContactRequest, UpdateContactRequest, ContactableType,
   AddressDto, CreateAddressRequest, UpdateAddressRequest, AddressableType,
   AgencyDto, CreateAgencyRequest, UpdateAgencyRequest, UpdateAgencyStatusRequest,
@@ -20,10 +20,12 @@ import {
 } from '@/types/organization';
 
 export interface IOrganizationRepository {
+
+
   // Organizations
-  getMyOrganizations(): Promise<OrganizationTableRow[]>;
-  getAllOrganizations(): Promise<OrganizationTableRow[]>;
-  getOrganizationsByDomain(domainId: string): Promise<OrganizationTableRow[]>;
+  getMyOrganizations(): Promise<OrganizationDto[]>;
+  getAllOrganizations(): Promise<OrganizationDto[]>;
+  getOrganizationsByDomain(domainId: string): Promise<OrganizationDto[]>;
   getOrganizationById(orgId: string): Promise<OrganizationDto | null>;
   createOrganization(data: CreateOrganizationRequest): Promise<OrganizationDto>;
   updateOrganization(orgId: string, data: UpdateOrganizationRequest): Promise<OrganizationDto>;

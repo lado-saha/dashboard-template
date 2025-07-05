@@ -49,6 +49,8 @@ export interface CreateOrganizationRequest {
   year_founded?: string; // format: date-time
   keywords?: string[]; // uniqueItems
   number_of_employees?: number; // int32
+
+  business_actor_id?: string;
 }
 
 export interface UpdateOrganizationRequest extends Partial<Omit<CreateOrganizationRequest, 'email'>> {
@@ -78,32 +80,37 @@ export interface OrganizationDto extends Auditable {
   keywords?: string[]; // uniqueItems
   status?: OrganizationStatus;
   number_of_employees?: number; // Added for consistency if available
+
+
+
+  business_actor_id?: string; // Who created/owns it
+  // --- State Initialization ---
 }
 
-export interface OrganizationTableRow extends Auditable { // As per GET /organizations
-  organization_id?: string;
-  business_actor_id?: string; // Who created/owns it
-  business_domains?: string[];
-  email?: string;
-  short_name?: string;
-  long_name?: string;
-  description?: string;
-  logo_url?: string;
-  is_individual_business?: boolean;
-  legal_form?: OrganizationLegalForm;
-  is_active?: boolean; // Usually derived from status
-  website_url?: string;
-  social_network?: string;
-  business_registration_number?: string;
-  tax_number?: string;
-  capital_share?: number;
-  registration_date?: string;
-  ceo_name?: string;
-  year_founded?: string;
-  keywords?: string[];
-  status?: OrganizationStatus;
-  number_of_employees?: number;
-}
+// export interface OrganizationDto extends Auditable { // As per GET /organizations
+//   organization_id?: string;
+//   business_actor_id?: string; // Who created/owns it
+//   business_domains?: string[];
+//   email?: string;
+//   short_name?: string;
+//   long_name?: string;
+//   description?: string;
+//   logo_url?: string;
+//   is_individual_business?: boolean;
+//   legal_form?: OrganizationLegalForm;
+//   is_active?: boolean; // Usually derived from status
+//   website_url?: string;
+//   social_network?: string;
+//   business_registration_number?: string;
+//   tax_number?: string;
+//   capital_share?: number;
+//   registration_date?: string;
+//   ceo_name?: string;
+//   year_founded?: string;
+//   keywords?: string[];
+//   status?: OrganizationStatus;
+//   number_of_employees?: number;
+// }
 
 export interface UpdateOrganizationStatusRequest {
   status: OrganizationStatus;
@@ -317,6 +324,7 @@ export const GenderValues: [Gender, ...Gender[]] = ["MALE", "FEMALE"];
 
 export interface CreateBusinessActorRequest { // Used for POST /business-actors
   first_name: string;
+  user_id: string;
   phone_number?: string;
   email?: string;
   avatar_picture?: string; // URL
@@ -481,7 +489,7 @@ export interface SalesPersonDto extends Auditable {
   organization_id?: string; // uuid
   agency_id?: string; // uuid
   sales_person_id?: string; // uuid, ID of this SalesPerson record
-  user_id?: string; // Link to User from Auth Service / BusinessActor
+  user_id?: string;
   first_name?: string;
   last_name?: string;
   name?: string; // Combined name

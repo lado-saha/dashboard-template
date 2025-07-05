@@ -6,9 +6,8 @@ export async function DELETE(_request: Request, { params }: { params: { orgId: s
   try {
     const { orgId } = await params;
     const deletedDetails = dbManager.deleteItem('organizationsDetails', orgId);
-    const deletedTableRow = dbManager.deleteItem('organizationsTableRows', orgId);
 
-    if (!deletedDetails && !deletedTableRow) { // If neither was found
+    if (!deletedDetails) { // If neither was found
       return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
     }
     // TODO: Cascade delete related entities (agencies, contacts, addresses, etc.)

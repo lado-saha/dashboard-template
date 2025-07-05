@@ -33,11 +33,12 @@ export const authOptions: NextAuthOptions = {
             if (!userId) {
               throw new Error("User ID is missing from login response.");
             }
-
-            // **NEW LOGIC**: Check if user is a Business Actor
             let businessActorProfile = null;
+
             try {
-              businessActorProfile = await organizationRepository.getBusinessActorById(userId);
+              // businessActorProfile = await organizationRepository.getBusinessActorById(userId);
+              const allBusinessActors = await organizationRepository.getAllBusinessActors();
+              businessActorProfile = allBusinessActors.find(actor => actor.user_id === userId) || null;
             } catch (error: any) {
               // A 404 is expected for normal users, so we ignore it.
               // Any other error should be logged but not block login.

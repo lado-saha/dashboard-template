@@ -1,6 +1,5 @@
 import {
-  OrganizationTableRow,
-  OrganizationDto,
+  OrganizationDto
   AddressDto,
   ContactDto,
   AgencyDto,
@@ -22,7 +21,7 @@ import {
 
 const placeholderImageUrl = "/placeholder.svg";
 
-export const mockUserOrganizations: OrganizationTableRow[] = [
+export const mockUserOrganizations: OrganizationDto[] = [
   {
     organization_id: "org-a1b2c3d4-main",
     business_actor_id: "ba-uuid-123",

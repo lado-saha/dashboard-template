@@ -1,7 +1,7 @@
 // app/api/mock/organization/create/route.ts
 import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { CreateOrganizationRequest, OrganizationDto, OrganizationTableRow } from '@/types/organization';
+import { CreateOrganizationRequest,OrganizationDto } from '@/types/organization';
 
 export async function POST(_request: Request) {
   try {
@@ -30,17 +30,12 @@ export async function POST(_request: Request) {
       keywords: body.keywords,
       number_of_employees: body.number_of_employees,
       is_individual_business: body.legal_form === "11",
+      business_actor_id: body.business_actor_id
     };
 
     const newOrg = dbManager.addItem('organizationsDetails', { ...newOrgData, status: 'PENDING_APPROVAL', is_active: false });
 
-    // Also add to organizationsTableRows for listing
-    const newOrgTableRow: Partial<OrganizationTableRow> = {
-      long_name: newOrg.long_name, short_name: newOrg.short_name, email: newOrg.email,
-      description: newOrg.description, logo_url: newOrg.logo_url, legal_form: newOrg.legal_form,
-    };
-    dbManager.addItem('organizationsTableRows', { ...newOrgTableRow, organization_id: newOrg.organization_id, status: newOrg.status });
-
+  
     return NextResponse.json(newOrg, { status: 201 });
   } catch (error: any)  {
     return NextResponse.json({ message: "Failed to create organization", error: error.message }, { status: 500 });
