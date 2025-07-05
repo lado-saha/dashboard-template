@@ -1,24 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// We will reuse the same form component for edit
-// import { AgencyForm } from "@/components/organization/agencies/agency-form";
+import { AgencyForm } from "@/components/organization/agencies/agency-form";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { AgencyDto } from "@/types/organization";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function EditAgencyPage({
   params,
 }: {
   params: { agencyId: string };
 }) {
-  const { activeOrganizationId } = useActiveOrganization();
+  const { activeOrganizationId, fetchAgenciesForCurrentOrg } =
+    useActiveOrganization();
   const [agencyData, setAgencyData] = useState<AgencyDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (activeOrganizationId && params.agencyId) {
@@ -26,16 +29,20 @@ export default function EditAgencyPage({
       organizationRepository
         .getAgencyById(activeOrganizationId, params.agencyId)
         .then((data) => {
-          if (data) {
-            setAgencyData(data);
-          } else {
-            setError("Agency not found.");
-          }
+          if (data) setAgencyData(data);
+          else setError("Agency not found.");
         })
         .catch(() => setError("Failed to fetch agency details."))
         .finally(() => setIsLoading(false));
     }
   }, [activeOrganizationId, params.agencyId]);
+
+  const handleSuccessAction = (updatedAgency: AgencyDto) => {
+    toast.success(`Agency "${updatedAgency.short_name}" updated successfully!`);
+    // Refresh the agency list in the context so the main list page will be up-to-date
+    fetchAgenciesForCurrentOrg();
+    router.push("/business-actor/org/agencies");
+  };
 
   if (isLoading) {
     return (
@@ -66,10 +73,12 @@ export default function EditAgencyPage({
       <h1 className="text-2xl font-bold tracking-tight mb-6">
         Edit Agency: {agencyData.short_name}
       </h1>
-      {/* The form for editing will be implemented in a future step, similar to the create form. */}
-      <p className="p-8 border-2 border-dashed rounded-lg text-center">
-        Edit Form for Agency will be placed here.
-      </p>
+      <AgencyForm
+        organizationId={activeOrganizationId!}
+        mode="edit"
+        initialData={agencyData}
+        onSuccessAction={handleSuccessAction}
+      />
     </div>
   );
 }

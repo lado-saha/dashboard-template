@@ -1,21 +1,23 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   CreateOrganizationRequest,
+  UpdateOrganizationRequest, // We'll need this type for editing
   OrganizationDto,
   BusinessDomainDto,
   OrganizationLegalForm,
   CreateAddressRequest,
+  UpdateAddressRequest, // And this type for updating addresses
   AddressDto,
 } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { mediaRepository } from "@/lib/data-repo/media";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 import { Form } from "@/components/ui/form";
 import { FormWizard } from "@/components/ui/form-wizard";
 import {
@@ -34,16 +36,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
 import { OrgBasicInfoForm } from "./forms/org-basic-info-form";
 import { OrgLegalForm } from "./forms/org-legal-form";
 import { OrgBrandingForm } from "./forms/org-branding-form";
 import { OrgAddressForm } from "./forms/org-address-form";
-import { useSession } from "next-auth/react";
 import { isValid } from "date-fns";
 import { embedId } from "@/lib/id-parser";
 
-// Schemas for each step
+// Schemas remain the same
 const basicInfoSchema = z.object({
   long_name: z.string().min(3, "Official name is required.").max(100),
   short_name: z.string().min(2, "Short name is required.").max(50),
@@ -52,10 +52,10 @@ const basicInfoSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters.")
     .max(500),
-  business_domains: z.array(z.string()),
-  // .min(1, "At least one business domain is required."),
+  business_domains: z
+    .array(z.string())
+    .min(1, "At least one business domain is required."),
 });
-
 const legalFormSchema = z.object({
   legal_form: z.string().min(1, "Legal form is required."),
   business_registration_number: z.string().optional().or(z.literal("")),
@@ -68,10 +68,9 @@ const legalFormSchema = z.object({
   registration_date: z.date().optional().nullable(),
   year_founded: z.date().optional().nullable(),
 });
-
 const brandingSchema = z.object({
   logoFile: z.any().optional(),
-  logo_url: z.string().url("Invalid URL.").optional().or(z.literal("")),
+  logo_url: z.string().url("Invalid URL").optional().or(z.literal("")),
   web_site_url: z
     .string()
     .url("Invalid website URL.")
@@ -88,14 +87,8 @@ const brandingSchema = z.object({
     )
     .optional(),
   keywords: z.string().optional().or(z.literal("")),
-  number_of_employees: z.coerce
-    .number()
-    .int()
-    .min(0, "Number of employees cannot be negative.")
-    .optional()
-    .nullable(),
+  number_of_employees: z.coerce.number().int().min(0).optional().nullable(),
 });
-
 const addressSchema = z.object({
   address_line_1: z.string().min(3, "Address line 1 is required."),
   address_line_2: z.string().optional().or(z.literal("")),
@@ -106,12 +99,19 @@ const addressSchema = z.object({
   latitude: z.coerce.number().min(-90).max(90).optional(),
   longitude: z.coerce.number().min(-180).max(180).optional(),
 });
-
 const fullOrganizationSchema = basicInfoSchema
   .merge(legalFormSchema)
   .merge(brandingSchema)
   .merge(addressSchema);
 type OrganizationFormData = z.infer<typeof fullOrganizationSchema>;
+
+// --- CHANGE 1: Define a proper props interface ---
+interface OrganizationFormProps {
+  mode: "create" | "edit";
+  initialData?: Partial<OrganizationDto>; // Optional: for edit mode
+  defaultAddress?: AddressDto | null; // Optional: for edit mode
+  onSuccessAction: (data: OrganizationDto) => void;
+}
 
 const formSteps = [
   {
@@ -144,11 +144,13 @@ const formSteps = [
   },
 ];
 
+// --- CHANGE 2: Use the new props interface ---
 export function OrganizationForm({
+  mode,
+  initialData,
+  defaultAddress,
   onSuccessAction,
-}: {
-  onSuccessAction: (data: OrganizationDto) => void;
-}) {
+}: OrganizationFormProps) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -160,7 +162,55 @@ export function OrganizationForm({
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(fullOrganizationSchema),
     mode: "onChange",
-    defaultValues: { business_domains: [], social_networks: [{ url: "" }] },
+    // --- CHANGE 3: Set defaultValues dynamically based on mode ---
+    defaultValues: useMemo(() => {
+      const socialNetworks =
+        initialData?.social_network
+          ?.split(",")
+          .filter(Boolean)
+          .map((url) => ({ url })) || [];
+
+      return {
+        long_name: initialData?.long_name || "",
+        short_name: initialData?.short_name || "",
+        email: initialData?.email || "",
+        description: initialData?.description || "",
+        business_domains: initialData?.business_domains?.length
+          ? initialData.business_domains
+          : [],
+        legal_form: initialData?.legal_form || "",
+        business_registration_number:
+          initialData?.business_registration_number || "",
+        tax_number: initialData?.tax_number || "",
+        capital_share: initialData?.capital_share || null,
+        registration_date:
+          initialData?.registration_date &&
+          isValid(new Date(initialData.registration_date))
+            ? new Date(initialData.registration_date)
+            : undefined,
+        year_founded:
+          initialData?.year_founded &&
+          isValid(new Date(initialData.year_founded))
+            ? new Date(initialData.year_founded)
+            : undefined,
+        logo_url: initialData?.logo_url || "",
+        web_site_url: initialData?.website_url || "",
+        social_networks:
+          socialNetworks.length > 0 ? socialNetworks : [{ url: "" }],
+        keywords: Array.isArray(initialData?.keywords)
+          ? initialData.keywords.join(", ")
+          : "",
+        number_of_employees: (initialData as any)?.number_of_employees || null,
+        address_line_1: defaultAddress?.address_line_1 || "",
+        address_line_2: defaultAddress?.address_line_2 || "",
+        city: defaultAddress?.city || "",
+        state: defaultAddress?.state || "",
+        zip_code: defaultAddress?.zip_code || "",
+        country: defaultAddress?.country_id || "",
+        latitude: defaultAddress?.latitude,
+        longitude: defaultAddress?.longitude,
+      };
+    }, [initialData, defaultAddress]),
   });
 
   useEffect(() => {
@@ -180,7 +230,9 @@ export function OrganizationForm({
     const fieldsToValidate = formSteps[currentStep].fields;
     const isStepValid = await form.trigger(fieldsToValidate);
     if (isStepValid) {
-      setCurrentStep((p) => p + 1);
+      if (currentStep < formSteps.length - 1) {
+        setCurrentStep((p) => p + 1);
+      }
     } else {
       toast.error("Please correct the errors before proceeding.");
     }
@@ -196,43 +248,37 @@ export function OrganizationForm({
     }
   };
 
+  // --- CHANGE 4: The onSubmit function now handles both create and edit modes ---
   const onSubmit = async (data: OrganizationFormData) => {
-    if (!session?.user?.businessActorId) {
+    const baId = session?.user?.businessActorId;
+    if (!baId) {
       toast.error("Business Actor profile not found. Please re-login.");
       return;
     }
     setIsLoading(true);
+
     try {
-      let logoUrl: string | undefined = undefined;
+      // Logo upload logic is the same for both modes
+      let logoUrl = data.logo_url || undefined;
       if (data.logoFile instanceof File) {
-        toast.loading("Uploading logo...");
         const response = await mediaRepository.uploadFile(
           "organization",
           "image",
           "logos",
-          session.user.businessActorId,
+          baId,
           data.logoFile,
           true
         );
         logoUrl = response.url;
-        toast.dismiss();
       }
 
-      const descriptionWithId = embedId(
-        data.description,
-        "ba_id",
-        session.user.businessActorId
-      );
-
-      const orgPayload: CreateOrganizationRequest = {
+      // Shared payload for both create and update
+      const orgPayload = {
         long_name: data.long_name,
         short_name: data.short_name,
         email: data.email,
-        description: descriptionWithId,
-        business_domains:
-          data.business_domains.length === 0
-            ? ["Other"]
-            : data.business_domains,
+        description: data.description, // No need for embedId in update
+        business_domains: data.business_domains,
         legal_form: data.legal_form as OrganizationLegalForm,
         logo_url: logoUrl,
         web_site_url: data.web_site_url,
@@ -253,47 +299,76 @@ export function OrganizationForm({
         registration_date: data.registration_date?.toISOString(),
         year_founded: data.year_founded?.toISOString(),
         number_of_employees: data.number_of_employees ?? undefined,
-        business_actor_id: session.user.businessActorId,
       };
 
-      const orgResponse = await organizationRepository.createOrganization(
-        orgPayload
-      );
+      const addressPayload = {
+        address_line_1: data.address_line_1,
+        address_line_2: data.address_line_2,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zip_code,
+        country_id: data.country,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        default: true,
+      };
 
-      if (orgResponse && orgResponse.organization_id) {
-        const addressPayload: CreateAddressRequest = {
-          address_line_1: data.address_line_1,
-          address_line_2: data.address_line_2,
-          city: data.city,
-          state: data.state,
-          zip_code: data.zip_code,
-          country_id: data.country,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          default: true,
+      if (mode === "create") {
+        const createPayload: CreateOrganizationRequest = {
+          ...orgPayload,
+          description: embedId(data.description, "ba_id", baId), // Embed ID only on create
+          business_actor_id: baId,
         };
-        try {
+        const orgResponse = await organizationRepository.createOrganization(
+          createPayload
+        );
+        if (orgResponse?.organization_id) {
           await organizationRepository.createAddress(
             "ORGANIZATION",
             orgResponse.organization_id,
             addressPayload
           );
-        } catch (addressError: any) {
-          toast.warning(
-            `Organization created, but failed to save address: ${addressError.message}`
+        }
+        onSuccessAction(orgResponse);
+      } else if (mode === "edit" && initialData?.organization_id) {
+        const updatedOrg = await organizationRepository.updateOrganization(
+          initialData.organization_id,
+          orgPayload
+        );
+
+        if (defaultAddress?.address_id) {
+          // If an address exists, update it
+          await organizationRepository.updateAddress(
+            "ORGANIZATION",
+            initialData.organization_id,
+            defaultAddress.address_id,
+            addressPayload
+          );
+        } else {
+          // If no address exists, create one
+          await organizationRepository.createAddress(
+            "ORGANIZATION",
+            initialData.organization_id,
+            addressPayload
           );
         }
-        toast.success(
-          `Organization "${orgResponse.short_name}" created successfully!`
-        );
-        onSuccessAction(orgResponse);
-      } else {
-        throw new Error("Failed to get organization ID after creation.");
+
+        onSuccessAction(updatedOrg);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to create organization.");
+      toast.error(error.message || `Failed to ${mode} organization.`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // --- CHANGE 5: A robust final submit handler ---
+  const handleFinalSubmit = async () => {
+    const isFormValid = await form.trigger();
+    if (isFormValid) {
+      await onSubmit(form.getValues());
+    } else {
+      onInvalid(form.formState.errors);
     }
   };
 
@@ -325,16 +400,21 @@ export function OrganizationForm({
         <FormWizard
           steps={formSteps}
           currentStepIndex={currentStep}
-          onStepClick={(index) => {
-            if (index < currentStep) setCurrentStep(index);
-          }}
+          onStepClick={setCurrentStep}
+          mode={mode}
         />
         <Card>
           <CardHeader>
             <CardTitle>{formSteps[currentStep].name}</CardTitle>
+            <CardDescription>
+              {mode === "edit"
+                ? `Update this section's details.`
+                : `Please fill in the details for this section.`}
+            </CardDescription>
           </CardHeader>
-          {renderCurrentStep()}
+          <div className="p-6 pt-0">{renderCurrentStep()}</div>
         </Card>
+
         <div className="flex justify-between mt-8 pt-6 border-t">
           <Button
             type="button"
@@ -342,22 +422,21 @@ export function OrganizationForm({
             onClick={() => setCurrentStep((p) => p - 1)}
             disabled={currentStep === 0 || isLoading}
           >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           {currentStep < formSteps.length - 1 ? (
             <Button type="button" onClick={handleNextStep}>
-              Next
-              <ChevronRight className="ml-2 h-4 w-4" />
+              Next <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
+            // --- CHANGE 6: Use the new handler and update the button text dynamically ---
             <Button
               type="button"
+              onClick={handleFinalSubmit}
               disabled={isLoading}
-              onClick={form.handleSubmit(onSubmit, onInvalid)}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Organization
+              {mode === "create" ? "Create Organization" : "Save All Changes"}
             </Button>
           )}
         </div>

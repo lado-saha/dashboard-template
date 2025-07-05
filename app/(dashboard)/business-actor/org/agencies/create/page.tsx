@@ -4,9 +4,24 @@ import { AgencyForm } from "@/components/organization/agencies/agency-form";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Inbox } from "lucide-react";
+import { AgencyDto } from "@/types/organization";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function CreateAgencyPage() {
-  const { activeOrganizationId, isLoadingOrgDetails } = useActiveOrganization();
+  const router = useRouter();
+  const {
+    activeOrganizationId,
+    isLoadingOrgDetails,
+    fetchAgenciesForCurrentOrg,
+  } = useActiveOrganization();
+
+  const handleCreateSuccess = (newAgency: AgencyDto) => {
+    toast.success(`Agency "${newAgency.short_name}" created successfully!`);
+    // Refresh the agency list in the context so the main list page will be up-to-date
+    fetchAgenciesForCurrentOrg();
+    router.push("/business-actor/org/agencies");
+  };
 
   if (!activeOrganizationId && !isLoadingOrgDetails) {
     return (
@@ -30,7 +45,11 @@ export default function CreateAgencyPage() {
         Create New Agency
       </h1>
       {activeOrganizationId && (
-        <AgencyForm organizationId={activeOrganizationId} />
+        <AgencyForm
+          organizationId={activeOrganizationId}
+          mode="create"
+          onSuccessAction={handleCreateSuccess}
+        />
       )}
     </div>
   );

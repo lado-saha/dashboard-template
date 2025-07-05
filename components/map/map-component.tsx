@@ -50,7 +50,7 @@ function LocationPicker({
   onLocationSelectAction: (lat: number, lng: number) => void;
 }) {
   useMapEvents({
-    click(error: any)  {
+    click(e)  {
       onLocationSelectAction(e.latlng.lat, e.latlng.lng);
     },
   });

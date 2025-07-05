@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, UseFormReturn } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -21,8 +21,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
 
-export function AgencyBrandingForm() {
-  const { control } = useFormContext();
+// THE FIX: Define the props interface
+interface AgencyBrandingFormProps {
+  form: UseFormReturn<any>;
+}
+
+export function AgencyBrandingForm({ form }: AgencyBrandingFormProps) {
+  // THE FIX: Destructure props
+  const { control } = form; // THE FIX: Get control from the passed form prop
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -30,13 +36,7 @@ export function AgencyBrandingForm() {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Branding & Marketing</CardTitle>
-        <CardDescription>
-          Define the agency public-facing identity.
-        </CardDescription>
-      </CardHeader>
+    <Card className="ml-2 mr-2">
       <CardContent className="space-y-4">
         <FormField
           control={control}
@@ -85,7 +85,7 @@ export function AgencyBrandingForm() {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={control}
           name="keywords"
           render={({ field }) => (
@@ -100,8 +100,7 @@ export function AgencyBrandingForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
-
+        /> */}
         <div className="space-y-3">
           <FormLabel>Image Gallery URLs</FormLabel>
           <FormDescription>
@@ -140,7 +139,7 @@ export function AgencyBrandingForm() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => append("")}
+            onClick={() => append({ value: "" })}
           >
             <PlusCircle className="mr-2 h-4 w-4" /> Add Image URL
           </Button>

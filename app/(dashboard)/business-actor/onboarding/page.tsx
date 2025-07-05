@@ -60,6 +60,7 @@ export default function BusinessActorOnboardingPage() {
             </p>
           </div>
           <BusinessActorForm onSuccessAction={handleSuccessAction} />
+
         </>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -27,17 +27,17 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarDays } from "lucide-react";
 
-export function AgencyLegalForm() {
-  const { control } = useFormContext();
+// THE FIX: Define the props interface
+interface AgencyLegalFormProps {
+  form: UseFormReturn<any>; // Use UseFormReturn<any> for simplicity or the specific form type
+}
+
+export function AgencyLegalForm({ form }: AgencyLegalFormProps) {
+  // THE FIX: Destructure props
+  const { control } = form; // THE FIX: Get control from the passed form prop
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Legal & Financial Details</CardTitle>
-        <CardDescription>
-          Provide optional legal and financial identifiers for this agency.
-        </CardDescription>
-      </CardHeader>
+    <Card className="ml-2 mr-2">
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={control}
@@ -118,12 +118,15 @@ export function AgencyLegalForm() {
                 </PopoverTrigger>
                 <PopoverContent
                   className="w-auto p-0"
-                  onInteractOutside={(e: any)  => e.preventDefault()}
+                  onInteractOutside={(e) => e.preventDefault()}
                 >
                   <Calendar
                     mode="single"
                     selected={field.value || undefined}
                     onSelect={field.onChange}
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
                   />
                 </PopoverContent>
               </Popover>

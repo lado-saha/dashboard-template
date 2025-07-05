@@ -9,7 +9,12 @@ const nextConfig = {
         pathname: '/**', // More permissive for any path on this host
       }, {
         protocol: 'https',
-        hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com',
+        hostname: '*',
+        pathname: '/**', // More permissive for any path on this host
+      },
+      {
+        protocol: 'http',
+        hostname: '*',
         pathname: '/**', // More permissive for any path on this host
       }
 

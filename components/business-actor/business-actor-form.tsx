@@ -286,6 +286,7 @@ export function BusinessActorForm({
               onStepClick={(stepIndex) => {
                 if (stepIndex < currentStep) setCurrentStep(stepIndex);
               }}
+              mode = {'create'}
             />
             <div className="min-h-[420px]">
               <div className={cn(currentStep !== 0 && "hidden")}>

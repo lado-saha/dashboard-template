@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { EmployeeForm } from "@/components/organization/employees/employee-form";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
@@ -8,34 +8,36 @@ import { EmployeeDto } from "@/types/organization";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, Inbox } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function EditEmployeePage() {
   const { employeeId }: { employeeId: string } = useParams();
   const { activeOrganizationId } = useActiveOrganization();
+  const router = useRouter();
+
   const [employeeData, setEmployeeData] = useState<EmployeeDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // THE FIX: Use the destructured employeeId variable.
     if (activeOrganizationId && employeeId) {
       setIsLoading(true);
       setError(null);
       organizationRepository
         .getOrgEmployeeById(activeOrganizationId, employeeId)
         .then((data) => {
-          if (data) {
-            setEmployeeData(data);
-          } else {
-            setError("Employee not found.");
-          }
+          if (data) setEmployeeData(data);
+          else setError("Employee not found.");
         })
         .catch(() => setError("Failed to fetch employee details."))
         .finally(() => setIsLoading(false));
     }
-    // THE FIX: Update the dependency array.
   }, [activeOrganizationId, employeeId]);
+
+  const handleSuccess = () => {
+    router.push("/business-actor/org/employees");
+    router.refresh();
+  };
 
   if (isLoading) {
     return (
@@ -72,7 +74,7 @@ export default function EditEmployeePage() {
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center text-center p-10">
           <Inbox className="h-12 w-12 text-muted-foreground mb-4" />
-          <p>The requested employee could not be found in this organization.</p>
+          <p>The requested employee could not be found.</p>
         </CardContent>
       </Card>
     );
@@ -84,6 +86,7 @@ export default function EditEmployeePage() {
         organizationId={activeOrganizationId!}
         mode="edit"
         initialData={employeeData}
+        onSuccessAction={handleSuccess}
       />
     </div>
   );

@@ -29,6 +29,10 @@ interface ActiveOrganizationContextType {
   ) => Promise<void>;
 
   fetchUserOrganizationsList: (businessActorId: string) => Promise<void>;
+  fetchAgenciesForCurrentOrg: () => Promise<void>;
+  fetchAndSetOrganizationDetails: (
+    id: string
+  ) => Promise<OrganizationDto | null>;
   activeAgencyId: string | null;
   activeAgencyDetails: AgencyDto | null;
   isLoadingAgencyDetails: boolean;
@@ -88,7 +92,7 @@ export const ActiveOrganizationProvider = ({
     setAgenciesForCurrentOrg([]);
   }, []);
 
-  const internalFetchAndSetOrgDetails = useCallback(
+  const fetchAndSetOrganizationDetails = useCallback(
     async (id: string): Promise<OrganizationDto | null> => {
       setIsLoadingOrgDetails(true);
       try {
@@ -116,12 +120,12 @@ export const ActiveOrganizationProvider = ({
       if (orgDetails && orgId === orgDetails.organization_id) {
         setActiveOrganizationDetailsState(orgDetails);
       } else if (orgId) {
-        await internalFetchAndSetOrgDetails(orgId);
+        await fetchAndSetOrganizationDetails(orgId);
       } else {
         setActiveOrganizationDetailsState(null);
       }
     },
-    [internalFetchAndSetOrgDetails]
+    [fetchAndSetOrganizationDetails]
   );
 
   const fetchAgenciesForCurrentOrg = useCallback(async () => {
@@ -209,8 +213,8 @@ export const ActiveOrganizationProvider = ({
   }, [
     sessionStatus,
     session,
-    isOrgContextInitialized,
-    fetchUserOrganizationsList,
+    // isOrgContextInitialized,
+    // fetchUserOrganizationsList,
   ]);
 
   useEffect(() => {
@@ -232,6 +236,8 @@ export const ActiveOrganizationProvider = ({
         isOrgContextInitialized,
         setActiveOrganization,
         fetchUserOrganizationsList,
+        fetchAgenciesForCurrentOrg,
+        fetchAndSetOrganizationDetails,
         activeAgencyId,
         activeAgencyDetails,
         isLoadingAgencyDetails,
