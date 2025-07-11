@@ -4,19 +4,17 @@ const NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const lat = searchParams.get('lat');
-  const lon = searchParams.get('lon');
+  const query = searchParams.get('q');
 
-  if (!lat || !lon) {
-    return NextResponse.json({ message: "Latitude and Longitude are required." }, { status: 400 });
+  if (!query || query.length < 3) {
+    return NextResponse.json({ message: "A search query of at least 3 characters is required." }, { status: 400 });
   }
 
-  const nominatimUrl = `${NOMINATIM_BASE_URL}/reverse?format=json&lat=${lat}&lon=${lon}`;
+  const nominatimUrl = `${NOMINATIM_BASE_URL}/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`;
 
   try {
     const response = await fetch(nominatimUrl, {
       headers: {
-        // Nominatim requires a specific User-Agent header for their public API
         'User-Agent': 'YowyobDashboard/1.0 (contact@yowyob.com)',
       },
     });
@@ -24,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Nominatim API Error:", errorText);
-      return NextResponse.json({ message: "Failed to fetch address from map service." }, { status: response.status });
+      return NextResponse.json({ message: "Failed to search for address." }, { status: response.status });
     }
 
     const data = await response.json();

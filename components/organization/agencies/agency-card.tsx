@@ -49,6 +49,7 @@ export function AgencyCard({
     : { icon: XCircle, color: "text-destructive", label: "Inactive" };
 
   return (
+    // [FIX] Added flex, flex-col, and h-full to ensure consistent card height in a grid
     <Card className="flex flex-col h-full shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group">
       <CardHeader>
         <div className="flex justify-between items-start gap-3">
@@ -103,6 +104,7 @@ export function AgencyCard({
           </DropdownMenu>
         </div>
       </CardHeader>
+      {/* [FIX] Added flex-grow to make this section expand and push the footer down */}
       <CardContent className="flex-grow space-y-3 text-sm py-2">
         <div className="flex items-center text-muted-foreground text-xs">
           <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />

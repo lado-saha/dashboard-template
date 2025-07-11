@@ -1,5 +1,5 @@
 "use client";
-
+import imageCompression from "browser-image-compression";
 import React, {
   useState,
   useCallback,
@@ -58,32 +58,50 @@ export function ImageUploader({
   }, [currentImageUrl]);
 
   const handleFileChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+    async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
-      if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error("Max 5MB.");
-          if (event.target) event.target.value = "";
-          return;
-        }
-        if (
-          !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
-            file.type
-          )
-        ) {
-          toast.error("Invalid file type.");
-          if (event.target) event.target.value = "";
-          return;
-        }
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Max file size is 5MB.");
+        return;
+      }
+      if (
+        !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+          file.type
+        )
+      ) {
+        toast.error("Invalid file type. Please use JPG, PNG, WEBP, or GIF.");
+        return;
+      }
+
+      const compressionToast = toast.loading("Compressing image...");
+
+      try {
+        // [ADD] Compression logic
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        toast.success("Image compressed successfully!", {
+          id: compressionToast,
+        });
+
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreview(reader.result as string);
-          setFileName(file.name);
-          onImageSelectedAction(file, reader.result as string);
+          setFileName(compressedFile.name);
+          onImageSelectedAction(compressedFile, reader.result as string);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        toast.error("Failed to compress image.", { id: compressionToast });
+        console.error(error);
+      } finally {
+        if (event.target) event.target.value = "";
       }
-      if (event.target) event.target.value = "";
     },
     [onImageSelectedAction]
   );
@@ -169,7 +187,7 @@ export function ImageUploader({
                     size="icon"
                     className="h-7 w-7 opacity-80 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background/90"
                     aria-label="View full image"
-                    onClick= {(e) => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       setIsFullViewOpen(true);
                     }}

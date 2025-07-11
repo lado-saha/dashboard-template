@@ -363,7 +363,7 @@ export function OrganizationForm({
   };
 
   // --- CHANGE 5: A robust final submit handler ---
-  const handleFinalSubmit = async () => {
+  const handleSave = async () => {
     const isFormValid = await form.trigger();
     if (isFormValid) {
       await onSubmit(form.getValues());
@@ -397,25 +397,19 @@ export function OrganizationForm({
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+        {/* [CHANGE] Use the new FormWizard component */}
         <FormWizard
           steps={formSteps}
           currentStepIndex={currentStep}
           onStepClick={setCurrentStep}
           mode={mode}
         />
-        <Card>
-          <CardHeader>
-            <CardTitle>{formSteps[currentStep].name}</CardTitle>
-            <CardDescription>
-              {mode === "edit"
-                ? `Update this section's details.`
-                : `Please fill in the details for this section.`}
-            </CardDescription>
-          </CardHeader>
-          <div className="p-6 pt-0">{renderCurrentStep()}</div>
-        </Card>
+
+        {/* The Card wrapper is now inside the renderCurrentStep function for better structure */}
+        <div className="mt-4 min-h-[420px]">{renderCurrentStep()}</div>
 
         <div className="flex justify-between mt-8 pt-6 border-t">
+          {/* Back Button is always the same */}
           <Button
             type="button"
             variant="outline"
@@ -424,18 +418,25 @@ export function OrganizationForm({
           >
             <ChevronLeft className="mr-2 h-4 w-4" /> Back
           </Button>
-          {currentStep < formSteps.length - 1 ? (
-            <Button type="button" onClick={handleNextStep}>
-              Next <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+
+          {/* [CHANGE] Conditional rendering for the right-side button */}
+          {mode === "create" ? (
+            // In CREATE mode, show Next or Finish
+            currentStep < formSteps.length - 1 ? (
+              <Button type="button" onClick={handleNextStep}>
+                Next <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button type="button" disabled={isLoading} onClick={handleSave}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Organization
+              </Button>
+            )
           ) : (
-            <Button
-              type="button"
-              onClick={handleFinalSubmit}
-              disabled={isLoading}
-            >
+            // In EDIT mode, show a consistent Save button
+            <Button type="button" disabled={isLoading} onClick={handleSave}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {mode === "create" ? "Create Organization" : "Save All Changes"}
+              Save Changes
             </Button>
           )}
         </div>

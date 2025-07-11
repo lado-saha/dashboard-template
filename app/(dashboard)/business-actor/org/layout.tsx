@@ -1,35 +1,37 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 
 export default function OrganizationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { activeOrganizationId } =
-    useActiveOrganization();
+  const { activeOrganizationId, isLoadingOrgDetails } = useActiveOrganization();
 
-  // Show a loading skeleton while waiting for an active organization to be confirmed.
-  if (!activeOrganizationId) {
+  if (isLoadingOrgDetails) {
     return (
       <div className="space-y-6">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <Skeleton className="h-48 w-full" />
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-80" />
           </div>
-          <div className="md:col-span-3">
-            <Skeleton className="h-96 w-full" />
-          </div>
+          <Skeleton className="h-10 w-32" />
         </div>
+        <Skeleton className="h-[400px] w-full" />
       </div>
     );
   }
 
-  // If an organization is active, render the page.
+  // If loading is finished but there's still no active org, show an empty state (or let child pages handle it).
+  if (!activeOrganizationId) {
+    // This can be a dedicated "Please select an organization" component.
+    // For now, we let the child pages render their specific empty states.
+    return <div className="w-full">{children}</div>;
+  }
+
   return <div className="w-full">{children}</div>;
 }

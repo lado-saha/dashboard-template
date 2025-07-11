@@ -5,22 +5,7 @@ import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { AgencyDto } from "@/types/organization";
-
-import { DataTable } from "@/components/ui/data-table";
-import { DataGrid } from "@/components/ui/data-grid";
-import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
-import { Button } from "@/components/ui/button";
-// import { Skeleton } from "@/components/ui/skeleton";
-import {
-  PlusCircle,
-  AlertTriangle,
-  // Inbox,
-  Building,
-  Trash2,
-  LayoutGrid,
-  LayoutList,
-} from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -32,29 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
-  PaginationState,
-  RowSelectionState,
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-} from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Building, SearchIcon } from "lucide-react";
 import { getAgencyColumns } from "@/components/organization/agencies/columns";
 import { AgencyCard } from "@/components/organization/agencies/agency-card";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn, fuzzyGlobalFilterFn } from "@/lib/utils";
-import { DataTableFilterOption } from "@/types/table";
+import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
-import { ViewMode } from "@/types/common";
-import { ListViewSkeleton } from "@/components/ui/list-view-skeleton";
+import { DataTableFilterOption } from "@/types/table";
+import { FeedbackCard } from "@/components/ui/feedback-card";
 
 const statusOptions: DataTableFilterOption[] = [
   { value: "true", label: "Active" },
@@ -66,41 +36,29 @@ export default function ManageAgenciesPage() {
   const { activeOrganizationId, activeOrganizationDetails, setActiveAgency } =
     useActiveOrganization();
 
-  const [allItems, setAllItems] = useState<AgencyDto[]>([]);
-  const [isItemsLoading, setIsItemsLoading] = useState(true);
-  const [itemsError, setItemsError] = useState<string | null>(null);
+  const [agencies, setAgencies] = useState<AgencyDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
-
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<AgencyDto[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilterAction] = useState<string>("");
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
 
   const fetchData = useCallback(async () => {
     if (!activeOrganizationId) {
-      setIsItemsLoading(false);
+      setIsLoading(false);
       return;
     }
-    setIsItemsLoading(true);
-    setItemsError(null);
+    setIsLoading(true);
+    setError(null);
     try {
       const data = await organizationRepository.getAgencies(
         activeOrganizationId
       );
-      setAllItems(data || []);
+      setAgencies(data || []);
     } catch (err: any) {
-      setItemsError(err.message || "Could not load agencies.");
+      setError(err.message || "Could not load agencies.");
     } finally {
-      setIsItemsLoading(false);
+      setIsLoading(false);
     }
   }, [activeOrganizationId]);
 
@@ -128,24 +86,25 @@ export default function ManageAgenciesPage() {
 
   const executeDelete = async () => {
     if (!activeOrganizationId || itemsToDelete.length === 0) return;
-    try {
-      await Promise.all(
-        itemsToDelete.map((item) =>
-          organizationRepository.deleteAgency(
-            activeOrganizationId,
-            item.agency_id!
-          )
+    const promise = Promise.all(
+      itemsToDelete.map((item) =>
+        organizationRepository.deleteAgency(
+          activeOrganizationId,
+          item.agency_id!
         )
-      );
-      toast.success(`${itemsToDelete.length} agency(s) deleted successfully.`);
-      refreshData();
-      table.resetRowSelection();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete agencies.");
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setItemsToDelete([]);
-    }
+      )
+    );
+
+    toast.promise(promise, {
+      loading: `Deleting ${itemsToDelete.length} agency(s)...`,
+      success: () => {
+        refreshData();
+        setIsDeleteDialogOpen(false);
+        setItemsToDelete([]);
+        return `${itemsToDelete.length} agency(s) deleted successfully.`;
+      },
+      error: (err) => `Failed to delete agencies: ${err.message}`,
+    });
   };
 
   const columns = useMemo<ColumnDef<AgencyDto>[]>(
@@ -155,168 +114,31 @@ export default function ManageAgenciesPage() {
         onEditAction: handleEditAction,
         onDeleteAction: (item) => handleDeleteConfirmation([item]),
       }),
-    [handleEditAction, handleEnterAgency]
+    []
   );
 
-  const table = useReactTable({
-    data: allItems,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-      columnVisibility,
-      rowSelection,
-      pagination,
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilterAction,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    globalFilterFn: fuzzyGlobalFilterFn,
-    enableRowSelection: true,
-  });
-
-  const renderContent = () => {
-    isItemsLoading && <ListViewSkeleton viewMode={viewMode} />;
-    {
-      !isItemsLoading && itemsError && (
-        <div className="min-h-[200px] flex flex-col justify-center items-center p-6 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
-          <AlertTriangle className="h-10 w-10 text-destructive mb-3" />
-          <p className="text-destructive-foreground font-medium">
-            {itemsError}
-          </p>
-          <Button onClick={refreshData} variant="destructive" className="mt-4">
-            Try Again
-          </Button>
-        </div>
-      );
-    }
-    if (itemsError) {
-      return (
-        <div className="min-h-[300px] flex flex-col justify-center items-center p-10 border border-destructive/50 bg-destructive/10 rounded-lg text-center">
-          <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-          <p className="text-destructive-foreground font-semibold">
-            {itemsError}
-          </p>
-          <Button onClick={refreshData} variant="destructive" className="mt-6">
-            Try Again
-          </Button>
-        </div>
-      );
-    }
-    if (table.getRowModel().rows.length === 0) {
-      const hasFilters = globalFilter || columnFilters.length > 0;
-      return (
-        <div className="min-h-[300px] text-center flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg p-10">
-          <Building className="h-16 w-16 text-muted-foreground/70 mb-6" />
-          <h3 className="text-lg font-semibold">
-            {hasFilters
-              ? "No Agencies Match Filters"
-              : "No Agencies Created Yet"}
-          </h3>
-          <p className="text-sm mt-1">
-            {hasFilters
-              ? "Try adjusting your search or filter criteria."
-              : "Get started by adding your first agency."}
-          </p>
-        </div>
-      );
-    }
-    return (
-      <>
-        {viewMode === "grid" ? (
-          <DataGrid
-            table={table}
-            renderCardAction={({ row }) => (
-              <AgencyCard
-                agency={row.original}
-                onEnterAction={handleEnterAgency}
-                onEditAction={handleEditAction}
-                onDeleteAction={(item) => handleDeleteConfirmation([item])}
-              />
-            )}
-          />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={allItems}
-            pageCount={table.getPageCount()}
-            sorting={sorting}
-            onSortingChange={setSorting}
-            columnFilters={columnFilters}
-            onColumnFiltersChange={setColumnFilters}
-            globalFilter={globalFilter}
-            onGlobalFilterChangeAction={setGlobalFilterAction}
-            columnVisibility={columnVisibility}
-            onColumnVisibilityChange={setColumnVisibility}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            pagination={pagination}
-            onPaginationChange={setPagination}
-            manualPagination={false}
-            manualSorting={false}
-            manualFiltering={false}
-          />
-        )}
-
-        {!isItemsLoading && !itemsError && table.getPageCount() >= 0 && (
-          <div className="mt-7">
-            <DataTablePagination table={table} viewMode={viewMode} />
-          </div>
-        )}
-      </>
-    );
-  };
-
   return (
-    <div className="space-y-6">
-      <header>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Agency Management
-            </h1>
-            <p className="text-muted-foreground">
-              Manage branches for <b>{activeOrganizationDetails?.long_name}</b>
-            </p>
-          </div>
-          <div className="flex items-center gap-x-2 flex-shrink-0">
-            <div className="flex items-center p-0.5 bg-muted rounded-md">
-              <Button
-                variant={viewMode === "grid" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className={cn(
-                  "h-9 px-3",
-                  viewMode === "grid" &&
-                  "bg-background text-foreground shadow-sm"
-                )}
-              >
-                <LayoutGrid className="h-4 w-4" />
-                <span className="ml-1.5 hidden sm:inline">Grid</span>
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className={cn(
-                  "h-9 px-3",
-                  viewMode === "list" &&
-                  "bg-background text-foreground shadow-sm"
-                )}
-              >
-                <LayoutList className="h-4 w-4" />
-                <span className="ml-1.5 hidden sm:inline">List</span>
-              </Button>
+    <>
+      <ResourceDataTable
+        data={agencies}
+        columns={columns}
+        isLoading={isLoading}
+        error={error}
+        viewModeStorageKey="agencies-view-mode"
+        exportFileName="agencies_export.csv"
+        onRefreshAction={refreshData}
+        searchPlaceholder="Search agencies by name or location..."
+        onDeleteItemsAction={handleDeleteConfirmation}
+        pageHeader={
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Agency Management
+              </h1>
+              <p className="text-muted-foreground">
+                Manage branches for{" "}
+                <b>{activeOrganizationDetails?.long_name}</b>
+              </p>
             </div>
             <Button
               onClick={() => router.push("/business-actor/org/agencies/create")}
@@ -326,45 +148,46 @@ export default function ManageAgenciesPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> Add Agency
             </Button>
           </div>
-        </div>
-      </header>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTableToolbar
-            table={table}
-            viewMode={viewMode}
-            globalFilter={globalFilter}
-            onGlobalFilterChangeAction={setGlobalFilterAction}
-            searchPlaceholder="Search agencies..."
-            filterControls={
-              <DataTableFacetedFilter
-                column={table.getColumn("is_active")}
-                title="Status"
-                options={statusOptions}
-              />
-            }
-            bulkActions={
+        }
+        filterControls={(table) => (
+          <DataTableFacetedFilter
+            column={table.getColumn("is_active")}
+            title="Status"
+            options={statusOptions}
+          />
+        )}
+        renderGridItemAction={(agency) => (
+          <AgencyCard
+            agency={agency}
+            onEnterAction={handleEnterAgency}
+            onEditAction={handleEditAction}
+            onDeleteAction={(item) => handleDeleteConfirmation([item])}
+          />
+        )}
+        emptyState={
+          <FeedbackCard
+            icon={Building}
+            title="No Agencies Created Yet"
+            description="Get started by adding your first agency to manage your operations."
+            actionButton={
               <Button
-                variant="destructive"
-                size="sm"
                 onClick={() =>
-                  handleDeleteConfirmation(
-                    table
-                      .getFilteredSelectedRowModel()
-                      .rows.map((r) => r.original)
-                  )
+                  router.push("/business-actor/org/agencies/create")
                 }
-                className="h-9"
               >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
+                <PlusCircle className="mr-2 h-4 w-4" /> Create Agency
               </Button>
             }
           />
-          <main className="mt-4">{renderContent()}</main>
-        </CardContent>
-      </Card>
-      {/* THE FIX: Moved pagination outside the Card */}
+        }
+        filteredEmptyState={
+          <FeedbackCard
+            icon={SearchIcon}
+            title="No Agencies Found"
+            description="Your search or filter criteria did not match any agencies. Try something different."
+          />
+        }
+      />
 
       <AlertDialog
         open={isDeleteDialogOpen}
@@ -387,6 +210,6 @@ export default function ManageAgenciesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

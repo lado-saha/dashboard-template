@@ -3,133 +3,62 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home } from "lucide-react";
+import { Home, Search } from "lucide-react";
+import { useActiveOrganization } from "@/contexts/active-organization-context";
+import { UserNav } from "./user-nav";
+import { ModeToggle } from "./mode-toggle";
+import { Button } from "./ui/button";
 import { signOut } from "next-auth/react";
 
-import { Notifications } from "./notifications";
-import { ModeToggle } from "./mode-toggle";
-import { UserNav } from "./user-nav";
-import { RoleSwitcher } from "./dev/role-switcher";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-
-function formatBreadcrumbSegment(segment: string): string {
-  if (!segment) return "";
-  if (segment === "super-admin") return "Super Admin";
-  if (segment === "business-actor") return "Business Actor";
-  if (segment === "org") return "Organization";
-  return segment
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+interface TopNavProps {
+  onOpenCommandPalette: () => void;
 }
 
-type Role = "business-actor" | "customer" | "super-admin";
-
-export function TopNav() {
+export function TopNav({ onOpenCommandPalette }: TopNavProps) {
   const pathname = usePathname();
-  const { activeOrganizationDetails, activeAgencyDetails } =
-    useActiveOrganization();
-
-  const pathSegments = pathname.split("/").filter(Boolean);
-  let currentRole: Role | null = null;
-  let homeHref = "/";
-
-  if (pathSegments.length > 0) {
-    const firstSegment = pathSegments[0] as Role;
-    if (["business-actor", "customer", "super-admin"].includes(firstSegment)) {
-      currentRole = firstSegment;
-      homeHref = `/${firstSegment}/dashboard`;
-    }
-  }
-
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
-  };
+  const { activeOrganizationDetails, activeAgencyDetails } = useActiveOrganization();
 
   const getBreadcrumbs = () => {
-    if (!currentRole) return null;
+    const pathSegments = pathname.split("/").filter(Boolean);
+    if (pathSegments.length === 0) return null;
 
-    if (pathname.startsWith("/business-actor/agency")) {
-      const agencySegments = pathSegments.slice(2); // Skip 'business-actor' and 'agency'
-      return (
-        <>
-          <Link
-            href="/business-actor/agency/dashboard"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-4 w-4" />
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <span
-            className="font-medium text-foreground truncate max-w-[200px]"
-            title={activeAgencyDetails?.short_name || "Agency"}
-          >
-            {activeAgencyDetails?.short_name || "Agency"}
-          </span>
-          {agencySegments.map((segment) => (
-            <React.Fragment key={segment}>
-              <span className="text-muted-foreground mx-1">/</span>
-              <span className="font-medium text-foreground">
-                {formatBreadcrumbSegment(segment)}
-              </span>
-            </React.Fragment>
-          ))}
-        </>
+    const breadcrumbs: React.ReactNode[] = [];
+    let currentPath = "";
+
+    pathSegments.forEach((segment, index) => {
+      currentPath += `/${segment}`;
+      let text = segment.replace(/-/g, " ");
+
+      // Replace IDs with names from context
+      if (segment === activeOrganizationDetails?.organization_id) {
+        text = activeOrganizationDetails.short_name || "Organization";
+      } else if (segment === activeAgencyDetails?.agency_id) {
+        text = activeAgencyDetails.short_name || "Agency";
+      }
+
+      // Don't link the very last segment (the current page)
+      const isLast = index === pathSegments.length - 1;
+
+      breadcrumbs.push(
+        <React.Fragment key={currentPath}>
+          <span className="text-muted-foreground mx-1">/</span>
+          {isLast ? (
+            <span className="font-medium text-foreground capitalize">{text}</span>
+          ) : (
+            <Link href={currentPath} className="capitalize text-muted-foreground hover:text-foreground">
+              {text}
+            </Link>
+          )}
+        </React.Fragment>
       );
-    }
+    });
 
-    if (pathname.startsWith("/business-actor/org")) {
-      const orgSegments = pathSegments.slice(2); // Skip 'business-actor' and 'org'
-      return (
-        <>
-          <Link
-            href="/business-actor/dashboard"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <Home className="h-4 w-4" />
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <span
-            className="font-medium text-foreground truncate max-w-[200px]"
-            title={activeOrganizationDetails?.short_name || "Organization"}
-          >
-            {activeOrganizationDetails?.short_name || "Organization"}
-          </span>
-          {orgSegments.map((segment,) => (
-            <React.Fragment key={segment}>
-              <span className="text-muted-foreground mx-1">/</span>
-              <span className="font-medium text-foreground">
-                {formatBreadcrumbSegment(segment)}
-              </span>
-            </React.Fragment>
-          ))}
-        </>
-      );
-    }
-
-    // Default breadcrumb for other role pages
-    const displaySegments = pathSegments
-      .slice(1)
-      .filter((s) => s !== "dashboard");
     return (
       <>
-        <Link
-          href={homeHref}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
-        >
+        <Link href="/dashboard" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
           <Home className="h-4 w-4" />
-          <span className="font-medium text-foreground">
-            {formatBreadcrumbSegment(currentRole)}
-          </span>
         </Link>
-        {displaySegments.map((segment) => (
-          <React.Fragment key={segment}>
-            <span className="text-muted-foreground mx-1">/</span>
-            <span className="font-medium text-foreground">
-              {formatBreadcrumbSegment(segment)}
-            </span>
-          </React.Fragment>
-        ))}
+        {breadcrumbs}
       </>
     );
   };
@@ -140,20 +69,16 @@ export function TopNav() {
         <div className="hidden items-center gap-1.5 text-sm md:flex flex-wrap mr-4">
           {getBreadcrumbs()}
         </div>
-
-        <div className="md:hidden">
-          <span className="text-sm font-medium">
-            {activeAgencyDetails?.short_name ||
-              activeOrganizationDetails?.short_name ||
-              formatBreadcrumbSegment(pathSegments[pathSegments.length - 1])}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-x-3 sm:gap-x-4">
-          <RoleSwitcher currentRole={currentRole} />
-          <Notifications />
+        <div className="flex items-center gap-x-2">
+          <Button variant="outline" size="sm" className="h-9 gap-2" onClick={onOpenCommandPalette}>
+            <Search className="h-4 w-4" />
+            <span className="hidden lg:inline-block">Search...</span>
+            <kbd className="hidden lg:inline-block pointer-events-none select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
           <ModeToggle />
-          <UserNav onLogoutAction={handleLogout} />
+          <UserNav onLogoutAction={() => signOut({ callbackUrl: "/login" })} />
         </div>
       </div>
     </header>
