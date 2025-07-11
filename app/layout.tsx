@@ -1,18 +1,19 @@
 import "./globals.css"; // Ensure globals are imported first
 import type React from "react";
+import { Montserrat } from "next/font/google"; // 1. Import the font
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner"; // Sonner Toaster for notifications
-
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { cn } from "@/lib/utils";
 
-// Initialize Montserrat font (adjust subsets and weights as needed)
-// const montserrat = Montserrat({
-//   subsets: ["latin"],
-//   display: "swap", 
-//   variable: "--font-montserrat", 
-// });
+// 2. Initialize Montserrat font
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-montserrat", // This name will be used in tailwind.config.js
+});
 
 export const metadata = {
   title: "YowYob Dashboard",
@@ -26,8 +27,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      {/* 3. Apply the font's CSS variable to the body */}
       <body
-        className={` antialiased min-h-screen flex flex-col`}
+        className={cn(
+          "antialiased min-h-screen flex flex-col font-sans", // Use font-sans as the base
+          montserrat.variable // Apply the custom font variable
+        )}
       >
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

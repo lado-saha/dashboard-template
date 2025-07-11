@@ -5,7 +5,13 @@ import { useSession } from "next-auth/react";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { BusinessActorDto } from "@/types/organization";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { AlertTriangle, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { BusinessActorForm } from "@/components/business-actor/business-actor-form";
@@ -22,8 +28,9 @@ export default function EditBusinessActorProfilePage() {
     if (baId) {
       setIsLoading(true);
       setError(null);
-      organizationRepository.getBusinessActorById(baId)
-        .then(data => {
+      organizationRepository
+        .getBusinessActorById(baId)
+        .then((data) => {
           if (data) {
             setActorData(data);
           } else {
@@ -56,20 +63,28 @@ export default function EditBusinessActorProfilePage() {
   if (error || !actorData) {
     return (
       <Card className="border-destructive max-w-2xl mx-auto">
-        <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle /> Error Loading Profile</CardTitle></CardHeader>
-        <CardContent><p>{error || "Your Business Actor profile could not be loaded."}</p></CardContent>
+        <CardHeader>
+          <CardTitle className="text-destructive flex items-center gap-2">
+            <AlertTriangle /> Error Loading Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{error || "Your Business Actor profile could not be loaded."}</p>
+        </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <UserCircle2 className="h-8 w-8 text-primary" />
           Business Actor Profile
         </h1>
-        <p className="text-muted-foreground mt-1">Manage your global professional information across all your organizations.</p>
+        <p className="text-muted-foreground mt-1">
+          Manage your global professional information across all your
+          organizations.
+        </p>
       </div>
       <BusinessActorForm
         mode="edit"

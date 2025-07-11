@@ -429,7 +429,6 @@ export function OrganizationForm({
               Next <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           ) : (
-            // --- CHANGE 6: Use the new handler and update the button text dynamically ---
             <Button
               type="button"
               onClick={handleFinalSubmit}

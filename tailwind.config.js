@@ -20,7 +20,7 @@ module.exports = {
     extend: {
       fontFamily: {
         // Set 'sans' to use the Montserrat variable, with fallbacks
-        sans: ["var(--font-montserrat)", ...fontFamily.sans],
+        // sans: ["var(--font-montserrat)", ...fontFamily.sans],
       },
       colors: {
          // Add sidebar specific colors if not already defined via CSS vars

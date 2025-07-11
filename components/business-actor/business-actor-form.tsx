@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -148,9 +148,10 @@ export function BusinessActorForm({
           ? new Date(initialData.birth_date)
           : undefined,
       nationality: initialData?.nationality || "",
+      is_individual: initialData?.is_individual ?? true,
       type: initialData?.type || undefined,
       profession: initialData?.profession || "",
-      biography: initialData?.biography || "",
+      biography: initialData?.biography ? initialData.biography : "",
       email: initialData?.email || session?.user.email || "",
       phone_number:
         initialData?.phone_number || session?.user.phone_number || "",
@@ -160,28 +161,19 @@ export function BusinessActorForm({
   });
 
   const handleNextStep = async () => {
-    const currentStepFields = formSteps[currentStep].fields;
-    const isValid = await form.trigger(currentStepFields, {
-      shouldFocus: true,
-    });
+    const fieldsToValidate = formSteps[currentStep].fields;
+    const isValid = await form.trigger(fieldsToValidate, { shouldFocus: true });
     if (isValid) {
-      setCurrentStep((prev) => prev + 1);
+      if (currentStep < formSteps.length - 1) {
+        setCurrentStep((prev) => prev + 1);
+      }
     } else {
       toast.error("Please fill out all required fields on this step.");
     }
   };
 
   const onInvalid = (errors: FieldErrors<BAFormData>) => {
-    toast.error(
-      `Please fix the errors before submitting.${
-        errors
-          ? " " +
-            Object.values(errors)
-              .map((e) => e.message)
-              .join(", ")
-          : ""
-      }`
-    );
+    toast.error("Please fix the errors on all steps before submitting.");
     for (const [index, step] of formSteps.entries()) {
       if (step.fields.some((field) => Object.keys(errors).includes(field))) {
         setCurrentStep(index);
@@ -197,10 +189,9 @@ export function BusinessActorForm({
     }
     setIsLoading(true);
 
-    let avatarUrl: string | undefined =
-      form.getValues("avatar_picture") || undefined;
-    let profileUrl: string | undefined =
-      form.getValues("profile_picture") || undefined;
+    let avatarUrl: string | undefined | null = form.getValues("avatar_picture");
+    let profileUrl: string | undefined | null =
+      form.getValues("profile_picture");
 
     try {
       if (data.avatarFile instanceof File) {
@@ -215,7 +206,7 @@ export function BusinessActorForm({
         avatarUrl = response.url;
         toast.dismiss();
       } else if (data.avatar_picture === null) {
-        avatarUrl = undefined;
+        avatarUrl = null;
       }
 
       if (data.profileFile instanceof File) {
@@ -230,10 +221,9 @@ export function BusinessActorForm({
         profileUrl = response.url;
         toast.dismiss();
       } else if (data.profile_picture === null) {
-        profileUrl = undefined;
+        profileUrl = null;
       }
 
-      // THE FIX: Embed the user_id into the biography before sending to the backend.
       const biographyWithId = embedId(
         data.biography,
         "user_id",
@@ -251,9 +241,9 @@ export function BusinessActorForm({
         type: data.type,
         profession: data.profession,
         biography: biographyWithId,
-        avatar_picture: avatarUrl,
-        profile_picture: profileUrl,
-        user_id: session.user.id, // Ensure we link to the current user
+        avatar_picture: avatarUrl ?? undefined,
+        profile_picture: profileUrl ?? undefined,
+        is_individual: data.is_individual,
       };
 
       if (mode === "edit" && initialData?.business_actor_id) {
@@ -275,20 +265,31 @@ export function BusinessActorForm({
     }
   };
 
+  const handleFinalSubmit = async () => {
+    const isFormValid = await form.trigger();
+    if (isFormValid) {
+      await onSubmit(form.getValues());
+    } else {
+      onInvalid(form.formState.errors);
+    }
+  };
+
   return (
     <Card className="shadow-lg w-full">
       <CardContent className="p-6">
         <Form {...form}>
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+            className="space-y-8"
+          >
             <FormWizard
               steps={formSteps}
               currentStepIndex={currentStep}
-              onStepClick={(stepIndex) => {
-                if (stepIndex < currentStep) setCurrentStep(stepIndex);
-              }}
-              mode = {'create'}
+              onStepClick={setCurrentStep}
+              mode={mode}
             />
-            <div className="min-h-[420px]">
+            <div className="">
+              {/* --- Step 1: Personal Details --- */}
               <div className={cn(currentStep !== 0 && "hidden")}>
                 <div className="border-b pb-4 mb-6">
                   <h3 className="text-xl font-semibold leading-6 text-foreground">
@@ -392,6 +393,7 @@ export function BusinessActorForm({
                                 fromYear={1900}
                                 toYear={new Date().getFullYear()}
                                 initialFocus
+                                captionLayout="dropdown-buttons"
                               />
                             </PopoverContent>
                           </Popover>
@@ -436,6 +438,7 @@ export function BusinessActorForm({
                   />
                 </div>
               </div>
+              {/* --- Step 2: Professional Info --- */}
               <div className={cn(currentStep !== 1 && "hidden")}>
                 <div className="border-b pb-4 mb-6">
                   <h3 className="text-xl font-semibold leading-6 text-foreground">
@@ -511,6 +514,7 @@ export function BusinessActorForm({
                   />
                 </div>
               </div>
+              {/* --- Step 3: Contact & Media --- */}
               <div className={cn(currentStep !== 2 && "hidden")}>
                 <div className="border-b pb-4 mb-6">
                   <h3 className="text-xl font-semibold leading-6 text-foreground">
@@ -604,6 +608,7 @@ export function BusinessActorForm({
                 </div>
               </div>
             </div>
+
             <div className="flex justify-between mt-8 pt-6 border-t">
               <Button
                 type="button"
@@ -611,21 +616,23 @@ export function BusinessActorForm({
                 onClick={() => setCurrentStep((p) => p - 1)}
                 disabled={currentStep === 0 || isLoading}
               >
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back
               </Button>
               {currentStep < formSteps.length - 1 ? (
                 <Button type="button" onClick={handleNextStep}>
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                  Next
+                  <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   type="button"
-                  onClick={form.handleSubmit(onSubmit, onInvalid)}
                   disabled={isLoading}
+                  onClick={handleFinalSubmit}
                 >
                   {isLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}{" "}
+                  )}
                   {mode === "create"
                     ? "Finish & Submit Profile"
                     : "Save Changes"}

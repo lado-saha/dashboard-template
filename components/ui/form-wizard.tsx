@@ -25,7 +25,6 @@ export function FormWizard({
   mode,
   className,
 }: FormWizardProps) {
-  // --- EDIT MODE: Use standard Tabs for free navigation ---
   const stepCount = steps.length;
   if (mode === "edit") {
     return (
