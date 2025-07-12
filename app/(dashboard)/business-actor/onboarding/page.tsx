@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { BusinessActorForm } from "@/components/business-actor/business-actor-form";
 import {
   Card,
@@ -12,72 +13,79 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, LogOut } from "lucide-react";
-import {
-  BusinessActorDto,
-} from "@/types/organization";
+import { CheckCircle, ArrowRight } from "lucide-react";
+import { BusinessActorDto } from "@/types/organization";
+import { toast } from "sonner";
 
 export default function BusinessActorOnboardingPage() {
+  const { data: session, update: updateSession } = useSession();
+  const router = useRouter();
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // This action is passed to the form to be called on successful submission
-  const handleSuccessAction = (newBA: BusinessActorDto) => {
+  const handleSuccessAction = async (newBA: BusinessActorDto) => {
+    toast.success("Business profile created successfully!");
+    await updateSession();
+
     setIsSuccess(true);
   };
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+  const handleContinue = () => {
+    // After session update, the user is now a BA and needs to create an org.
+    router.push("/business-actor/organization/create");
   };
 
-  // The main view for the onboarding page
+  if (session?.user.businessActorId && !isSuccess) {
+    return (
+      <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-10rem)]">
+        <Card className="max-w-lg text-center">
+          <CardHeader>
+            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+            <CardTitle>You're Already a Business Actor!</CardTitle>
+            <CardDescription>
+              Your business profile is already set up. You can proceed to your
+              workspace.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button
+              className="w-full"
+              onClick={() => router.push("/business-actor/organizations")}
+            >
+              Go to My Organizations
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {isSuccess ? (
-        <Card className="max-w-2xl mx-auto animate-fade-in-up text-center border-green-500/50 shadow-lg shadow-green-500/10">
+        <Card className="max-w-2xl mx-auto animate-fade-in-up text-center">
           <CardHeader>
-            <div className="mx-auto bg-green-100 dark:bg-green-900/30 p-4 rounded-full w-fit mb-4">
-              <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-green-700 dark:text-green-300">
-              Profile Created!
+            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+            <CardTitle className="text-3xl font-bold">
+              Profile Activated!
             </CardTitle>
             <CardDescription className="text-lg text-muted-foreground pt-2">
-              Your Business Actor profile is now active.
+              Your business profile is ready. The next step is to create your
+              first organization.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="font-semibold text-foreground">
-              One final step is required to access your new workspace.
-            </p>
-            <p className="text-muted-foreground">
-              Please sign out and sign back in to refresh your account
-              permissions. You will then be redirected to your new Business
-              Actor dashboard.
-            </p>
-          </CardContent>
           <CardFooter className="flex justify-center">
-            <Button size="lg" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out & Continue
+            <Button size="lg" onClick={handleContinue}>
+              Create Organization <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </CardFooter>
         </Card>
       ) : (
-        <>
-          <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight">
-              Become a Business Actor
-            </h1>
-            <p className="text-muted-foreground">
-              Complete your professional profile to unlock business management
-              tools.
-            </p>
-          </div>
+        <div className="max-w-4xl mx-auto">
           <BusinessActorForm
             onSuccessAction={handleSuccessAction}
             mode={"create"}
           />
-        </>
+        </div>
       )}
     </div>
   );

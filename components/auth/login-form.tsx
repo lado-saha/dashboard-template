@@ -23,7 +23,9 @@ import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const LoginSchema = z.object({
-  username: z.string().min(1, { message: "Username, email or phone is required." }),
+  username: z
+    .string()
+    .min(1, { message: "Username, email or phone is required." }),
   password: z.string().min(1, { message: "Password is required." }),
 });
 
@@ -35,6 +37,7 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
+  const isNewUser = searchParams.get("new_user") === "true";
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -52,13 +55,18 @@ export const LoginForm = () => {
         });
 
         if (result?.error) {
-          const errorMessage = result.error === "CredentialsSignin" ? "Invalid username or password." : result.error;
+          const errorMessage =
+            result.error === "CredentialsSignin"
+              ? "Invalid username or password."
+              : result.error;
           setError(errorMessage);
           toast.error(errorMessage);
         } else if (result?.ok) {
           toast.success("Login successful! Redirecting...");
-          // THE FIX: Always redirect to /dashboard. It will handle the final destination.
-          window.location.href = callbackUrl || "/dashboard";
+          const destination = isNewUser
+            ? "/welcome"
+            : callbackUrl || "/dashboard";
+          window.location.href =destination
         } else {
           setError("An unexpected error occurred during login.");
           toast.error("An unexpected login error occurred.");
@@ -80,16 +88,81 @@ export const LoginForm = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
-            <FormField control={form.control} name="username" render={({ field }) => (<FormItem><FormLabel>Username, Email or Phone</FormLabel><FormControl><Input placeholder="yourusername" {...field} disabled={isPending} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="password" render={({ field }) => (<FormItem>
-              <div className="flex justify-between items-center"><FormLabel>Password</FormLabel><Button size="sm" variant="link" asChild className="px-0 font-normal text-xs h-auto text-muted-foreground hover:text-primary"><Link href="/forgot-password" tabIndex={-1}>Forgot password?</Link></Button></div>
-              <FormControl><div className="relative"><Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} disabled={isPending} /><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}>{showPassword ? (<EyeOff className="h-4 w-4" />) : (<Eye className="h-4 w-4" />)}</Button></div></FormControl>
-              <FormMessage />
-            </FormItem>
-            )} />
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username, Email or Phone</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="yourusername"
+                      {...field}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex justify-between items-center">
+                    <FormLabel>Password</FormLabel>
+                    <Button
+                      size="sm"
+                      variant="link"
+                      asChild
+                      className="px-0 font-normal text-xs h-auto text-muted-foreground hover:text-primary"
+                    >
+                      <Link href="/forgot-password" tabIndex={-1}>
+                        Forgot password?
+                      </Link>
+                    </Button>
+                  </div>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        {...field}
+                        disabled={isPending}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowPassword(!showPassword)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          {error && (<Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Login Failed</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>)}
-          <Button type="submit" className="w-full" disabled={isPending}>{isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isPending ? "Signing In..." : "Sign In"}</Button>
+          {error && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Login Failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending ? "Signing In..." : "Sign In"}
+          </Button>
         </form>
       </Form>
     </AuthCardWrapper>

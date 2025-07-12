@@ -177,6 +177,7 @@ export function MainSidebar() {
   );
 
   const isAgencyContext = pathname.startsWith("/business-actor/agency");
+  const isWorkspace = pathname.startsWith("/business-actor");
 
   let mainNav: any[] = userNavigation;
   let globalNav: any[] = [];
@@ -188,7 +189,7 @@ export function MainSidebar() {
     mainNav = superAdminNavigation;
     sidebarTitle = "Platform Admin";
     homeLink = "/super-admin/dashboard";
-  } else if (isBusinessActor) {
+  } else if (isBusinessActor && isWorkspace) {
     if (isAgencyContext) {
       mainNav = agencyNavigation;
       sidebarTitle = activeAgencyDetails?.short_name || "Agency";
@@ -204,6 +205,11 @@ export function MainSidebar() {
         <OrganizationSwitcher isCollapsed={isCollapsed} />
       );
     }
+  } else if (session?.user) {
+    mainNav = userNavigation;
+    globalNav = baGlobalNavigation;
+    sidebarTitle = "My Account";
+    homeLink = "/dashboard";
   }
 
   const ExitButton = () => {
