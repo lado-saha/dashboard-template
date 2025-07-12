@@ -1,5 +1,4 @@
 @import "tailwindcss";
-/* @import "tw-animate-css"; */
 
 /* Define the custom variant for dark mode (unchanged) */
 @custom-variant dark (&:is(.dark *));
@@ -65,78 +64,73 @@
 /* --- Light Theme --- */
 :root {
   --radius: 0.75rem;
-  /* Unchanged, soft radius */
 
-  /* Base */
-  --background: oklch(0.98 0.005 240);
-  /* Slightly brighter, cleaner white-grey */
-  --foreground: oklch(0.20 0.03 245);
-  /* Darker blue-grey for better contrast */
+  /* Base: Soft, off-white background with strong text contrast */
+  --background: oklch(98.5% 0.005 240);
+  /* Almost white, slightly cool */
+  --foreground: oklch(25% 0.03 255);
+  /* Dark, saturated slate blue for text */
 
-  /* Cards & Popovers */
-  --card: oklch(1 0 0);
-  /* Pure white, unchanged */
+  /* Cards & Popovers: Clean white, stands out from the background */
+  --card: oklch(100% 0 0);
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--card-foreground);
 
-  /* Primary */
-  --primary: oklch(0.55 0.18 255);
-  /* Slightly deeper blue for prominence */
-  --primary-foreground: oklch(0.98 0.01 255);
-  /* Near-white, unchanged */
+  /* Primary: A vibrant, modern blue for main actions */
+  --primary: oklch(58% 0.18 260);
+  /* A confident, slightly purplish blue */
+  --primary-foreground: oklch(99% 0.01 260);
+  /* Bright white for high contrast on blue */
 
-  /* Secondary */
-  --secondary: oklch(0.95 0.015 250);
-  /* Lighter cool grey for subtle contrast */
-  --secondary-foreground: oklch(0.30 0.04 250);
-  /* Darker for readability */
+  /* Secondary: For secondary buttons and less important interactive elements */
+  --secondary: oklch(94% 0.015 250);
+  /* Light, cool gray */
+  --secondary-foreground: oklch(35% 0.03 255);
+  /* Dark slate for text on secondary bg */
 
-  /* Muted */
-  --muted: oklch(0.96 0.01 240);
-  /* Lighter muted tone */
-  --muted-foreground: oklch(0.50 0.03 245);
-  /* Darker muted text for clarity */
+  /* Muted: For subtle backgrounds and text */
+  --muted: oklch(96% 0.01 245);
+  /* Very light gray, almost blends with background */
+  --muted-foreground: oklch(55% 0.025 250);
+  /* Mid-tone slate for placeholder text */
 
-  /* Accent */
-  --accent: oklch(0.92 0.02 255);
-  /* Softer blue for hover/active states */
-  --accent-foreground: oklch(0.25 0.04 255);
-  /* Darker accent text */
+  /* Accent: For hover states on lists and other subtle interactions */
+  --accent: oklch(95% 0.015 250);
+  /* Same as secondary for consistency */
+  --accent-foreground: var(--secondary-foreground);
 
-  /* Destructive */
-  --destructive: oklch(0.62 0.21 25);
-  /* Slightly brighter red */
-  --destructive-foreground: oklch(0.98 0.01 25);
-  /* Unchanged */
+  /* Destructive: A clear, accessible red */
+  --destructive: oklch(65% 0.22 25);
+  /* Strong, clear red */
+  --destructive-foreground: oklch(99% 0.01 25);
 
-  /* Borders & Inputs */
-  --border: oklch(0.88 0.02 245);
-  /* Darker, more visible border */
-  --input: oklch(0.99 0.005 240);
-  /* Near-white input bg for contrast */
-  --ring: oklch(0.65 0.12 255 / 80%);
-  /* Brighter focus ring, slightly opaque */
+  /* Borders & Inputs: Clear distinction for form fields */
+  --border: oklch(90% 0.02 250);
+  /* A visible but not overpowering border */
+  --input: oklch(97% 0.01 240);
+  /* Slightly darker than card to show it's a field */
+  --ring: oklch(60% 0.2 260 / 70%);
+  /* A vivid focus ring using the primary color */
 
-  /* Charts */
-  --chart-1: oklch(0.72 0.18 150);
-  /* Teal, slightly brighter */
-  --chart-2: oklch(0.68 0.2 280);
-  /* Purple, more vibrant */
-  --chart-3: oklch(0.77 0.16 50);
-  /* Orange, slightly brighter */
-  --chart-4: oklch(0.62 0.16 220);
-  /* Sky Blue, more distinct */
-  --chart-5: oklch(0.82 0.11 100);
-  /* Lime Green, slightly brighter */
+  /* Charts: A vibrant, data-friendly palette */
+  --chart-1: oklch(70% 0.18 155);
+  /* Teal */
+  --chart-2: oklch(65% 0.22 285);
+  /* Magenta */
+  --chart-3: oklch(75% 0.18 55);
+  /* Amber */
+  --chart-4: oklch(60% 0.18 225);
+  /* Sky Blue */
+  --chart-5: oklch(80% 0.15 105);
+  /* Lime */
 
-  /* Sidebar */
-  --sidebar: oklch(0.97 0.008 245);
-  /* Slightly lighter than bg */
+  /* Sidebar: Slightly different from main background for clear separation */
+  --sidebar: oklch(97% 0.01 245);
   --sidebar-foreground: var(--foreground);
   --sidebar-border: var(--border);
-  --sidebar-accent: oklch(0.55 0.18 255 / 20%);
-  /* Slightly more opaque */
+  --sidebar-accent: oklch(58% 0.18 260 / 15%);
+  /* Primary color with low opacity */
   --sidebar-accent-foreground: var(--primary);
   --sidebar-ring: var(--ring);
 }
@@ -144,78 +138,61 @@
 /* --- Dark Theme --- */
 .dark {
   --radius: 0.75rem;
-  /* Unchanged */
 
-  /* Base */
-  --background: oklch(0.16 0.025 245);
-  /* Slightly darker, richer blue-grey */
-  --foreground: oklch(0.94 0.01 240);
-  /* Brighter foreground for contrast */
+  /* Base: Deep, dark slate background */
+  --background: oklch(15% 0.02 255);
+  /* Very dark, slightly saturated blue-slate */
+  --foreground: oklch(95% 0.01 240);
+  /* Bright, slightly cool text */
 
-  /* Cards & Popovers */
-  --card: oklch(0.20 0.03 245);
-  /* Lighter card for better hierarchy */
+  /* Cards & Popovers: A distinct, lighter layer */
+  --card: oklch(20% 0.025 255);
+  /* A step up from the background */
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--card-foreground);
 
-  /* Primary */
-  --primary: oklch(0.72 0.19 255);
-  /* Brighter blue for dark mode */
-  --primary-foreground: oklch(0.12 0.03 255);
-  /* Darker for contrast */
+  /* Primary: A brighter, more energetic blue for dark mode */
+  --primary: oklch(70% 0.2 260);
+  --primary-foreground: oklch(15% 0.03 260);
+  /* Dark blue for text on bright blue bg */
 
-  /* Secondary */
-  --secondary: oklch(0.30 0.04 250);
-  /* Lighter secondary for contrast */
-  --secondary-foreground: oklch(0.96 0.01 250);
-  /* Brighter text */
+  /* Secondary: For secondary buttons and interactive elements */
+  --secondary: oklch(30% 0.03 255);
+  --secondary-foreground: oklch(97% 0.01 250);
 
-  /* Muted */
-  --muted: oklch(0.28 0.03 245);
-  /* Lighter muted tone */
-  --muted-foreground: oklch(0.70 0.03 245);
-  /* Brighter muted text */
+  /* Muted: For subtle backgrounds and text */
+  --muted: oklch(25% 0.028 250);
+  --muted-foreground: oklch(65% 0.03 250);
 
-  /* Accent */
-  --accent: oklch(0.35 0.05 255);
-  /* Lighter blue for hover/active */
-  --accent-foreground: oklch(0.95 0.01 255);
-  /* Bright accent text */
+  /* Accent: For hover states */
+  --accent: oklch(28% 0.03 255);
+  --accent-foreground: var(--secondary-foreground);
 
-  /* Destructive */
-  --destructive: oklch(0.68 0.23 25);
-  /* Brighter red */
-  --destructive-foreground: oklch(0.98 0.01 25);
-  /* Unchanged */
+  /* Destructive: A vivid red that stands out on dark backgrounds */
+  --destructive: oklch(65% 0.24 25);
+  --destructive-foreground: oklch(99% 0.01 25);
 
-  /* Borders & Inputs */
-  --border: oklch(0.35 0.04 245 / 80%);
-  /* More visible border */
-  --input: oklch(0.26 0.03 245);
-  /* Lighter input bg for contrast */
-  --ring: oklch(0.78 0.16 255 / 80%);
-  /* Brighter focus ring */
+  /* Borders & Inputs: Clear but not harsh */
+  --border: oklch(35% 0.03 250 / 80%);
+  /* Slightly transparent to blend */
+  --input: oklch(22% 0.028 250);
+  /* A distinct input field color */
+  --ring: oklch(75% 0.2 260 / 70%);
+  /* Bright focus ring */
 
-  /* Charts */
-  --chart-1: oklch(0.78 0.18 150);
-  /* Brighter teal */
-  --chart-2: oklch(0.73 0.2 280);
-  /* Brighter purple */
-  --chart-3: oklch(0.82 0.15 50);
-  /* Brighter orange */
-  --chart-4: oklch(0.68 0.15 220);
-  /* Brighter sky blue */
-  --chart-5: oklch(0.88 0.1 100);
-  /* Brighter lime green */
+  /* Charts: Bright and vibrant for dark backgrounds */
+  --chart-1: oklch(75% 0.18 155);
+  --chart-2: oklch(70% 0.22 285);
+  --chart-3: oklch(80% 0.18 55);
+  --chart-4: oklch(65% 0.18 225);
+  --chart-5: oklch(85% 0.15 105);
 
-  /* Sidebar */
+  /* Sidebar: Matches the main background for a unified feel */
   --sidebar: var(--background);
-  /* Match main bg */
   --sidebar-foreground: var(--foreground);
   --sidebar-border: var(--border);
-  --sidebar-accent: oklch(0.72 0.19 255 / 20%);
-  /* Slightly more opaque */
+  --sidebar-accent: oklch(70% 0.2 260 / 15%);
   --sidebar-accent-foreground: var(--primary);
   --sidebar-ring: var(--ring);
 }
@@ -231,12 +208,12 @@
     @apply transition-colors duration-200 ease-in-out;
   }
 
-  /* Enhanced input styles for better readability */
+  /* Enhanced input styles for better readability and distinction */
   input,
   textarea,
   select {
     @apply bg-input text-foreground border-border;
-    @apply focus:ring-2 focus:ring-ring focus:outline-none;
+    @apply focus:ring-2 focus:ring-ring focus:outline-none focus:border-primary/50;
     @apply placeholder:text-muted-foreground;
     @apply rounded-md px-3 py-2;
   }

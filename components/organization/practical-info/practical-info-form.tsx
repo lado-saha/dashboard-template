@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
+import { FormWrapper } from "@/components/ui/form-wrapper";
 
 const practicalInfoFormSchema = z.object({
   type: z
@@ -83,7 +84,10 @@ export function PracticalInfoForm({
     setIsSubmitting(true);
     const payload = data as CreatePracticalInformationRequest; // Types are compatible
 
-    const success = await onSubmitAttemptAction(payload, initialData?.information_id);
+    const success = await onSubmitAttemptAction(
+      payload,
+      initialData?.information_id
+    );
     if (success) {
       form.reset(); // Reset form on success
     }
@@ -91,86 +95,98 @@ export function PracticalInfoForm({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(processSubmit)}
-        className="space-y-6 p-1"
-      >
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Information Type <span className="text-destructive">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="e.g., Opening Hours, WiFi Password, Emergency Contact"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                A clear category for this piece of information.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="value"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Value / Content <span className="text-destructive">*</span>
-              </FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter the detailed information here..."
-                  {...field}
-                  rows={5}
-                />
-              </FormControl>
-              <FormDescription>
-                The actual piece of information (e.g., Mon-Fri: 9 AM - 5 PM).
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Additional Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Any relevant context or extra details..."
-                  {...field}
-                  rows={3}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-end gap-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancelAction}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {mode === "create" ? "Add Information" : "Save Changes"}
-          </Button>
+    <FormWrapper
+      form={form}
+      onFormSubmit={processSubmit}
+      isLoading={isSubmitting}
+      title={mode === "create" ? "Add New Information" : "Edit Information"}
+      description={
+        mode === "create"
+          ? "Provide a new piece of practical information."
+          : `Update details for "${initialData?.type}"`
+      }
+      submitButtonText={mode === "create" ? "Add Information" : "Save Changes"}
+    >
+      {() => (
+        <div className="space-y-6 p-1">
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Information Type <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Opening Hours, WiFi Password, Emergency Contact"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  A clear category for this piece of information.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="value"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Value / Content <span className="text-destructive">*</span>
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter the detailed information here..."
+                    {...field}
+                    rows={5}
+                  />
+                </FormControl>
+                <FormDescription>
+                  The actual piece of information (e.g., Mon-Fri: 9 AM - 5 PM).
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="notes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Additional Notes (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Any relevant context or extra details..."
+                    {...field}
+                    rows={3}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancelAction}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {mode === "create" ? "Add Information" : "Save Changes"}
+            </Button>
+          </div>
         </div>
-      </form>
-    </Form>
+      )}
+    </FormWrapper>
   );
 }

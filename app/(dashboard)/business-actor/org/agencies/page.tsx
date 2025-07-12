@@ -25,6 +25,7 @@ import { ResourceDataTable } from "@/components/resource-management/resource-dat
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
 import { DataTableFilterOption } from "@/types/table";
 import { FeedbackCard } from "@/components/ui/feedback-card";
+import { PageHeader } from "@/components/ui/page-header";
 
 const statusOptions: DataTableFilterOption[] = [
   { value: "true", label: "Active" },
@@ -130,24 +131,21 @@ export default function ManageAgenciesPage() {
         searchPlaceholder="Search agencies by name or location..."
         onDeleteItemsAction={handleDeleteConfirmation}
         pageHeader={
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Agency Management
-              </h1>
-              <p className="text-muted-foreground">
-                Manage branches for{" "}
-                <b>{activeOrganizationDetails?.long_name}</b>
-              </p>
-            </div>
-            <Button
-              onClick={() => router.push("/business-actor/org/agencies/create")}
-              size="sm"
-              className="h-10"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Agency
-            </Button>
-          </div>
+          <PageHeader
+            title="Agency Management"
+            description={`Manage branches for ${activeOrganizationDetails?.long_name}`}
+            action={
+              <Button
+                onClick={() =>
+                  router.push("/business-actor/org/agencies/create")
+                }
+                size="sm"
+                className="h-10"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Agency
+              </Button>
+            }
+          />
         }
         filterControls={(table) => (
           <DataTableFacetedFilter

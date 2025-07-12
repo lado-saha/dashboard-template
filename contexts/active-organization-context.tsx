@@ -40,6 +40,8 @@ interface ActiveOrganizationContextType {
   agenciesForCurrentOrg: AgencyDto[];
   isLoadingAgencies: boolean;
   clearActiveEntities: () => void;
+  clearActiveAgency: () => void;
+  clearActiveOrganization: () => void;
 }
 
 const ActiveOrganizationContext = createContext<
@@ -90,6 +92,26 @@ export const ActiveOrganizationProvider = ({
     setActiveAgencyIdState,
     setActiveAgencyDetailsState,
   ]);
+
+  const clearActiveOrganization = useCallback(() => {
+    setActiveOrganizationIdState(null);
+    setActiveOrganizationDetailsState(null);
+    // Also clear agency context when exiting the organization
+    setActiveAgencyIdState(null);
+    setActiveAgencyDetailsState(null);
+    setAgenciesForCurrentOrg([]);
+  }, [
+    setActiveOrganizationIdState,
+    setActiveOrganizationDetailsState,
+    setActiveAgencyIdState,
+    setActiveAgencyDetailsState,
+  ]);
+
+  const clearActiveAgency = useCallback(() => {
+    setActiveAgencyIdState(null);
+    setActiveAgencyDetailsState(null);
+    setAgenciesForCurrentOrg([]);
+  }, [setActiveAgencyIdState, setActiveAgencyDetailsState]);
 
   const fetchAndSetOrganizationDetails = useCallback(
     async (id: string): Promise<OrganizationDto | null> => {
@@ -273,6 +295,8 @@ export const ActiveOrganizationProvider = ({
         agenciesForCurrentOrg,
         isLoadingAgencies,
         clearActiveEntities,
+        clearActiveAgency,
+        clearActiveOrganization,
       }}
     >
       {children}

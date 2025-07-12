@@ -51,17 +51,22 @@ export function OrganizationSwitcher({
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                {/* [FIX] Add w-full and justify-center */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-14 w-full flex justify-center items-center"
+                >
                   {activeOrg?.logo_url ? (
                     <Image
                       src={activeOrg.logo_url}
                       alt="Org Logo"
-                      width={24}
-                      height={24}
-                      className="h-6 w-6 rounded-md object-cover"
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 rounded-md object-cover"
                     />
                   ) : (
-                    <Building className="h-5 w-5" />
+                    <Building className="h-6 w-6" />
                   )}
                   <span className="sr-only">Switch Organization</span>
                 </Button>
@@ -72,15 +77,10 @@ export function OrganizationSwitcher({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <DialogContent className="p-0 gap-0 w-[95vw] max-w-md h-[70vh] flex flex-col">
-          <OrganizationSelectorDialog
-            onCloseAction={() => setIsDialogOpen(false)}
-          />
-        </DialogContent>
+        {/* ... DialogContent ... */}
       </Dialog>
     );
   }
-
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>

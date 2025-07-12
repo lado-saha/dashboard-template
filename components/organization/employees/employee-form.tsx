@@ -47,6 +47,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { FormWizard } from "@/components/ui/form-wizard";
+import { FormWrapper } from "@/components/ui/form-wrapper";
 
 const employeeDetailsSchema = z.object({
   first_name: z.string().min(2, "First name is required."),
@@ -124,16 +125,6 @@ export function EmployeeForm({
       .catch(() => toast.error("Could not load agency list."));
   }, [organizationId]);
 
-  const onInvalidSubmit = (errors: FieldErrors<EmployeeFormData>) => {
-    toast.error("Please fix the errors before submitting.");
-    for (const [index, step] of formSteps.entries()) {
-      if (step.fields.some((field) => Object.keys(errors).includes(field))) {
-        setCurrentStep(index);
-        break;
-      }
-    }
-  };
-
   async function onSubmit(data: EmployeeFormData) {
     setIsLoading(true);
     try {
@@ -156,24 +147,24 @@ export function EmployeeForm({
     }
   }
 
-  const handleNextStep = async () => {
-    const fieldsToValidate = formSteps[currentStep].fields;
-    const isStepValid = await form.trigger(fieldsToValidate);
-    if (isStepValid) setCurrentStep((prev) => prev + 1);
-  };
-
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Employee Identity & Role</CardTitle>
-              <CardDescription>
-                Enter the employee personal and professional details.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+  return (
+    <FormWrapper
+      form={form}
+      onFormSubmit={onSubmit}
+      isLoading={isLoading}
+      title={
+        mode === "create"
+          ? "Add New Employee"
+          : `Edit Employee: ${initialData?.first_name} ${initialData?.last_name}`
+      }
+      description="Provide the employee's details and assign them to an agency."
+      steps={formSteps}
+      submitButtonText={mode === "create" ? "Create Employee" : "Save Changes"}
+    >
+      {(currentStep) => (
+        <div className="min-h-[450px] p-1">
+          {currentStep === 0 && (
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -294,20 +285,10 @@ export function EmployeeForm({
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
-        );
-      case 1:
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Agency Assignment</CardTitle>
-              <CardDescription>
-                Assign this employee to a specific agency or keep them at the
-                headquarters.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            </div>
+          )}
+          {currentStep === 1 && (
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="agency_id"
@@ -334,7 +315,7 @@ export function EmployeeForm({
                             key={agency.agency_id}
                             value={agency.agency_id!}
                           >
-                            {agency.long_name} ({agency.short_name})
+                            {agency.long_name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -343,66 +324,10 @@ export function EmployeeForm({
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Form {...form}>
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-        <div className="flex justify-between items-center">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back to List
-          </Button>
-          {mode === "edit" && (
-            <Button
-              type="button"
-              disabled={isLoading}
-              onClick={form.handleSubmit(onSubmit, onInvalidSubmit)}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+            </div>
           )}
         </div>
-        <FormWizard
-          steps={formSteps}
-          currentStepIndex={currentStep}
-          onStepClick={setCurrentStep}
-          mode={mode}
-        />
-        <div className="mt-4 min-h-[420px]">{renderCurrentStep()}</div>
-        {mode === "create" && (
-          <div className="flex justify-between items-center pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setCurrentStep((p) => p - 1)}
-              disabled={currentStep === 0 || isLoading}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
-            </Button>
-            {currentStep < formSteps.length - 1 ? (
-              <Button type="button" onClick={handleNextStep}>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                disabled={isLoading}
-                onClick={form.handleSubmit(onSubmit, onInvalidSubmit)}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Employee
-              </Button>
-            )}
-          </div>
-        )}
-      </form>
-    </Form>
+      )}
+    </FormWrapper>
   );
 }

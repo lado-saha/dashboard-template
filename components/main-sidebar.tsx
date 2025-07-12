@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   Award,
   Briefcase,
@@ -14,8 +14,6 @@ import {
   FolderHeart,
   HandCoins,
   HelpCircle,
-  ImageIcon as ImageIconLucide,
-  Info,
   LayoutGrid,
   Lightbulb,
   LogOut,
@@ -34,11 +32,11 @@ import {
   UsersRound,
   Wallet,
   Webhook,
-  ArrowRight,
   ArrowLeft,
   UserCog,
+  Power,
+  Info,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,14 +49,21 @@ import { OrganizationSwitcher } from "@/components/organization/organization-swi
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { Separator } from "./ui/separator";
 import { AgencySwitcher } from "./organization/agencies/agency-switcher";
+import { toast } from "sonner";
 
-// --- UPDATED NAVIGATION ARRAYS ---
+// --- Navigation Definitions (No changes here) ---
 const baOrgNavigation = [
   {
-    name: "Dashboard",
+    name: "Organizations Hub",
+    href: "/business-actor/organizations",
+    icon: Building,
+    isOrgSpecific: false,
+  },
+  {
+    name: "Org. Dashboard",
     href: "/business-actor/dashboard",
     icon: LayoutGrid,
-    isOrgSpecific: false,
+    isOrgSpecific: true,
   },
   {
     name: "Org. Profile",
@@ -76,18 +81,6 @@ const baOrgNavigation = [
     name: "Employees",
     href: "/business-actor/org/employees",
     icon: Users,
-    isOrgSpecific: true,
-  },
-  {
-    name: "Products",
-    href: "/business-actor/org/products",
-    icon: Package,
-    isOrgSpecific: true,
-  },
-  {
-    name: "Services",
-    href: "/business-actor/org/services",
-    icon: Combine,
     isOrgSpecific: true,
   },
   {
@@ -135,9 +128,6 @@ const userNavigation = [
   { name: "Services", href: "/services", icon: Briefcase },
   { name: "Invoices", href: "/invoices", icon: FileText },
   { name: "My Bonus", href: "/bonus", icon: HandCoins },
-  { name: "Favorites", href: "/favorites", icon: FolderHeart },
-  { name: "Invite Friends", href: "/invite", icon: Share2 },
-  { name: "Chat", href: "/chat", icon: MessagesSquare },
 ];
 const superAdminNavigation = [
   { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
@@ -159,56 +149,115 @@ export function MainSidebar() {
   const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { activeOrganizationId, activeAgencyDetails } = useActiveOrganization();
+  const {
+    activeOrganizationId,
+    activeAgencyDetails,
+    clearActiveAgency,
+    clearActiveOrganization,
+  } = useActiveOrganization();
 
-  const isBusinessActor = !!session?.user.businessActorId;
-  const isSuperAdminContext = pathname.startsWith("/super-admin");
+  // [FIX] This effect now correctly resets the collapsed state on mobile screen sizes.
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(false); // Force sidebar to be expanded in its logic for mobile
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Run on initial mount
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const { isBusinessActor, isSuperAdmin } = useMemo(
+    () => ({
+      isBusinessActor: !!session?.user.businessActorId,
+      isSuperAdmin: session?.user.roles?.includes("SUPER_ADMIN_ROLE"),
+    }),
+    [session]
+  );
+
   const isAgencyContext = pathname.startsWith("/business-actor/agency");
-  const isOrgContext =
-    !isAgencyContext && pathname.startsWith("/business-actor"); // Simplified this logic
-  const isUserContext = !isBusinessActor;
 
-  // --- Determine current navigation context ---
-  let mainNav: any[] = [];
+  let mainNav: any[] = userNavigation;
   let globalNav: any[] = [];
   let sidebarTitle = "My Account";
   let homeLink = "/dashboard";
   let ContextSwitcher = null;
-  let ContextExitButton = null;
 
-  if (isSuperAdminContext) {
+  if (isSuperAdmin) {
     mainNav = superAdminNavigation;
     sidebarTitle = "Platform Admin";
     homeLink = "/super-admin/dashboard";
-  } else if (isAgencyContext) {
-    mainNav = agencyNavigation;
-    sidebarTitle = activeAgencyDetails?.short_name || "Agency";
-    homeLink = "/business-actor/agency/dashboard";
-    ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
-    ContextExitButton = () => (
-      <Button
-        onClick={() => router.push("/business-actor/dashboard")}
-        variant="ghost"
-        className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-      >
-        <ArrowLeft
-          className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
-        />
-        {!isCollapsed && "Exit Agency"}
-      </Button>
-    );
-  } else if (isOrgContext) {
-    mainNav = baOrgNavigation;
-    globalNav = baGlobalNavigation;
-    sidebarTitle = "BA Workspace";
-    homeLink = "/business-actor/dashboard";
-    ContextSwitcher = () => <OrganizationSwitcher isCollapsed={isCollapsed} />;
-  } else {
-    // User context
-    mainNav = userNavigation;
+  } else if (isBusinessActor) {
+    if (isAgencyContext) {
+      mainNav = agencyNavigation;
+      sidebarTitle = activeAgencyDetails?.short_name || "Agency";
+      homeLink = "/business-actor/agency/dashboard";
+      ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
+    } else {
+      mainNav = baOrgNavigation;
+      globalNav = baGlobalNavigation;
+      sidebarTitle = "BA Workspace";
+      // homeLink = "/business-actor/dashboard";
+      homeLink = "/business-actor/organizations"; // This is the new default home
+      ContextSwitcher = () => (
+        <OrganizationSwitcher isCollapsed={isCollapsed} />
+      );
+    }
   }
 
-  const handleLogout = async () => await signOut({ callbackUrl: "/login" });
+  const ExitButton = () => {
+    if (isAgencyContext) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => {
+                clearActiveAgency();
+                router.push("/business-actor/dashboard");
+              }}
+              variant="ghost"
+              className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <ArrowLeft
+                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
+              />
+              {!isCollapsed && "Exit Agency"}
+            </Button>
+          </TooltipTrigger>
+          {isCollapsed && (
+            <TooltipContent side="right">Exit Agency</TooltipContent>
+          )}
+        </Tooltip>
+      );
+    }
+    if (isBusinessActor) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => {
+                clearActiveOrganization();
+                router.push("/dashboard");
+                toast.info("Exited Business Workspace.");
+              }}
+              variant="ghost"
+              className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-amber-500/10 hover:text-amber-600"
+            >
+              <Power
+                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
+              />
+              {!isCollapsed && "Exit Workspace"}
+            </Button>
+          </TooltipTrigger>
+          {isCollapsed && (
+            <TooltipContent side="right">Exit Workspace</TooltipContent>
+          )}
+        </Tooltip>
+      );
+    }
+    return null;
+  };
 
   const NavItem = ({
     item,
@@ -221,19 +270,19 @@ export function MainSidebar() {
     };
   }) => {
     const isDisabled = item.isOrgSpecific && !activeOrganizationId;
-    const finalHref = isDisabled ? "#" : item.href;
-    const isActive = !isDisabled && pathname.startsWith(finalHref);
+    const isActive = !isDisabled && pathname.startsWith(item.href);
 
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
           <Link
-            href={finalHref}
+            href={isDisabled ? "#" : item.href}
             className={cn(
               "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors h-9",
-              isActive
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent/80",
+              isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+              !isDisabled &&
+                !isActive &&
+                "text-sidebar-foreground hover:bg-sidebar-accent/80",
               isDisabled && "cursor-not-allowed text-muted-foreground/50",
               isCollapsed && "justify-center px-2"
             )}
@@ -269,14 +318,13 @@ export function MainSidebar() {
       </Button>
       <div
         className={cn(
-          " fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen",
-          isCollapsed ? "w-[72px] items-center" : "w-64",
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen",
+          isCollapsed ? "w-[72px]" : "w-64",
           isMobileOpen
             ? "translate-x-0 shadow-xl"
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* --- HEADER --- */}
         <div
           className={cn(
             "flex h-16 shrink-0 items-center border-b px-4",
@@ -299,29 +347,19 @@ export function MainSidebar() {
               <span className="text-lg truncate">{sidebarTitle}</span>
             )}
           </Link>
-
-          {/* THE FIX: Collapse and Expand buttons now correctly toggle state */}
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 ml-auto hidden lg:flex"
-              onClick={() => setIsCollapsed(true)}
-            >
-              <SidebarClose className="h-4 w-4" />
-            </Button>
-          )}
-          {isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 ml-auto hidden lg:flex"
-              onClick={() => setIsCollapsed(false)}
-            >
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          )}
-
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("h-8 w-8 ml-auto hidden lg:flex")}
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            <SidebarClose
+              className={cn(
+                "h-4 w-4 transition-transform",
+                isCollapsed && "rotate-180"
+              )}
+            />
+          </Button>
           {isMobileOpen && (
             <Button
               variant="ghost"
@@ -333,12 +371,7 @@ export function MainSidebar() {
             </Button>
           )}
         </div>
-
-        <div>
-          {ContextSwitcher && <ContextSwitcher />}
-          <Separator className="my-2 w-full bg-border/60" />
-        </div>
-
+        {ContextSwitcher && <ContextSwitcher />}
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <nav
             className={cn(
@@ -346,67 +379,30 @@ export function MainSidebar() {
               isCollapsed ? "px-2" : "px-4"
             )}
           >
-            {/* Main Navigation */}
             {mainNav.map((item) => (
               <NavItem key={item.name} item={item} />
             ))}
-
-            {/* Global BA Navigation (if applicable) */}
             {globalNav.length > 0 && (
               <>
-                <Separator className="my-3 bg-border/60" />
+                <Separator className="my-3" />
                 {globalNav.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
               </>
             )}
-
-            {/* "Enter BA Workspace" button for regular users */}
-            {isOrgContext && (
-              <>
-                <Separator className="my-3" />
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => router.push("/dashboard")}
-                      variant="ghost"
-                      className="group relative flex items-center w-full justify-start h-9 px-3 text-red-500 hover:text-red-600 hover:bg-primary/10"
-                    >
-                      <ArrowLeft
-                        className={cn(
-                          "h-[18px] w-[18px] transition-transform group-hover:translate-x-1",
-                          !isCollapsed && "mr-3"
-                        )}
-                      />
-                      {!isCollapsed && "Exit BA Workspace"}
-                    </Button>
-                  </TooltipTrigger>
-                  {isCollapsed && (
-                    <TooltipContent side="right">
-                      Exit BA Workspace
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </>
-            )}
           </nav>
-
-          {/* --- BOTTOM NAVIGATION --- */}
           <div
-            className={cn(
-              "mt-auto border-t border-sidebar-border px-4",
-              isCollapsed && "px-2"
-            )}
+            className={cn("mt-auto border-t", isCollapsed ? "px-2" : "px-4")}
           >
             <div className="space-y-1 py-4">
-              {ContextExitButton && <ContextExitButton />}
+              <ExitButton />
               {bottomNavigation.map((item) => (
                 <NavItem key={item.name} item={item} />
               ))}
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={handleLogout}
+                    onClick={() => signOut({ callbackUrl: "/login" })}
                     variant="ghost"
                     className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive"
                   >

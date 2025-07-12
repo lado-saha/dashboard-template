@@ -6,42 +6,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   CreateOrganizationRequest,
-  UpdateOrganizationRequest, // We'll need this type for editing
   OrganizationDto,
   BusinessDomainDto,
   OrganizationLegalForm,
-  CreateAddressRequest,
-  UpdateAddressRequest, // And this type for updating addresses
   AddressDto,
 } from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { mediaRepository } from "@/lib/data-repo/media";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { Form } from "@/components/ui/form";
-import { FormWizard } from "@/components/ui/form-wizard";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  Info,
-  FileText,
-  Building,
-  MapPin,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+
+import { Info, FileText, Building, MapPin } from "lucide-react";
 import { OrgBasicInfoForm } from "./forms/org-basic-info-form";
 import { OrgLegalForm } from "./forms/org-legal-form";
 import { OrgBrandingForm } from "./forms/org-branding-form";
 import { OrgAddressForm } from "./forms/org-address-form";
 import { isValid } from "date-fns";
 import { embedId } from "@/lib/id-parser";
+import { FormWrapper } from "@/components/ui/form-wrapper";
 
 // Schemas remain the same
 const basicInfoSchema = z.object({
@@ -362,85 +344,38 @@ export function OrganizationForm({
     }
   };
 
-  // --- CHANGE 5: A robust final submit handler ---
-  const handleSave = async () => {
-    const isFormValid = await form.trigger();
-    if (isFormValid) {
-      await onSubmit(form.getValues());
-    } else {
-      onInvalid(form.formState.errors);
-    }
-  };
-
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <OrgBasicInfoForm
-            form={form}
-            filteredDomains={filteredDomains}
-            domainSearch={domainSearch}
-            onDomainSearchChangeAction={setDomainSearch}
-          />
-        );
-      case 1:
-        return <OrgLegalForm form={form} />;
-      case 2:
-        return <OrgBrandingForm form={form} />;
-      case 3:
-        return <OrgAddressForm form={form} />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Form {...form}>
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-        {/* [CHANGE] Use the new FormWizard component */}
-        <FormWizard
-          steps={formSteps}
-          currentStepIndex={currentStep}
-          onStepClick={setCurrentStep}
-          mode={mode}
-        />
-
-        {/* The Card wrapper is now inside the renderCurrentStep function for better structure */}
-        <div className="mt-4 min-h-[420px]">{renderCurrentStep()}</div>
-
-        <div className="flex justify-between mt-8 pt-6 border-t">
-          {/* Back Button is always the same */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setCurrentStep((p) => p - 1)}
-            disabled={currentStep === 0 || isLoading}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-
-          {/* [CHANGE] Conditional rendering for the right-side button */}
-          {mode === "create" ? (
-            // In CREATE mode, show Next or Finish
-            currentStep < formSteps.length - 1 ? (
-              <Button type="button" onClick={handleNextStep}>
-                Next <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button type="button" disabled={isLoading} onClick={handleSave}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Organization
-              </Button>
-            )
-          ) : (
-            // In EDIT mode, show a consistent Save button
-            <Button type="button" disabled={isLoading} onClick={handleSave}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+    <FormWrapper
+      form={form}
+      onFormSubmit={onSubmit}
+      isLoading={isLoading}
+      title={
+        mode === "create"
+          ? "Create New Organization"
+          : `Editing: ${initialData?.long_name}`
+      }
+      description="Complete all steps to save your organization's profile."
+      steps={formSteps}
+      submitButtonText={
+        mode === "create" ? "Create Organization" : "Save Changes"
+      }
+    >
+      {(currentStep) => (
+        // This function returns the content for the current step
+        <div className="min-h-[450px]">
+          {currentStep === 0 && (
+            <OrgBasicInfoForm
+              form={form}
+              filteredDomains={filteredDomains}
+              domainSearch={domainSearch}
+              onDomainSearchChangeAction={setDomainSearch}
+            />
           )}
+          {currentStep === 1 && <OrgLegalForm form={form} />}
+          {currentStep === 2 && <OrgBrandingForm form={form} />}
+          {currentStep === 3 && <OrgAddressForm form={form} />}
         </div>
-      </form>
-    </Form>
+      )}
+    </FormWrapper>
   );
 }

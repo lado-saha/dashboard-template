@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/card";
 import { FormWizard } from "@/components/ui/form-wizard";
 import { isValid } from "date-fns";
+import { FormWrapper } from "@/components/ui/form-wrapper";
 
 const basicInfoSchema = z.object({
   long_name: z.string().min(3, "Official name is required.").max(100),
@@ -208,114 +209,77 @@ export function AgencyForm({
     }
   };
 
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <AgencyBasicInfoForm>
-            <FormField
-              control={form.control}
-              name="business_domains"
-              render={({ field }) => (
-                <FormItem className="col-span-1 md:col-span-2">
-                  <FormLabel>Business Domains *</FormLabel>
-                  <div className="border rounded-md p-2">
-                    <Input
-                      placeholder="Search domains..."
-                      className="mb-2 h-9"
-                      value={domainSearch}
-                      onChange={(e) => setDomainSearch(e.target.value)}
-                    />
-                    <ScrollArea className="h-40">
-                      <div className="space-y-2 p-1">
-                        {filteredDomains.map((domain) => (
-                          <FormItem
-                            key={domain.id}
-                            className="flex flex-row items-center space-x-3 space-y-0"
-                          >
-                            <FormControl>
-                              <input
-                                type="checkbox"
-                                checked={field.value?.includes(domain.id!)}
-                                onChange={(e) => {
-                                  const values = field.value || [];
-                                  field.onChange(
-                                    e.target.checked
-                                      ? [...values, domain.id!]
-                                      : values.filter((v) => v !== domain.id!)
-                                  );
-                                }}
-                                className="form-checkbox h-4 w-4 rounded"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal text-sm">
-                              {domain.name}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </AgencyBasicInfoForm>
-        );
-      case 1:
-        return <AgencyLegalForm form={form} />;
-      case 2:
-        return <AgencyBrandingForm form={form} />;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Form {...form}>
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-        <FormWizard
-          steps={formSteps}
-          currentStepIndex={currentStep}
-          onStepClick={setCurrentStep}
-          mode={mode}
-        />
-        <Card>
-          <CardHeader>
-            <CardTitle>{formSteps[currentStep].name}</CardTitle>
-            <CardDescription>
-              Please fill in the details for this section.
-            </CardDescription>
-          </CardHeader>
-          {renderCurrentStep()}
-        </Card>
-        <div className="flex justify-between mt-8 pt-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setCurrentStep((p) => p - 1)}
-            disabled={currentStep === 0 || isLoading}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          {currentStep < formSteps.length - 1 ? (
-            <Button type="button" onClick={handleNextStep}>
-              Next
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              disabled={isLoading}
-              onClick={form.handleSubmit(onSubmit, onInvalid)}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{" "}
-              {mode === "create" ? "Create Agency" : "Save Changes"}
-            </Button>
+    <FormWrapper
+      form={form}
+      onFormSubmit={onSubmit}
+      isLoading={isLoading}
+      title={
+        mode === "create"
+          ? "Create New Agency"
+          : `Edit Agency: ${initialData?.short_name}`
+      }
+      description="Fill in the agency's details across all sections."
+      steps={formSteps}
+      submitButtonText={mode === "create" ? "Create Agency" : "Save Changes"}
+    >
+      {(currentStep) => (
+        <div className="min-h-[400px]">
+          {currentStep === 0 && (
+            <AgencyBasicInfoForm>
+              <FormField
+                control={form.control}
+                name="business_domains"
+                render={({ field }) => (
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>Business Domains *</FormLabel>
+                    <div className="border rounded-md p-2">
+                      <Input
+                        placeholder="Search domains..."
+                        className="mb-2 h-9"
+                        value={domainSearch}
+                        onChange={(e) => setDomainSearch(e.target.value)}
+                      />
+                      <ScrollArea className="h-40">
+                        <div className="space-y-2 p-1">
+                          {filteredDomains.map((domain) => (
+                            <FormItem
+                              key={domain.id}
+                              className="flex flex-row items-center space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <input
+                                  type="checkbox"
+                                  checked={field.value?.includes(domain.id!)}
+                                  onChange={(e) => {
+                                    const values = field.value || [];
+                                    field.onChange(
+                                      e.target.checked
+                                        ? [...values, domain.id!]
+                                        : values.filter((v) => v !== domain.id!)
+                                    );
+                                  }}
+                                  className="form-checkbox h-4 w-4 rounded"
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal text-sm">
+                                {domain.name}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AgencyBasicInfoForm>
           )}
+          {currentStep === 1 && <AgencyLegalForm form={form} />}
+          {currentStep === 2 && <AgencyBrandingForm form={form} />}
         </div>
-      </form>
-    </Form>
+      )}
+    </FormWrapper>
   );
 }
