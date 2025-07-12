@@ -1,39 +1,54 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Building, ShieldCheck } from "lucide-react";
 
 export default function SuperAdminDashboardPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Super Admin Dashboard</h1>
-       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-         <Card>
-           <CardHeader>
-             <CardTitle>Platform Overview</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p>Key metrics across all platforms.</p>
-             {/* TODO: Add high-level stats (Total BAs, Customers, Subscriptions) */}
-           </CardContent>
-         </Card>
-          <Card>
-           <CardHeader>
-             <CardTitle>Recent Activities</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p>Platform-wide significant events.</p>
-             {/* TODO: Add important activity feed */}
-           </CardContent>
-         </Card>
-         <Card>
-           <CardHeader>
-             <CardTitle>System Health</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p>Status of key services.</p>
-             {/* TODO: Add system status indicators */}
-           </CardContent>
-         </Card>
+    <div className="space-y-6">
+      <PageHeader
+        title="Super Admin Dashboard"
+        description="Platform-wide overview and management tools."
+      />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">...</div>
+            <p className="text-xs text-muted-foreground">Loading data...</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Organizations</CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">...</div>
+            <p className="text-xs text-muted-foreground">Loading data...</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">System Health</CardTitle>
+            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">Operational</div>
+            <p className="text-xs text-muted-foreground">All services are online.</p>
+          </CardContent>
+        </Card>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Platform Activity Feed</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Activity feed coming soon...</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
