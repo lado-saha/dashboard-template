@@ -20,8 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
-import { Loader2, Calendar as CalendarIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -30,6 +28,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format, isValid } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { FormWrapper } from "@/components/ui/form-wrapper";
 
 const certificationFormSchema = z.object({
@@ -49,25 +48,20 @@ const certificationFormSchema = z.object({
   obtainment_date: z.date().optional().nullable(),
 });
 
-type CertificationFormData = z.infer<typeof certificationFormSchema>;
+export type CertificationFormData = z.infer<typeof certificationFormSchema>;
 
 interface CertificationFormProps {
   initialData?: Partial<CertificationDto>;
   mode: "create" | "edit";
-  onSubmitAttemptAction: (
-    data: CreateCertificationRequest | UpdateCertificationRequest,
-    certId?: string
-  ) => Promise<boolean>;
-  onCancelAction: () => void;
+  onSubmitAction: (data: CertificationFormData) => Promise<boolean>;
 }
 
 export function CertificationForm({
   initialData,
   mode,
-  onSubmitAttemptAction,
-  onCancelAction,
+  onSubmitAction,
 }: CertificationFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CertificationFormData>({
     resolver: zodResolver(certificationFormSchema),
@@ -96,27 +90,17 @@ export function CertificationForm({
     });
   }, [initialData, form.reset]);
 
-  const processSubmit = async (data: CertificationFormData) => {
-    setIsSubmitting(true);
-    const payload = {
-      ...data,
-      obtainment_date: data.obtainment_date
-        ? data.obtainment_date.toISOString()
-        : undefined,
-    };
-    const success = await onSubmitAttemptAction(
-      payload,
-      initialData?.certification_id
-    );
-    if (success) form.reset();
-    setIsSubmitting(false);
+  const handleSubmit = async (data: CertificationFormData) => {
+    setIsLoading(true);
+    const success = await onSubmitAction(data);
+    if (!success) setIsLoading(false);
   };
 
   return (
     <FormWrapper
       form={form}
-      onFormSubmit={processSubmit}
-      isLoading={isSubmitting}
+      onFormSubmit={handleSubmit}
+      isLoading={isLoading}
       title={mode === "create" ? "Add New Certification" : "Edit Certification"}
       description={
         mode === "create"
@@ -134,9 +118,7 @@ export function CertificationForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Certification Name <span className="text-destructive">*</span>
-                </FormLabel>
+                <FormLabel>Certification Name *</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g., Certified Scrum Master"
@@ -152,10 +134,7 @@ export function CertificationForm({
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Certification Type/Body{" "}
-                  <span className="text-destructive">*</span>
-                </FormLabel>
+                <FormLabel>Certification Type/Body *</FormLabel>
                 <FormControl>
                   <Input placeholder="e.g., Scrum Alliance, ISO" {...field} />
                 </FormControl>
@@ -179,21 +158,16 @@ export function CertificationForm({
                           !field.value && "text-muted-foreground"
                         )}
                       >
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         {field.value ? (
                           format(field.value, "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0"
-                    align="start"
-                    // THE FIX: This prevents the parent Dialog from closing when interacting with the Popover
-                    onInteractOutside={(e) => e.preventDefault()}
-                  >
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value ?? undefined}
@@ -224,22 +198,6 @@ export function CertificationForm({
               </FormItem>
             )}
           />
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancelAction}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {mode === "create" ? "Add Certification" : "Save Changes"}
-            </Button>
-          </div>
         </div>
       )}
     </FormWrapper>

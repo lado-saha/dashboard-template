@@ -181,7 +181,7 @@ export function ResourceDataTable<TData extends Record<string, any>, TValue>({
           <main className="mt-4">{renderContent()}</main>
         </CardContent>
       </Card>
-      {!isLoading && !error && table.getPageCount() > 1 && (
+      {!isLoading && !error && table.getPageCount() > 0 && (
         <DataTablePagination table={table} viewMode={viewMode} />
       )}
     </div>

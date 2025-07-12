@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,7 +8,6 @@ import {
   CreateOrganizationRequest,
   UpdateOrganizationRequest,
   OrganizationDto,
-  BusinessDomainDto,
   AddressDto,
   OrganizationLegalForm,
 } from "@/types/organization";
@@ -24,8 +23,6 @@ import { OrgBrandingForm } from "./forms/org-branding-form";
 import { OrgAddressForm, addressSchema } from "./forms/org-address-form";
 import { isValid } from "date-fns";
 
-// --- Zod Schemas for Form Validation ---
-
 const basicInfoSchema = z.object({
   long_name: z.string().min(3, "Official name is required.").max(100),
   short_name: z.string().min(2, "Short name is required.").max(50),
@@ -38,7 +35,6 @@ const basicInfoSchema = z.object({
     .array(z.string())
     .min(1, "At least one business domain is required."),
 });
-
 const legalFormSchema = z.object({
   legal_form: z.string().min(1, "Legal form is required."),
   business_registration_number: z.string().optional().or(z.literal("")),
@@ -52,7 +48,6 @@ const legalFormSchema = z.object({
   year_founded: z.date().optional().nullable(),
   ceo_name: z.string().optional().or(z.literal("")),
 });
-
 const brandingSchema = z.object({
   logoFile: z.any().optional(),
   logo_url: z.string().url("Invalid URL").optional().or(z.literal("")),
@@ -69,12 +64,10 @@ const brandingSchema = z.object({
   keywords: z.string().optional().or(z.literal("")),
   number_of_employees: z.coerce.number().int().min(0).optional().nullable(),
 });
-
 const fullOrganizationSchema = basicInfoSchema
   .merge(legalFormSchema)
   .merge(brandingSchema)
   .merge(addressSchema);
-
 type OrganizationFormData = z.infer<typeof fullOrganizationSchema>;
 
 const formSteps = [
@@ -119,10 +112,6 @@ export function OrganizationForm({
 }: OrganizationFormProps) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const [availableBusinessDomains, setAvailableBusinessDomains] = useState<
-    BusinessDomainDto[]
-  >([]);
-  const [domainSearch, setDomainSearch] = useState("");
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(fullOrganizationSchema),
@@ -156,7 +145,7 @@ export function OrganizationForm({
         keywords: Array.isArray(initialData?.keywords)
           ? initialData.keywords.join(", ")
           : "",
-        number_of_employees: (initialData )?.number_of_employees || null,
+        number_of_employees: (initialData as any)?.number_of_employees || null,
         address_line_1: defaultAddress?.address_line_1 || "",
         address_line_2: defaultAddress?.address_line_2 || "",
         city: defaultAddress?.city || "",
@@ -170,26 +159,8 @@ export function OrganizationForm({
     ),
   });
 
-  useEffect(() => {
-    organizationRepository
-      .getAllBusinessDomains()
-      .then(setAvailableBusinessDomains);
-  }, []);
-
-  const filteredDomains = useMemo(() => {
-    if (!domainSearch) return availableBusinessDomains;
-    return availableBusinessDomains.filter((d) =>
-      d.name?.toLowerCase().includes(domainSearch.toLowerCase())
-    );
-  }, [domainSearch, availableBusinessDomains]);
-
   const onSubmit = async (data: OrganizationFormData) => {
-    if (!session?.user.id) {
-      toast.error("User session not found. Please re-login.");
-      return;
-    }
     setIsLoading(true);
-
     try {
       let logoUrl = data.logo_url || undefined;
       if (data.logoFile instanceof File) {
@@ -197,7 +168,7 @@ export function OrganizationForm({
           "organization",
           "image",
           "logos",
-          session.user.id,
+          session!.user.id,
           data.logoFile,
           true
         );
@@ -274,7 +245,7 @@ export function OrganizationForm({
         }
         onSuccessAction(updatedOrg);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || `Failed to ${mode} organization.`);
     } finally {
       setIsLoading(false);
@@ -299,14 +270,7 @@ export function OrganizationForm({
     >
       {(currentStep) => (
         <div className="min-h-[450px]">
-          {currentStep === 0 && (
-            <OrgBasicInfoForm
-              form={form}
-              filteredDomains={filteredDomains}
-              domainSearch={domainSearch}
-              onDomainSearchChangeAction={setDomainSearch}
-            />
-          )}
+          {currentStep === 0 && <OrgBasicInfoForm form={form} />}
           {currentStep === 1 && <OrgLegalForm form={form} />}
           {currentStep === 2 && <OrgBrandingForm form={form} />}
           {currentStep === 3 && <OrgAddressForm form={form} />}

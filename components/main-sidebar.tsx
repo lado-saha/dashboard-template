@@ -118,15 +118,15 @@ const baOrgNavigation = [
     isOrgSpecific: true,
   },
   {
-    name: "Products",
+    name: "Products & Services",
     href: "/business-actor/org/products",
     icon: Package,
     isOrgSpecific: true,
   },
   {
-    name: "Services",
-    href: "/business-actor/org/services",
-    icon: Combine,
+    name: "Business Domains",
+    href: "/super-admin/business-domains",
+    icon: Briefcase,
     isOrgSpecific: true,
   },
   {
