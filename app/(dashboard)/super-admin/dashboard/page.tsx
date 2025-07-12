@@ -1,54 +1,37 @@
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Building, ShieldCheck } from "lucide-react";
+import { Metadata } from "next";
+import { authRepository } from "@/lib/data-repo/auth";
+import { organizationRepository } from "@/lib/data-repo/organization";
+import { SuperAdminDashboardClientPage } from "./dashboard-client";
 
-export default function SuperAdminDashboardPage() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Super Admin Dashboard"
-        description="Platform-wide overview and management tools."
-      />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">...</div>
-            <p className="text-xs text-muted-foreground">Loading data...</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Organizations</CardTitle>
-            <Building className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">...</div>
-            <p className="text-xs text-muted-foreground">Loading data...</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Health</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">Operational</div>
-            <p className="text-xs text-muted-foreground">All services are online.</p>
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Platform Activity Feed</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Activity feed coming soon...</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "Super Admin Dashboard",
+  description: "Platform-wide overview of all users, organizations, and activities.",
+};
+
+// This page can be cached and revalidated periodically
+export const revalidate = 300; // 5 minutes
+
+async function getDashboardData() {
+  try {
+    const [users, organizations, businessActors] = await Promise.all([
+      authRepository.getAllUsers(),
+      organizationRepository.getAllOrganizations(),
+      organizationRepository.getAllBusinessActors(),
+    ]);
+
+    return {
+      users: users || [],
+      organizations: organizations || [],
+      businessActors: businessActors || [],
+      error: null,
+    };
+  } catch (error: any) {
+    console.error("Super Admin Dashboard data fetching error:", error);
+    return { users: [], organizations: [], businessActors: [], error: "Failed to load platform data." };
+  }
+}
+
+export default async function SuperAdminDashboardPage() {
+  const initialData = await getDashboardData();
+  return <SuperAdminDashboardClientPage initialData={initialData} />;
 }
