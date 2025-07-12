@@ -45,7 +45,7 @@ export async function POST(_request: Request) {
 
     return NextResponse.json(loginResponse, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("[MOCK API /auth/login ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to login user." }, { status: 500 });
   }

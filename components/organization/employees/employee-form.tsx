@@ -140,7 +140,7 @@ export function EmployeeForm({
         toast.success("Employee created successfully!");
       }
       onSuccessAction();
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || "An unexpected error occurred.");
     } finally {
       setIsLoading(false);

@@ -13,7 +13,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { role_id
       return NextResponse.json({ message: `Role with ID ${roleId} not found.` }, { status: 404 });
     }
     return NextResponse.json(updatedRole, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to update role." }, { status: 500 });
   }
 }
@@ -31,7 +31,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { role
       return NextResponse.json({ message: `Role with ID ${roleId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Role deleted successfully." }, { status: 200 }); // Spec says 200 OK
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to delete role." }, { status: 500 });
   }
 }

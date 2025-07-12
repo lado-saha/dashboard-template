@@ -7,7 +7,7 @@ export async function GET(_request: NextRequest) {
   try {
     const roles = dbManager.getCollection('authRoles'); // Assuming 'authRoles' collection in dbManager
     return NextResponse.json(roles, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     console.error("[MOCK API /auth/roles GET ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to get roles." }, { status: 500 });
   }
@@ -34,7 +34,7 @@ export async function POST(_request: NextRequest) {
 
     return NextResponse.json(createdRole, { status: 201 });
 
-  } catch (error: any)  {
+  } catch (error)  {
     console.error("[MOCK API /auth/roles POST ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to create role." }, { status: 500 });
   }

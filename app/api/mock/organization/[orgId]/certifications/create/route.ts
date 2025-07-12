@@ -17,7 +17,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdCert = dbManager.addItem('certifications', newCertData);
     return NextResponse.json(createdCert, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create certification", error: error.message }, { status: 500 });
   }
 }

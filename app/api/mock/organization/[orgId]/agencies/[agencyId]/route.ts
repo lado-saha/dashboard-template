@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Agency with ID ${agencyId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(agency);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get agency", error: error.message }, { status: 500 });
   }
 }
@@ -26,7 +26,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedAgency = dbManager.updateItem('agencies', agencyId, body);
     return NextResponse.json(updatedAgency, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update agency", error: error.message }, { status: 500 });
   }
 }
@@ -44,7 +44,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     }
     // TODO: Handle cascading deletes or disassociation of employees, customers etc. linked to this agency
     return NextResponse.json(null, { status: 204 }); // Spec: 204 No Content
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete agency", error: error.message }, { status: 500 });
   }
 }

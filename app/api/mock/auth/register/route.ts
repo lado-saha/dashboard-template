@@ -46,7 +46,7 @@ export async function POST(_request: Request) {
 
     return NextResponse.json(userDtoFields, { status: 201 });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("[MOCK API /auth/register ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to register user." }, { status: 500 });
   }

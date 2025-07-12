@@ -78,7 +78,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
       statusText: remoteResponse.statusText,
       headers: responseHeaders,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error(`[API PROXY] Error fetching ${targetUrl}:`, error);
     return NextResponse.json(
       { message: 'Proxy request failed', error: error.message },

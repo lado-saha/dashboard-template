@@ -68,7 +68,7 @@ export function ReservationModal({ product, isOpen, onOpenChange, onReservationS
       onReservationSuccess();
       onOpenChange(false); // Close modal
       setFormData({}); // Reset form
-    } catch (error: any)  {
+    } catch (error)  {
       console.error("Reservation submission error:", error);
       toast.error(error.message || "Failed to submit reservation. Please try again.");
     } finally {

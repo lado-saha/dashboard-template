@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
               // businessActorProfile = await organizationRepository.getBusinessActorById(userId);
               const allBusinessActors = await organizationRepository.getAllBusinessActors();
               businessActorProfile = allBusinessActors.find(actor => actor.user_id === userId) || null;
-            } catch (error: any) {
+            } catch (error) {
               // A 404 is expected for normal users, so we ignore it.
               // Any other error should be logged but not block login.
               if (error.status !== 404) {
@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
             };
           }
           return null;
-        } catch (error: any) {
+        } catch (error) {
           console.error("Authorize Error:", error);
           throw new Error(error.message || "Invalid credentials");
         }

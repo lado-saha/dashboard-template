@@ -8,7 +8,10 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { OrganizationDto, AgencyDto } from "@/types/organization";
+import {
+  AgencyDto,
+  OrganizationDto,
+} from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -18,9 +21,9 @@ interface ActiveOrganizationContextType {
   activeOrganizationId: string | null;
   activeOrganizationDetails: OrganizationDto | null;
   isLoadingOrgDetails: boolean;
-  userOrganizations: OrganizationDto[];
   isLoadingUserOrgs: boolean;
   isOrgContextInitialized: boolean;
+  userOrganizations: OrganizationDto[];
   setActiveOrganization: (
     orgId: string | null,
     orgDetails?: OrganizationDto
@@ -132,13 +135,18 @@ export const ActiveOrganizationProvider = ({
   );
 
   const setActiveOrganization = useCallback(
-    async (orgId: string | null, orgDetails?: OrganizationDto) => {
-      setActiveAgencyIdState(null);
-      setActiveAgencyDetailsState(null);
-      setAgenciesForCurrentOrg([]);
+    async (
+      orgId: string | null,
+      orgDetails?: OrganizationDto | OrganizationDto
+    ) => {
       setActiveOrganizationIdState(orgId);
+
       if (orgDetails && orgId === orgDetails.organization_id) {
-        setActiveOrganizationDetailsState(orgDetails);
+        if ("number_of_employees" in orgDetails) {
+          setActiveOrganizationDetailsState(orgDetails as OrganizationDto);
+        } else {
+          await fetchAndSetOrganizationDetails(orgId);
+        }
       } else if (orgId) {
         await fetchAndSetOrganizationDetails(orgId);
       } else {
@@ -148,9 +156,7 @@ export const ActiveOrganizationProvider = ({
     [
       fetchAndSetOrganizationDetails,
       setActiveOrganizationIdState,
-      setActiveOrganizationDetailsState,
-      setActiveAgencyIdState,
-      setActiveAgencyDetailsState,
+      setActiveOrganizationDetailsState /* ... */,
     ]
   );
 

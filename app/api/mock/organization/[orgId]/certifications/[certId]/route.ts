@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Certification with ID ${certId} not found for this organization.` }, { status: 404 });
     }
     return NextResponse.json(cert);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get certification", error: error.message }, { status: 500 });
   }
 }
@@ -26,7 +26,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedCert = dbManager.updateItem('certifications', certId, body);
     return NextResponse.json(updatedCert, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update certification", error: error.message }, { status: 500 });
   }
 }
@@ -43,7 +43,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
       return NextResponse.json({ message: `Certification with ID ${certId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Certification deleted." }, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete certification", error: error.message }, { status: 500 });
   }
 }

@@ -20,7 +20,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     dbManager.saveCollection('organizationImages', orgImages);
 
     return NextResponse.json(dummyImages, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to upload images." }, { status: 500 });
   }
 }

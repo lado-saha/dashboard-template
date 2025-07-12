@@ -19,7 +19,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdThirdParty = dbManager.addItem('thirdParties', newThirdPartyData);
     return NextResponse.json(createdThirdParty, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create third party", error: error.message }, { status: 500 });
   }
 }

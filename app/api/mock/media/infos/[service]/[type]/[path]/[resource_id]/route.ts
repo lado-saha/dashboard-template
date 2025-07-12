@@ -16,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
             m.type === params.type
         );
         return NextResponse.json(resourceMedia);
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json({ message: "Failed to get media info", error: error.message }, { status: 500 });
     }
 }

@@ -12,7 +12,7 @@ export async function POST(_request: NextRequest) {
     // In a real app, check for duplicate names, etc.
     const newDomain = dbManager.addItem('businessDomains', body);
     return NextResponse.json(newDomain, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create business domain", error: error.message }, { status: 500 });
   }
 }

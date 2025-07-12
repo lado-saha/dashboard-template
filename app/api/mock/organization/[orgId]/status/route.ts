@@ -15,7 +15,7 @@ export async function PUT(_request: Request, { params }: { params: { orgId: stri
     dbManager.updateItem('organizationsDetails', orgId, { status: body.status });
 
     return NextResponse.json(updatedOrg, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update organization status", error: error.message }, { status: 500 });
   }
 }

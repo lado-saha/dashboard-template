@@ -6,7 +6,7 @@ import {
 } from "@/types/auth";
 import {
  OrganizationDto, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto,
-  ImageDto, ThirdPartyDto, ProposedActivityDto, SalesPersonDto, CustomerOrgDto, ProviderDto, ProspectDto,
+  ImageDto, ThirdPartyDto, ProposedActivityDto, SalesPersonDto, CustomerDto, ProviderDto, ProspectDto,
   PracticalInformationDto, CertificationDto, ApplicationDto, ApplicationKeyDto, BusinessActorDto,
 } from "@/types/organization";
 // import { ResourceDto, ServiceDto } from "@/types/resourceManagement";
@@ -28,7 +28,7 @@ export interface LocalJsonDBCollections {
   authUsers: UserDto[]; authRoles: RoleDto[]; authPermissions: PermissionDto[]; authRolePermissions: RolePermissionDto[]; authRbacResources: RbacResource[];
   organizationsDetails: OrganizationDto[]; contacts: ContactDto[]; addresses: AddressDto[];
   userPreferences: UserPreferencesDto[]; agencies: AgencyDto[]; employees: EmployeeDto[]; salesPersons: SalesPersonDto[];
-  orgCustomers: CustomerOrgDto[]; providers: ProviderDto[]; prospects: ProspectDto[]; practicalInformation: PracticalInformationDto[];
+  orgCustomers: CustomerDto[]; providers: ProviderDto[]; prospects: ProspectDto[]; practicalInformation: PracticalInformationDto[];
   certifications: CertificationDto[]; businessDomains: BusinessDomainDto[]; organizationImages: ImageDto[]; thirdParties: ThirdPartyDto[];
   proposedActivities: ProposedActivityDto[]; businessActors: BusinessActorDto[]; applicationsData: ApplicationDto[];
   applicationKeysData: ApplicationKeyDto[]; media: MediaDto[]
@@ -95,7 +95,7 @@ function readCollectionData<T>(collectionName: CollectionName): T[] {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
     return fileContent.trim() === "" ? [] : JSON.parse(fileContent) as T[];
-  } catch (error: any) {
+  } catch (error) {
     console.error(`Error reading or parsing ${collectionFileMap[collectionName]}:`, error);
     try {
       fs.writeFileSync(filePath, JSON.stringify([]), "utf-8");
@@ -110,7 +110,7 @@ function writeCollectionData<T>(collectionName: CollectionName, data: T[]): void
   const filePath = getCollectionFilePath(collectionName);
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error: any) {
+  } catch (error) {
     console.error(`Error writing to ${collectionFileMap[collectionName]}:`, error);
   }
 }

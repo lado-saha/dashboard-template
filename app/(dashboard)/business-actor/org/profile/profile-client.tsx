@@ -49,7 +49,7 @@ export function OrganizationProfileClient({
           addresses.find((addr) => addr.is_default) ||
           (addresses.length > 0 ? addresses[0] : null);
         setDefaultAddress(defaultAddr);
-      } catch (error: any) {
+      } catch (error) {
         toast.error("Could not load organization's default address.");
       } finally {
         setIsLoadingAddress(false);

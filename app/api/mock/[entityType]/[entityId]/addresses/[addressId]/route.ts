@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) { /* .
       return NextResponse.json({ message: `Address with ID ${addressId} not found for this entity.` }, { status: 404 });
     }
     return NextResponse.json(address);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get address", error: error.message }, { status: 500 });
   }
 }
@@ -32,7 +32,7 @@ export async function PUT(_request: NextRequest, { params }: RouteParams) { /* .
       return NextResponse.json({ message: `Address with ID ${addressId} not found.` }, { status: 404 });
     }
     return NextResponse.json(updatedAddress, { status: 202 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update address", error: error.message }, { status: 500 });
   }
 }
@@ -44,7 +44,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) { /
       return NextResponse.json({ message: `Address with ID ${addressId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Address deleted successfully." }, { status: 202 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete address", error: error.message }, { status: 500 });
   }
 }

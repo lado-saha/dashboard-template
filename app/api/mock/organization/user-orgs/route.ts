@@ -9,7 +9,7 @@ export async function GET(_request: Request) {
   try {
     const orgs = dbManager.getCollection('organizationsDetails');
     return NextResponse.json(orgs);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get user organizations", error: error.message }, { status: 500 });
   }
 }

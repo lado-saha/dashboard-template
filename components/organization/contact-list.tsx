@@ -104,7 +104,7 @@ export function ContactList({
       );
       toast.success("Contact deleted.");
       fetchContacts();
-    } catch (error: any)  {
+    } catch (error)  {
       toast.error(error.message || "Failed to delete contact.");
     }
   };

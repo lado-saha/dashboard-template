@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allEmployees = dbManager.getCollection('employees');
     const agencyEmployees = allEmployees.filter(emp => emp.organisation_id === orgId && emp.agency_id === agencyId);
     return NextResponse.json(agencyEmployees);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get agency employees", error: error.message }, { status: 500 });
   }
 }

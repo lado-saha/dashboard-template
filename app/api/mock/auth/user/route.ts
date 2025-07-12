@@ -34,7 +34,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ message: "Unauthorized: No active user session found in mock." }, { status: 401 });
 
-  } catch (error: any)  {
+  } catch (error)  {
     console.error("[MOCK API /auth/user ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to get current user." }, { status: 500 });
   }

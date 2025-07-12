@@ -202,7 +202,7 @@ export function AgencyForm({
         );
         onSuccessAction(newAgency);
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || `Failed to ${mode} agency.`);
     } finally {
       setIsLoading(false);

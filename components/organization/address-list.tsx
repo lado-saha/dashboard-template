@@ -73,7 +73,7 @@ export function AddressList({
         organizationId
       );
       setAddresses(data || []);
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Failed to load addresses.");
     } finally {
       setIsLoading(false);
@@ -144,7 +144,7 @@ export function AddressList({
       );
       toast.success("Address deleted.");
       fetchAddresses();
-    } catch (error: any)  {
+    } catch (error)  {
       toast.error(error.message || "Failed to delete address.");
     }
   };
@@ -159,7 +159,7 @@ export function AddressList({
       );
       toast.success("Default address updated.");
       await fetchAddresses();
-    } catch (error: any)  {
+    } catch (error)  {
       toast.error(error.message || "Failed to set default address.");
     }
   };

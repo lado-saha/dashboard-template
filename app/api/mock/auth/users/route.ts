@@ -12,7 +12,7 @@ export async function GET(_request: NextRequest) {
       return userWithoutPassword;
     });
     return NextResponse.json(users, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to get users." }, { status: 500 });
   }
 }

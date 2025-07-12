@@ -1,7 +1,7 @@
 // app/api/mock/organization/[orgId]/customers/[customerId]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { CustomerOrgDto, UpdateCustomerRequest } from '@/types/organization';
+import { CustomerDto, UpdateCustomerRequest } from '@/types/organization';
 
 export async function GET(_request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
   try {
@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Customer ${customerId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(customer);
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to get organization customer", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to get organization customer", error: error.message }, { status: 500 }); }
 }
 
 export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedCustomer = dbManager.updateItem('orgCustomers', customerId, body);
     return NextResponse.json(updatedCustomer, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to update organization customer", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to update organization customer", error: error.message }, { status: 500 }); }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
@@ -37,5 +37,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('orgCustomers', customerId);
     if (!deleted) return NextResponse.json({ message: `Customer ${customerId} not found.` }, { status: 404 });
     return NextResponse.json({ message: "Organization customer deleted." }, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to delete organization customer", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to delete organization customer", error: error.message }, { status: 500 }); }
 }

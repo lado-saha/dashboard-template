@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(employee);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get employee", error: error.message }, { status: 500 });
   }
 }
@@ -40,7 +40,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
         updated_at: updatedEmployeeFull.updated_at,
     };
     return NextResponse.json(response, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update employee", error: error.message }, { status: 500 });
   }
 }
@@ -57,7 +57,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Employee deleted successfully." }, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete employee", error: error.message }, { status: 500 });
   }
 }

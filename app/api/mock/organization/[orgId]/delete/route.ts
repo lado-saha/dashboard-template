@@ -12,7 +12,7 @@ export async function DELETE(_request: Request, { params }: { params: { orgId: s
     }
     // TODO: Cascade delete related entities (agencies, contacts, addresses, etc.)
     return NextResponse.json({ message: "Organization deleted successfully." }, { status: 202 }); // Spec says 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete organization", error: error.message }, { status: 500 });
   }
 }

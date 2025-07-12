@@ -1,12 +1,12 @@
 // lib/data-repo/organization/organization-repository-interface.ts
 import {
- OrganizationDto, CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
+  OrganizationDto, CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
   ContactDto, CreateContactRequest, UpdateContactRequest, ContactableType,
   AddressDto, CreateAddressRequest, UpdateAddressRequest, AddressableType,
   AgencyDto, CreateAgencyRequest, UpdateAgencyRequest, UpdateAgencyStatusRequest,
   EmployeeDto, CreateEmployeeRequest, UpdateEmployeeRequest, AffectEmployeeRequest, EmployeeResponse,
   SalesPersonDto, CreateSalesPersonRequest, UpdateSalesPersonRequest,
-  CustomerOrgDto, CreateCustomerRequest, UpdateCustomerRequest, AffectCustomerRequest,
+  CustomerDto, CreateCustomerRequest, UpdateCustomerRequest, AffectCustomerRequest,
   ProviderDto, CreateProviderRequest, UpdateProviderRequest, AffectProviderRequest,
   ProspectDto, CreateProspectRequest, UpdateProspectRequest,
   PracticalInformationDto, CreatePracticalInformationRequest, UpdatePracticalInformationRequest,
@@ -20,12 +20,11 @@ import {
 } from '@/types/organization';
 
 export interface IOrganizationRepository {
-
-
   // Organizations
   getMyOrganizations(): Promise<OrganizationDto[]>;
   getAllOrganizations(): Promise<OrganizationDto[]>;
   getOrganizationsByDomain(domainId: string): Promise<OrganizationDto[]>;
+
   getOrganizationById(orgId: string): Promise<OrganizationDto | null>;
   createOrganization(data: CreateOrganizationRequest): Promise<OrganizationDto>;
   updateOrganization(orgId: string, data: UpdateOrganizationRequest): Promise<OrganizationDto>;
@@ -109,19 +108,19 @@ export interface IOrganizationRepository {
   deleteAgencySalesPerson(orgId: string, agencyId: string, salesPersonId: string): Promise<void>;
 
   // Customers (Organization-scoped)
-  getOrgCustomers(orgId: string): Promise<CustomerOrgDto[]>;
-  createOrgCustomer(orgId: string, data: CreateCustomerRequest): Promise<CustomerOrgDto>;
-  getOrgCustomerById(orgId: string, customerId: string): Promise<CustomerOrgDto | null>;
-  updateOrgCustomer(orgId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerOrgDto>;
+  getOrgCustomers(orgId: string): Promise<CustomerDto[]>;
+  createOrgCustomer(orgId: string, data: CreateCustomerRequest): Promise<CustomerDto>;
+  getOrgCustomerById(orgId: string, customerId: string): Promise<CustomerDto | null>;
+  updateOrgCustomer(orgId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerDto>;
   deleteOrgCustomer(orgId: string, customerId: string): Promise<void>;
 
   // Customers (Agency-scoped)
-  getAgencyCustomers(orgId: string, agencyId: string): Promise<CustomerOrgDto[]>;
-  createAgencyCustomer(orgId: string, agencyId: string, data: CreateCustomerRequest): Promise<CustomerOrgDto>;
-  getAgencyCustomerById(orgId: string, agencyId: string, customerId: string): Promise<CustomerOrgDto | null>;
-  updateAgencyCustomer(orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerOrgDto>;
+  getAgencyCustomers(orgId: string, agencyId: string): Promise<CustomerDto[]>;
+  createAgencyCustomer(orgId: string, agencyId: string, data: CreateCustomerRequest): Promise<CustomerDto>;
+  getAgencyCustomerById(orgId: string, agencyId: string, customerId: string): Promise<CustomerDto | null>;
+  updateAgencyCustomer(orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerDto>;
   deleteAgencyCustomer(orgId: string, agencyId: string, customerId: string): Promise<void>;
-  affectCustomerToAgency(orgId: string, agencyId: string, data: AffectCustomerRequest): Promise<CustomerOrgDto>;
+  affectCustomerToAgency(orgId: string, agencyId: string, data: AffectCustomerRequest): Promise<CustomerDto>;
 
   // Suppliers (Providers) (Organization-scoped)
   getOrgSuppliers(orgId: string): Promise<ProviderDto[]>;

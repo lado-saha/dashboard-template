@@ -17,7 +17,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
       dbManager.updateItem('organizationsDetails', orgId, { business_domains: org.business_domains });
     }
     return NextResponse.json(org, { status: 202 }); // 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to remove business domain." }, { status: 500 });
   }
 }

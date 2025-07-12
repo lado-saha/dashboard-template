@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             m.location?.startsWith(path)
         );
         return NextResponse.json(resourceMedia);
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json({ message: "Failed to get media info", error: error.message }, { status: 500 });
     }
 }
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         };
 
         return NextResponse.json(response, { status: 200 });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json({ message: "Failed to upload media", error: error.message }, { status: 500 });
     }
 }
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
         } else {
             return NextResponse.json({ message: "File not found for deletion" }, { status: 404 });
         }
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json({ message: "Failed to delete media", error: error.message }, { status: 500 });
     }
 }

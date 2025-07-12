@@ -19,7 +19,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
       dbManager.updateItem('organizationsDetails', orgId, { business_domains: org.business_domains });
     }
     return NextResponse.json(org, { status: 202 }); // 202 Accepted as per spec
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to add business domain." }, { status: 500 });
   }
 }

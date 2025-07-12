@@ -61,7 +61,7 @@ export async function GET(_request: NextRequest, { params }: { params: { userId:
     if (!userId) return NextResponse.json({ message: "User ID is required." }, { status: 400 });
     const preferences = getOrCreateUserPreferences(userId);
     return NextResponse.json(preferences, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     console.error("[MOCK API /user-preferences GET ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to get user preferences." }, { status: 500 });
   }
@@ -103,7 +103,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { userId:
     dbManager.saveCollection('userPreferences', collection);
 
     return NextResponse.json(updatedData, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     console.error("[MOCK API /user-preferences PUT ERROR]:", error);
     return NextResponse.json({ message: error.message || "Failed to update user preferences." }, { status: 500 });
   }

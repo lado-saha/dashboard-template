@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       filteredAgencies = filteredAgencies.filter(agency => agency.is_active === isActive);
     }
     return NextResponse.json(filteredAgencies);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get agencies", error: error.message }, { status: 500 });
   }
 }
@@ -38,7 +38,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdAgency = dbManager.addItem('agencies', { ...newAgencyData, is_active: true }); // Default new agencies to active
     return NextResponse.json(createdAgency, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create agency", error: error.message }, { status: 500 });
   }
 }

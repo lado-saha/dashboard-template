@@ -8,7 +8,7 @@ export async function GET(_request: Request, { params }: { params: { domainId: s
     const allOrgs = dbManager.getCollection('organizationsDetails');
     const orgsInDomain = allOrgs.filter(org => org.business_domains?.includes(domainId));
     return NextResponse.json(orgsInDomain);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get organizations by domain", error: error.message }, { status: 500 });
   }
 }

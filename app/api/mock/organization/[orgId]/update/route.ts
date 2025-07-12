@@ -20,7 +20,7 @@ export async function PUT(_request: Request, { params }: { params: { orgId: stri
     const updatedOrg = dbManager.updateItem('organizationsDetails', orgId, updatedData);
 
     return NextResponse.json(updatedOrg, { status: 202 }); // Spec says 202 Accepted for update
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update organization", error: error.message }, { status: 500 });
   }
 }

@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: "Practical information not found for this organization." }, { status: 404 });
     }
     return NextResponse.json(info);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get practical information item", error: error.message }, { status: 500 });
   }
 }
@@ -26,7 +26,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedInfo = dbManager.updateItem('practicalInformation', infoId, body);
     return NextResponse.json(updatedInfo, { status: 200 }); // Or 202
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update practical information", error: error.message }, { status: 500 });
   }
 }
@@ -43,7 +43,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
       return NextResponse.json({ message: "Practical information not found during deletion attempt." }, { status: 404 });
     }
     return NextResponse.json({ message: "Practical information deleted." }, { status: 202 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete practical information", error: error.message }, { status: 500 });
   }
 }

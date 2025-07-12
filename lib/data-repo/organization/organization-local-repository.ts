@@ -1,5 +1,4 @@
 // lib/data-repo/organization/organization-local-repository.ts
-import { cleanBusinessActorDto, cleanOrganizationDto } from "@/lib/id-parser";
 import { IOrganizationRepository } from "./organization-repository-interface";
 import {
   OrganizationDto,
@@ -26,7 +25,7 @@ import {
   SalesPersonDto,
   CreateSalesPersonRequest,
   UpdateSalesPersonRequest,
-  CustomerOrgDto,
+  CustomerDto,
   CreateCustomerRequest,
   UpdateCustomerRequest,
   AffectCustomerRequest,
@@ -117,12 +116,10 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // Organizations
   async getMyOrganizations(): Promise<OrganizationDto[]> {
-    const orgs = await this.fetchMockApi<OrganizationDto[]>("/user-orgs");
-    return orgs.map(org => cleanOrganizationDto(org)!);
+    return this.fetchMockApi<OrganizationDto[]>("/user-orgs");
   }
   async getAllOrganizations(): Promise<OrganizationDto[]> {
-    const orgs = await this.fetchMockApi<OrganizationDto[]>("/all");
-    return orgs.map(org => cleanOrganizationDto(org)!);
+    return this.fetchMockApi<OrganizationDto[]>("/all");
   }
   async getOrganizationsByDomain(
     domainId: string
@@ -130,8 +127,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     return this.fetchMockApi<OrganizationDto[]>(`/domain/${domainId}`);
   }
   async getOrganizationById(orgId: string): Promise<OrganizationDto | null> {
-    const org = await this.fetchMockApi<OrganizationDto | null>(`/${orgId}/details`);
-    return org ? cleanOrganizationDto(org) : org;
+    return this.fetchMockApi<OrganizationDto | null>(`/${orgId}/details`);
   }
   async createOrganization(
     data: CreateOrganizationRequest
@@ -671,14 +667,14 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   }
 
   // Customers (Organization-linked)
-  async getOrgCustomers(orgId: string): Promise<CustomerOrgDto[]> {
-    return this.fetchMockApi<CustomerOrgDto[]>(`/${orgId}/customers/list`);
+  async getOrgCustomers(orgId: string): Promise<CustomerDto[]> {
+    return this.fetchMockApi<CustomerDto[]>(`/${orgId}/customers/list`);
   }
   async createOrgCustomer(
     orgId: string,
     data: CreateCustomerRequest
-  ): Promise<CustomerOrgDto> {
-    return this.fetchMockApi<CustomerOrgDto>(`/${orgId}/customers/create`, {
+  ): Promise<CustomerDto> {
+    return this.fetchMockApi<CustomerDto>(`/${orgId}/customers/create`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -686,8 +682,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   async getOrgCustomerById(
     orgId: string,
     customerId: string
-  ): Promise<CustomerOrgDto | null> {
-    return this.fetchMockApi<CustomerOrgDto | null>(
+  ): Promise<CustomerDto | null> {
+    return this.fetchMockApi<CustomerDto | null>(
       `/${orgId}/customers/${customerId}`
     );
   }
@@ -695,8 +691,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     customerId: string,
     data: UpdateCustomerRequest
-  ): Promise<CustomerOrgDto> {
-    return this.fetchMockApi<CustomerOrgDto>(
+  ): Promise<CustomerDto> {
+    return this.fetchMockApi<CustomerDto>(
       `/${orgId}/customers/${customerId}/update`,
       { method: "PUT", body: JSON.stringify(data) }
     );
@@ -711,8 +707,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   async getAgencyCustomers(
     orgId: string,
     agencyId: string
-  ): Promise<CustomerOrgDto[]> {
-    return this.fetchMockApi<CustomerOrgDto[]>(
+  ): Promise<CustomerDto[]> {
+    return this.fetchMockApi<CustomerDto[]>(
       `/${orgId}/agencies/${agencyId}/customers/list`
     );
   }
@@ -720,8 +716,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     agencyId: string,
     data: CreateCustomerRequest
-  ): Promise<CustomerOrgDto> {
-    return this.fetchMockApi<CustomerOrgDto>(
+  ): Promise<CustomerDto> {
+    return this.fetchMockApi<CustomerDto>(
       `/${orgId}/agencies/${agencyId}/customers/create`,
       { method: "POST", body: JSON.stringify(data) }
     );
@@ -730,8 +726,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     agencyId: string,
     customerId: string
-  ): Promise<CustomerOrgDto | null> {
-    return this.fetchMockApi<CustomerOrgDto | null>(
+  ): Promise<CustomerDto | null> {
+    return this.fetchMockApi<CustomerDto | null>(
       `/${orgId}/agencies/${agencyId}/customers/${customerId}`
     );
   }
@@ -740,8 +736,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string,
     customerId: string,
     data: UpdateCustomerRequest
-  ): Promise<CustomerOrgDto> {
-    return this.fetchMockApi<CustomerOrgDto>(
+  ): Promise<CustomerDto> {
+    return this.fetchMockApi<CustomerDto>(
       `/${orgId}/agencies/${agencyId}/customers/${customerId}/update`,
       { method: "PUT", body: JSON.stringify(data) }
     );
@@ -760,8 +756,8 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     agencyId: string,
     data: AffectCustomerRequest
-  ): Promise<CustomerOrgDto> {
-    return this.fetchMockApi<CustomerOrgDto>(
+  ): Promise<CustomerDto> {
+    return this.fetchMockApi<CustomerDto>(
       `/${orgId}/agencies/${agencyId}/customers/add`,
       { method: "POST", body: JSON.stringify(data) }
     );
@@ -953,8 +949,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // Business Actors
   async getAllBusinessActors(): Promise<BusinessActorDto[]> {
-    const actors = await this.fetchMockApi<BusinessActorDto[]>("", {}, `${MOCK_API_GLOBAL_ORG_ENTITIES_BASE}/business-actors`);
-    return actors.map(actor => cleanBusinessActorDto(actor)!);
+    return this.fetchMockApi<BusinessActorDto[]>("", {}, `${MOCK_API_GLOBAL_ORG_ENTITIES_BASE}/business-actors`);
   }
   async createBusinessActor(
     data: CreateBusinessActorRequest
@@ -966,8 +961,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     );
   }
   async getBusinessActorById(baId: string): Promise<BusinessActorDto | null> {
-    const ba = await this.fetchMockApi<BusinessActorDto | null>(`/${baId}`, {}, `${MOCK_API_GLOBAL_ORG_ENTITIES_BASE}/business-actors`);
-    return ba ? cleanBusinessActorDto(ba) : ba;
+    return this.fetchMockApi<BusinessActorDto | null>(`/${baId}`, {}, `${MOCK_API_GLOBAL_ORG_ENTITIES_BASE}/business-actors`);
   }
 
   async updateBusinessActor(
@@ -990,13 +984,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   async getBusinessActorsByType(
     type: BusinessActorType
   ): Promise<BusinessActorDto[]> {
-    const actors = await this.fetchMockApi<BusinessActorDto[]>(
+    return this.fetchMockApi<BusinessActorDto[]>(
       `/type/${type}`,
       {},
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-actors"
     );
     // const orgs = await this.fetchMockApi<OrganizationDto[]>("/all");
-    return actors.map(actor => cleanBusinessActorDto(actor)!);
   }
 
   // Images

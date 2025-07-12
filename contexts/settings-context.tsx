@@ -108,7 +108,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           privacy: prefsDto.privacy,
         });
 
-      } catch (error: any) {
+      } catch (error) {
         toast.error("Could not load your settings.");
       } finally {
         setIsLoadingSettings(false);

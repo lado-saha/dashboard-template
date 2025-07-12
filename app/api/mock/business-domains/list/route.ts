@@ -28,7 +28,7 @@ export async function GET(_request: NextRequest) {
       domains = domains.slice(start, end);
     }
     return NextResponse.json(domains);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get business domains", error: error.message }, { status: 500 });
   }
 }

@@ -13,7 +13,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { contact
     }
     const updatedContact = dbManager.updateItem('contacts', contactId, { is_favorite: !contact.is_favorite });
     return NextResponse.json(updatedContact, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to toggle favorite contact", error: error.message }, { status: 500 });
   }
 }

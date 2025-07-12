@@ -229,7 +229,6 @@ export function BusinessActorForm({
         avatar_picture: avatarUrl ?? undefined,
         profile_picture: profileUrl ?? undefined,
         is_individual: data.is_individual,
-        user_id: session.user.id, // Always include user_id
       };
 
       if (mode === "edit" && initialData?.business_actor_id) {
@@ -244,7 +243,7 @@ export function BusinessActorForm({
         );
         onSuccessAction(newBA);
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || `An error occurred during profile ${mode}.`);
     } finally {
       setIsLoading(false);

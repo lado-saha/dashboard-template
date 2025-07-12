@@ -17,7 +17,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdInfo = dbManager.addItem('practicalInformation', newData);
     return NextResponse.json(createdInfo, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create practical information", error: error.message }, { status: 500 });
   }
 }

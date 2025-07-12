@@ -7,7 +7,7 @@ import { /* Import ALL DTOs and Request types used in the interface */
   AgencyDto, CreateAgencyRequest, UpdateAgencyRequest, UpdateAgencyStatusRequest,
   EmployeeDto, CreateEmployeeRequest, UpdateEmployeeRequest, AffectEmployeeRequest, EmployeeResponse,
   SalesPersonDto, CreateSalesPersonRequest, UpdateSalesPersonRequest,
-  CustomerOrgDto, CreateCustomerRequest, UpdateCustomerRequest, AffectCustomerRequest,
+  CustomerDto, CreateCustomerRequest, UpdateCustomerRequest, AffectCustomerRequest,
   ProviderDto, CreateProviderRequest, UpdateProviderRequest, AffectProviderRequest,
   ProspectDto, CreateProspectRequest, UpdateProspectRequest,
   PracticalInformationDto, CreatePracticalInformationRequest, UpdatePracticalInformationRequest,
@@ -21,24 +21,19 @@ import { /* Import ALL DTOs and Request types used in the interface */
 } from '@/types/organization';
 import { yowyobOrganizationApi } from '@/lib/apiClient';
 
-import { cleanBusinessActorDto, cleanOrganizationDto } from "@/lib/id-parser";
 export class OrganizationRemoteRepository implements IOrganizationRepository {
   // Organizations
   async getMyOrganizations(): Promise<OrganizationDto[]> {
-    const orgs = await yowyobOrganizationApi.getMyOrganizations();
-    return orgs.map(org => cleanOrganizationDto(org)!)
+    return yowyobOrganizationApi.getMyOrganizations();
   }
   async getAllOrganizations(): Promise<OrganizationDto[]> {
-    const orgs = await yowyobOrganizationApi.getAllOrganizations();
-    return orgs.map(org => cleanOrganizationDto(org)!)
+    return yowyobOrganizationApi.getAllOrganizations();
   }
   async getOrganizationsByDomain(domainId: string): Promise<OrganizationDto[]> {
-    const orgs = await yowyobOrganizationApi.getOrganizationsByDomain(domainId);
-    return orgs.map(org => cleanOrganizationDto(org)!);
+    return yowyobOrganizationApi.getOrganizationsByDomain(domainId);
   }
   async getOrganizationById(orgId: string): Promise<OrganizationDto | null> {
-    const org = await yowyobOrganizationApi.getOrganizationById(orgId).catch(e => (e.status === 404 ? null : Promise.reject(e)));
-    return cleanOrganizationDto(org);
+    return yowyobOrganizationApi.getOrganizationById(orgId).catch(e => (e.status === 404 ? null : Promise.reject(e)));
   }
   async createOrganization(data: CreateOrganizationRequest): Promise<OrganizationDto> { return yowyobOrganizationApi.createOrganization(data); }
   async updateOrganization(orgId: string, data: UpdateOrganizationRequest): Promise<OrganizationDto> { return yowyobOrganizationApi.updateOrganization(orgId, data); }
@@ -120,17 +115,17 @@ export class OrganizationRemoteRepository implements IOrganizationRepository {
   async deleteAgencySalesPerson(orgId: string, agencyId: string, salesPersonId: string): Promise<void> { return yowyobOrganizationApi.deleteAgencySalesPerson(orgId, agencyId, salesPersonId); }
 
   // Customers (Organization-linked) - Placeholder
-  async getOrgCustomers(orgId: string): Promise<CustomerOrgDto[]> { const c = await yowyobOrganizationApi.getOrgCustomers(orgId); return c || []; }
-  async createOrgCustomer(orgId: string, data: CreateCustomerRequest): Promise<CustomerOrgDto> { return yowyobOrganizationApi.createOrgCustomer(orgId, data); }
-  async getOrgCustomerById(orgId: string, customerId: string): Promise<CustomerOrgDto | null> { return yowyobOrganizationApi.getOrgCustomerById(orgId, customerId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
-  async updateOrgCustomer(orgId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerOrgDto> { return yowyobOrganizationApi.updateOrgCustomer(orgId, customerId, data); }
+  async getOrgCustomers(orgId: string): Promise<CustomerDto[]> { const c = await yowyobOrganizationApi.getOrgCustomers(orgId); return c || []; }
+  async createOrgCustomer(orgId: string, data: CreateCustomerRequest): Promise<CustomerDto> { return yowyobOrganizationApi.createOrgCustomer(orgId, data); }
+  async getOrgCustomerById(orgId: string, customerId: string): Promise<CustomerDto | null> { return yowyobOrganizationApi.getOrgCustomerById(orgId, customerId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
+  async updateOrgCustomer(orgId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerDto> { return yowyobOrganizationApi.updateOrgCustomer(orgId, customerId, data); }
   async deleteOrgCustomer(orgId: string, customerId: string): Promise<void> { return yowyobOrganizationApi.deleteOrgCustomer(orgId, customerId); }
-  async getAgencyCustomers(orgId: string, agencyId: string): Promise<CustomerOrgDto[]> { const c = await yowyobOrganizationApi.getAgencyCustomers(orgId, agencyId); return c || []; }
-  async createAgencyCustomer(orgId: string, agencyId: string, data: CreateCustomerRequest): Promise<CustomerOrgDto> { return yowyobOrganizationApi.createAgencyCustomer(orgId, agencyId, data); }
-  async getAgencyCustomerById(orgId: string, agencyId: string, customerId: string): Promise<CustomerOrgDto | null> { return yowyobOrganizationApi.getAgencyCustomerById(orgId, agencyId, customerId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
-  async updateAgencyCustomer(orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerOrgDto> { return yowyobOrganizationApi.updateAgencyCustomer(orgId, agencyId, customerId, data); }
+  async getAgencyCustomers(orgId: string, agencyId: string): Promise<CustomerDto[]> { const c = await yowyobOrganizationApi.getAgencyCustomers(orgId, agencyId); return c || []; }
+  async createAgencyCustomer(orgId: string, agencyId: string, data: CreateCustomerRequest): Promise<CustomerDto> { return yowyobOrganizationApi.createAgencyCustomer(orgId, agencyId, data); }
+  async getAgencyCustomerById(orgId: string, agencyId: string, customerId: string): Promise<CustomerDto | null> { return yowyobOrganizationApi.getAgencyCustomerById(orgId, agencyId, customerId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
+  async updateAgencyCustomer(orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest): Promise<CustomerDto> { return yowyobOrganizationApi.updateAgencyCustomer(orgId, agencyId, customerId, data); }
   async deleteAgencyCustomer(orgId: string, agencyId: string, customerId: string): Promise<void> { return yowyobOrganizationApi.deleteAgencyCustomer(orgId, agencyId, customerId); }
-  async affectCustomerToAgency(orgId: string, agencyId: string, data: AffectCustomerRequest): Promise<CustomerOrgDto> { return yowyobOrganizationApi.affectCustomerToAgency(orgId, agencyId, data); }
+  async affectCustomerToAgency(orgId: string, agencyId: string, data: AffectCustomerRequest): Promise<CustomerDto> { return yowyobOrganizationApi.affectCustomerToAgency(orgId, agencyId, data); }
 
   // Suppliers (Providers) - Placeholder
   async getOrgSuppliers(orgId: string): Promise<ProviderDto[]> { const s = await yowyobOrganizationApi.getOrgSuppliers(orgId); return s || []; }
@@ -160,19 +155,16 @@ export class OrganizationRemoteRepository implements IOrganizationRepository {
 
   // Business Actors
   async getAllBusinessActors(): Promise<BusinessActorDto[]> {
-    const actors = await yowyobOrganizationApi.getAllBusinessActors();
-    return actors.map(actor => cleanBusinessActorDto(actor)!);
+    return yowyobOrganizationApi.getAllBusinessActors();
   }
   async createBusinessActor(data: CreateBusinessActorRequest): Promise<BusinessActorDto> { return yowyobOrganizationApi.createBusinessActor(data); }
   async getBusinessActorById(baId: string): Promise<BusinessActorDto | null> {
-    const actor = await yowyobOrganizationApi.getBusinessActorById(baId).catch(e => (e.status === 404 ? null : Promise.reject(e)));
-    return actor ? cleanBusinessActorDto(actor) : actor;
+    return yowyobOrganizationApi.getBusinessActorById(baId).catch(e => (e.status === 404 ? null : Promise.reject(e)));
   }
   async updateBusinessActor(baId: string, data: UpdateBusinessActorRequest): Promise<BusinessActorDto> { return yowyobOrganizationApi.updateBusinessActor(baId, data); }
   async deleteBusinessActor(baId: string): Promise<void> { return yowyobOrganizationApi.deleteBusinessActor(baId); }
   async getBusinessActorsByType(type: BusinessActorType): Promise<BusinessActorDto[]> {
-    const orgs = await yowyobOrganizationApi.getBusinessActorsByType(type);
-    return orgs.map(org => cleanBusinessActorDto(org)!);
+    return yowyobOrganizationApi.getBusinessActorsByType(type);
   }
 
   // Images

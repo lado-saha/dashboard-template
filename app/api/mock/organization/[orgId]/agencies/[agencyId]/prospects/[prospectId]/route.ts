@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Prospect ${prospectId} not found for agency ${agencyId}.` }, { status: 404 });
     }
     return NextResponse.json(prospect);
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to get agency prospect", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to get agency prospect", error: error.message }, { status: 500 }); }
 }
 
 export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, prospectId: string } }) {
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedProspect = dbManager.updateItem('prospects', prospectId, body);
     return NextResponse.json(updatedProspect, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to update agency prospect", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to update agency prospect", error: error.message }, { status: 500 }); }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, prospectId: string } }) {
@@ -37,5 +37,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('prospects', prospectId);
     if (!deleted) return NextResponse.json({ message: `Prospect ${prospectId} not found.` }, { status: 404 });
     return NextResponse.json({ message: "Agency prospect deleted." }, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to delete agency prospect", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to delete agency prospect", error: error.message }, { status: 500 }); }
 }

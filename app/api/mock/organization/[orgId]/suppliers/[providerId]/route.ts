@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Supplier ${providerId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(provider);
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to get organization supplier", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to get organization supplier", error: error.message }, { status: 500 }); }
 }
 
 export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, providerId: string } }) {
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedProvider = dbManager.updateItem('providers', providerId, body);
     return NextResponse.json(updatedProvider, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to update organization supplier", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to update organization supplier", error: error.message }, { status: 500 }); }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, providerId: string } }) {
@@ -37,5 +37,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('providers', providerId);
     if (!deleted) return NextResponse.json({ message: `Supplier ${providerId} not found.` }, { status: 404 });
     return NextResponse.json({ message: "Organization supplier deleted." }, { status: 202 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to delete organization supplier", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to delete organization supplier", error: error.message }, { status: 500 }); }
 }

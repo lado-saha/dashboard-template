@@ -29,7 +29,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
         thirdParties = thirdParties.slice(start, end);
     }
     return NextResponse.json(thirdParties);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get third parties", error: error.message }, { status: 500 });
   }
 }

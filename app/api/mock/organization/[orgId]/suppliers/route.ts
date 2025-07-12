@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allProviders = dbManager.getCollection('providers');
     const orgProviders = allProviders.filter(p => p.organization_id === orgId && !p.agency_id);
     return NextResponse.json(orgProviders);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get organization suppliers", error: error.message }, { status: 500 });
   }
 }
@@ -26,7 +26,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdProvider = dbManager.addItem('providers', newProviderData);
     return NextResponse.json(createdProvider, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create organization supplier", error: error.message }, { status: 500 });
   }
 }

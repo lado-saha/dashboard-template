@@ -10,7 +10,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allActivities = dbManager.getCollection('proposedActivities');
     const orgActivities = allActivities.filter(act => act.organization_id === orgId);
     return NextResponse.json(orgActivities);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get proposed activities", error: error.message }, { status: 500 });
   }
 }
@@ -28,7 +28,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdActivity = dbManager.addItem('proposedActivities', newActivityData);
     return NextResponse.json(createdActivity, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create proposed activity", error: error.message }, { status: 500 });
   }
 }

@@ -10,7 +10,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     // Filter for employees directly under the organization (agency_id is null or matches orgId if that the convention)
     const orgEmployees = allEmployees.filter(emp => emp.organisation_id === orgId && (!emp.agency_id || emp.agency_id === orgId));
     return NextResponse.json(orgEmployees);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get organization employees", error: error.message }, { status: 500 });
   }
 }

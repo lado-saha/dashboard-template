@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { domainI
       return NextResponse.json({ message: `Business domain with ID ${domainId} not found.` }, { status: 404 });
     }
     return NextResponse.json(domain);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get business domain", error: error.message }, { status: 500 });
   }
 }
@@ -25,7 +25,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { domainI
       return NextResponse.json({ message: `Business domain with ID ${domainId} not found.` }, { status: 404 });
     }
     return NextResponse.json(updatedDomain, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update business domain", error: error.message }, { status: 500 });
   }
 }
@@ -39,7 +39,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { doma
       return NextResponse.json({ message: `Business domain with ID ${domainId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Business domain deleted." }, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to delete business domain", error: error.message }, { status: 500 });
   }
 }

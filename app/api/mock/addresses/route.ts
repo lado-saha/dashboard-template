@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest) {
     const allAddresses = dbManager.getCollection('addresses');
     const filteredAddresses = allAddresses.filter(c => c.addressable_type === addressableType && c.addressable_id === addressableId);
     return NextResponse.json(filteredAddresses);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get addresses", error: error.message }, { status: 500 });
   }
 }
@@ -42,7 +42,7 @@ export async function POST(_request: NextRequest) {
     };
     const createdAddress = dbManager.addItem('addresses', newAddressData);
     return NextResponse.json(createdAddress, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create address", error: error.message }, { status: 500 });
   }
 }

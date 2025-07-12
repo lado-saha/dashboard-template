@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allProspects = dbManager.getCollection('prospects');
     const orgProspects = allProspects.filter(p => p.organization_id === orgId && !p.agency_id);
     return NextResponse.json(orgProspects);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get organization prospects", error: error.message }, { status: 500 });
   }
 }
@@ -25,7 +25,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdProspect = dbManager.addItem('prospects', newProspectData);
     return NextResponse.json(createdProspect, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create organization prospect", error: error.message }, { status: 500 });
   }
 }

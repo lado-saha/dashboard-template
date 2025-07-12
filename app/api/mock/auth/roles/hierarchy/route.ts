@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest) {
     const hierarchyString = "ADMIN_ROLE > (MANAGER_ROLE > (STAFF_ROLE, USER_ROLE)); GUEST_ROLE";
     // Or: const hierarchyJson = JSON.stringify({ name: "SUPER_ADMIN", children: [...] });
     return NextResponse.json(hierarchyString, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to get roles hierarchy." }, { status: 500 });
   }
 }

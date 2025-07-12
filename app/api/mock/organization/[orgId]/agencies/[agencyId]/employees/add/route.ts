@@ -42,7 +42,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
       department: updatedEmployee.department,
     };
     return NextResponse.json(response, { status: 201 }); // 201 Created or 200 OK
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to affect employee to agency", error: error.message }, { status: 500 });
   }
 }

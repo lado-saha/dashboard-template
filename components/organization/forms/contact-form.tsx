@@ -63,7 +63,7 @@ export function ContactForm({
     setIsLoading(true);
     try {
       await onSubmitAction(data);
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || `Failed to ${mode} contact.`);
     } finally {
       setIsLoading(false);

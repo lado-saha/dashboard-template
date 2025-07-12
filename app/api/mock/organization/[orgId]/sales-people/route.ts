@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allSalesPersons = dbManager.getCollection('salesPersons');
     const orgSalesPersons = allSalesPersons.filter(sp => sp.organization_id === orgId && !sp.agency_id); // No agency_id for org-level
     return NextResponse.json(orgSalesPersons);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get org sales persons", error: error.message }, { status: 500 });
   }
 }
@@ -26,7 +26,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdSp = dbManager.addItem('salesPersons', newSpData);
     return NextResponse.json(createdSp, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create org sales person", error: error.message }, { status: 500 });
   }
 }

@@ -29,7 +29,7 @@ export class AuthRemoteRepository implements IAuthRepository {
   async getCurrentUser(): Promise<UserInfo | null> {
     try {
       return await yowyobAuthApi.getCurrentUser();
-    } catch (error: any)  {
+    } catch (error)  {
       if (error.status === 401 || error.status === 403) return null;
       throw error;
     }

@@ -6,7 +6,7 @@ export async function GET(_request: NextRequest) {
   try {
     const permissions = dbManager.getCollection('authPermissions');
     return NextResponse.json(permissions, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to get permissions." }, { status: 500 });
   }
 }
@@ -19,7 +19,7 @@ export async function POST(_request: NextRequest) {
     }
     const newPerm = dbManager.addItem('authPermissions', body);
     return NextResponse.json(newPerm, { status: 200 }); // Spec says 200 for create
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to create permission." }, { status: 500 });
   }
 }

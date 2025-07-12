@@ -10,7 +10,7 @@ export async function GET(_request: NextRequest, { params }: { params: { permiss
       return NextResponse.json({ message: `Permission with ID ${permissionId} not found.` }, { status: 404 });
     }
     return NextResponse.json(permission, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to get permission." }, { status: 500 });
   }
 }
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { permiss
       return NextResponse.json({ message: `Permission with ID ${permissionId} not found.` }, { status: 404 });
     }
     return NextResponse.json(updatedPermission, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to update permission." }, { status: 500 });
   }
 }
@@ -41,7 +41,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { perm
       return NextResponse.json({ message: `Permission with ID ${permissionId} not found.` }, { status: 404 });
     }
     return NextResponse.json({ message: "Permission deleted successfully." }, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to delete permission." }, { status: 500 });
   }
 }

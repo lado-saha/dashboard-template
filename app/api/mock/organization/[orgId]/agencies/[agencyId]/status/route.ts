@@ -17,7 +17,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updatedAgency = dbManager.updateItem('agencies', agencyId, { is_active: body.active });
     return NextResponse.json(updatedAgency, { status: 202 }); // Spec: 202 Accepted
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to update agency status", error: error.message }, { status: 500 });
   }
 }

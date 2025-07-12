@@ -1,7 +1,7 @@
 // app/api/mock/organization/[orgId]/agencies/[agencyId]/customers/add/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { CustomerOrgDto, AffectCustomerRequest } from '@/types/organization';
+import { CustomerDto, AffectCustomerRequest } from '@/types/organization';
 
 export async function POST(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
       customer = dbManager.updateItem('orgCustomers', body.customer_id, { agency_id: agencyId, organization_id: orgId });
     } else {
       // If no such customer record, create a new one (this implies customer_id might be a User ID from auth)
-      const newCustomerData: Partial<CustomerOrgDto> = {
+      const newCustomerData: Partial<CustomerDto> = {
         customer_id: body.customer_id, // This ID likely refers to a User/BusinessActor ID
         user_id: body.customer_id, // Assuming customer_id is the user_id from auth
         organization_id: orgId,
@@ -40,7 +40,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     }
 
     return NextResponse.json(customer, { status: 201 }); // 201 Created or 200 OK
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to affect customer to agency", error: error.message }, { status: 500 });
   }
 }

@@ -23,7 +23,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { address
     }
     const updatedAddress = dbManager.updateItem('addresses', addressId, { is_default: !address.is_default });
     return NextResponse.json(updatedAddress, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to toggle favorite address", error: error.message }, { status: 500 });
   }
 }

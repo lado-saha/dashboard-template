@@ -7,7 +7,7 @@ import {
   RolePermissionDto, RbacResource, ApiResponseBoolean
 } from "@/types/auth";
 import {
-  CreateOrganizationRequest,OrganizationDto, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
+  CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
   AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest,
   AffectEmployeeRequest,
   AgencyDto,
@@ -43,7 +43,7 @@ import {
   CreateProspectRequest,
   CreateSalesPersonRequest,
   CreateThirdPartyRequest,
-  CustomerOrgDto,
+  CustomerDto,
   GetThirdPartyRequest,
   ProposedActivityDto,
   ProspectDto,
@@ -56,7 +56,8 @@ import {
   UpdateProviderRequest,
   UpdateSalesPersonRequest,
   UpdateThirdPartyRequest,
-  UpdateThirdPartyStatusRequest
+  UpdateThirdPartyStatusRequest,
+  OrganizationDto
 } from "@/types/organization";
 import { MediaDto, MediaType, ServiceType, UploadMediaResponse, UploadRequest } from "@/types/media";
 
@@ -98,13 +99,14 @@ export async function yowyobApiRequest<T = any>(
     'X-Target-URL': targetUrl,
   };
 
-  // const session = await getSession();
-  // if (session?.user?.accessToken) {
-  //   (headers as Record<string, string>)['Authorization'] = `Bearer ${session.user.accessToken}`;
-  // }
-  // else if (CLIENT_BASIC_AUTH_TOKEN) {
-  (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
-  // }
+  const session = await getSession();
+  if (session?.user?.accessToken) {
+    // If a user is logged in, use their personal token
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${session.user.accessToken}`;
+  } else if (CLIENT_BASIC_AUTH_TOKEN) {
+    // Otherwise, use the system-level token (for login, register, etc.)
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${CLIENT_BASIC_AUTH_TOKEN}`;
+  }
 
   // THE FIX: The URL for the fetch call must match the dynamic route pattern.
   // We append a generic slug that doesn't affect logic but satisfies routing.
@@ -130,7 +132,7 @@ export async function yowyobApiRequest<T = any>(
     }
     if (response.status === 204 || response.headers.get("content-length") === "0") return null as T;
     return (await response.json()) as T;
-  } catch (error: any) {
+  } catch (error) {
     if (!error.status && !(error instanceof SyntaxError)) {
       console.error("Network or unhandled Yowyob API error:", error);
       if (!isUserAuthAction) {
@@ -142,73 +144,73 @@ export async function yowyobApiRequest<T = any>(
 
 // NEW: Media Service API object
 export const yowyobMediaApi = {
-    uploadFile: (
-        service: ServiceType,
-        type: MediaType,
-        path: string,
-        resourceId: string | null,
-        file: File,
-        uploadRequest?: UploadRequest
-    ) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (uploadRequest) {
-            formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
-        }
-        
-        const endpoint = resourceId
-            ? `/media/${service}/${type}/${path}/${resourceId}`
-            : `/media/${service}/${type}/${path}`;
-        
-        return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
-            method: "POST",
-            body: formData,
-            isFormData: true, // This is the key change for multipart requests
-        });
-    },
+  uploadFile: (
+    service: ServiceType,
+    type: MediaType,
+    path: string,
+    resourceId: string | null,
+    file: File,
+    uploadRequest?: UploadRequest
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (uploadRequest) {
+      formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
+    }
 
-    updateFile: (
-        service: ServiceType,
-        type: MediaType,
-        path: string,
-        filename: string,
-        file: File,
-        uploadRequest?: UploadRequest
-    ) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (uploadRequest) {
-            formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
-        }
-        const endpoint = `/media/${service}/${type}/${path}/${filename}`;
-        return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
-            method: "PUT",
-            body: formData,
-            isFormData: true,
-        });
-    },
+    const endpoint = resourceId
+      ? `/media/${service}/${type}/${path}/${resourceId}`
+      : `/media/${service}/${type}/${path}`;
 
-    deleteFile: (
-        service: ServiceType,
-        type: MediaType,
-        path: string,
-        filename: string
-    ) => {
-        const endpoint = `/media/${service}/${type}/${path}/${filename}`;
-        return yowyobApiRequest<boolean>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
-            method: "DELETE",
-        });
-    },
+    return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+      method: "POST",
+      body: formData,
+      isFormData: true, // This is the key change for multipart requests
+    });
+  },
 
-    getMediaForResource: (
-        service: ServiceType,
-        type: MediaType,
-        path: string,
-        resourceId: string
-    ) => {
-        const endpoint = `/media/infos/${service}/${type}/${path}/${resourceId}`;
-        return yowyobApiRequest<MediaDto[]>(YOWYOB_MEDIA_API_BASE_URL, endpoint, { method: "GET" });
-    },
+  updateFile: (
+    service: ServiceType,
+    type: MediaType,
+    path: string,
+    filename: string,
+    file: File,
+    uploadRequest?: UploadRequest
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (uploadRequest) {
+      formData.append("request", new Blob([JSON.stringify(uploadRequest)], { type: "application/json" }));
+    }
+    const endpoint = `/media/${service}/${type}/${path}/${filename}`;
+    return yowyobApiRequest<UploadMediaResponse>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+      method: "PUT",
+      body: formData,
+      isFormData: true,
+    });
+  },
+
+  deleteFile: (
+    service: ServiceType,
+    type: MediaType,
+    path: string,
+    filename: string
+  ) => {
+    const endpoint = `/media/${service}/${type}/${path}/${filename}`;
+    return yowyobApiRequest<boolean>(YOWYOB_MEDIA_API_BASE_URL, endpoint, {
+      method: "DELETE",
+    });
+  },
+
+  getMediaForResource: (
+    service: ServiceType,
+    type: MediaType,
+    path: string,
+    resourceId: string
+  ) => {
+    const endpoint = `/media/infos/${service}/${type}/${path}/${resourceId}`;
+    return yowyobApiRequest<MediaDto[]>(YOWYOB_MEDIA_API_BASE_URL, endpoint, { method: "GET" });
+  },
 };
 
 
@@ -241,6 +243,7 @@ export const yowyobOrganizationApi = {
   getMyOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user"),
   getAllOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations"),
   getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`),
+
   getOrganizationById: (orgId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`),
   createOrganization: (data: CreateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "POST", body: JSON.stringify(data) }),
   updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data) }),
@@ -309,17 +312,17 @@ export const yowyobOrganizationApi = {
   getAgencySalesPersonById: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`),
   updateAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "DELETE" }),
-  getOrgCustomers: (orgId: string) => yowyobApiRequest<CustomerOrgDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`),
-  createOrgCustomer: (orgId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`, { method: "POST", body: JSON.stringify(data) }),
-  getOrgCustomerById: (orgId: string, customerId: string) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`),
-  updateOrgCustomer: (orgId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
+  getOrgCustomers: (orgId: string) => yowyobApiRequest<CustomerDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`),
+  createOrgCustomer: (orgId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`, { method: "POST", body: JSON.stringify(data) }),
+  getOrgCustomerById: (orgId: string, customerId: string) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`),
+  updateOrgCustomer: (orgId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteOrgCustomer: (orgId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "DELETE" }),
-  getAgencyCustomers: (orgId: string, agencyId: string) => yowyobApiRequest<CustomerOrgDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`),
-  createAgencyCustomer: (orgId: string, agencyId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`, { method: "POST", body: JSON.stringify(data) }),
-  getAgencyCustomerById: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`),
-  updateAgencyCustomer: (orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
+  getAgencyCustomers: (orgId: string, agencyId: string) => yowyobApiRequest<CustomerDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`),
+  createAgencyCustomer: (orgId: string, agencyId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`, { method: "POST", body: JSON.stringify(data) }),
+  getAgencyCustomerById: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`),
+  updateAgencyCustomer: (orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteAgencyCustomer: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "DELETE" }),
-  affectCustomerToAgency: (orgId: string, agencyId: string, data: AffectCustomerRequest) => yowyobApiRequest<CustomerOrgDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/add`, { method: "POST", body: JSON.stringify(data) }),
+  affectCustomerToAgency: (orgId: string, agencyId: string, data: AffectCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/add`, { method: "POST", body: JSON.stringify(data) }),
   getOrgSuppliers: (orgId: string) => yowyobApiRequest<ProviderDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`),
   createOrgSupplier: (orgId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`, { method: "POST", body: JSON.stringify(data) }),
   getOrgSupplierById: (orgId: string, providerId: string) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`),

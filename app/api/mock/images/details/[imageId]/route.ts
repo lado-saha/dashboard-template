@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { imageId
       return NextResponse.json({ message: `Image with ID ${imageId} not found.` }, { status: 404 });
     }
     return NextResponse.json(imageInfo);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get image info", error: error.message }, { status: 500 });
   }
 }

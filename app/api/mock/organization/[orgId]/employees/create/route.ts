@@ -33,7 +33,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
         updated_at: createdEmployeeFull.updated_at,
     };
     return NextResponse.json(response, { status: 201 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to create organization employee", error: error.message }, { status: 500 });
   }
 }

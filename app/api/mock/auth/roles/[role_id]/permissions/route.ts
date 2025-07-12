@@ -22,7 +22,7 @@ export async function POST(_request: NextRequest, { params }: { params: { role_i
     });
     dbManager.saveCollection('authRolePermissions', rolePermissions);
     return NextResponse.json(added, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to assign permissions." }, { status: 500 });
   }
 }
@@ -44,7 +44,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { role
       return NextResponse.json({ message: "Permissions removed successfully." }, { status: 200 });
     }
     return NextResponse.json({ message: "No matching permissions found to remove or already removed." }, { status: 200 }); // Or 404 if none were found
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to remove permissions." }, { status: 500 });
   }
 }

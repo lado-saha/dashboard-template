@@ -14,7 +14,7 @@ export async function POST(_request: NextRequest) {
     dbManager.addItem('authRbacResources', body); // Store it
     const response: ApiResponseBoolean = { status: "SUCCESS", message: "RBAC Resource saved successfully.", data: true, ok: true };
     return NextResponse.json(response, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     const response: ApiResponseBoolean = { status: "FAILED", message: error.message || "Failed to save RBAC resource.", data: false, ok: false };
     return NextResponse.json(response, { status: 500 });
   }

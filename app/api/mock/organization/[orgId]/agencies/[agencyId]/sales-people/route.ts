@@ -9,7 +9,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const allSalesPersons = dbManager.getCollection('salesPersons');
     const agencySalesPersons = allSalesPersons.filter(sp => sp.organization_id === orgId && sp.agency_id === agencyId);
     return NextResponse.json(agencySalesPersons);
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to get agency sales persons", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to get agency sales persons", error: error.message }, { status: 500 }); }
 }
 
 export async function POST(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
@@ -24,5 +24,5 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdSp = dbManager.addItem('salesPersons', newSpData);
     return NextResponse.json(createdSp, { status: 201 });
-  } catch (error: any)  { return NextResponse.json({ message: "Failed to create agency sales person", error: error.message }, { status: 500 }); }
+  } catch (error)  { return NextResponse.json({ message: "Failed to create agency sales person", error: error.message }, { status: 500 }); }
 }

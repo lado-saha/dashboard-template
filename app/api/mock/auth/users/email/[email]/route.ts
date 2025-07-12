@@ -12,7 +12,7 @@ export async function GET(_request: NextRequest, { params }: { params: { email: 
     }
     const { password_hash, ...userWithoutPassword } = user;
     return NextResponse.json(userWithoutPassword, { status: 200 });
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: error.message || "Failed to get user by email." }, { status: 500 });
   }
 }

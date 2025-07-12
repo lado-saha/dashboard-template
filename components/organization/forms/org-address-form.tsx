@@ -125,7 +125,7 @@ export function OrgAddressForm({
       } else {
         toast.warning("Could not find a specific address for this location.");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Failed to fetch address.");
     } finally {
       setIsGeocoding(false);
@@ -159,7 +159,7 @@ export function OrgAddressForm({
       } else {
         toast.warning("Could not find this address.");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Failed to search address.");
     } finally {
       toast.dismiss();

@@ -12,7 +12,7 @@ export async function GET(_request: Request, { params }: { params: { orgId: stri
       return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
     }
     return NextResponse.json(org);
-  } catch (error: any)  {
+  } catch (error)  {
     return NextResponse.json({ message: "Failed to get organization details", error: error.message }, { status: 500 });
   }
 }
