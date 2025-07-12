@@ -13,7 +13,7 @@ interface RouteParams {
 
 // GET /media/infos/{service}/{type}/{path}/{resource_id}
 export async function GET(req: NextRequest, { params }: RouteParams) {
-    const { resource_id, service, type, path } = params;
+    const { resource_id, service, type, path } = await params;
     try {
         const allMedia = dbManager.getCollection('media');
         const resourceMedia = allMedia.filter(m => 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
 // POST /media/{service}/{type}/{path}/{resource_id}
 export async function POST(req: NextRequest, { params }: RouteParams) {
-    const { resource_id, service, type, path } = params;
+    const { resource_id, service, type, path } = await params;
     try {
         const body = await req.json(); 
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 // DELETE /media/{service}/{type}/{path}/{filename}
 // The {filename} from the API spec is mapped to the {resource_id} parameter here.
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-    const { service, type, path, resource_id: filename } = params; // Treat param as filename
+    const { service, type, path, resource_id: filename } = await params; // Treat param as filename
     try {
         const allMedia = dbManager.getCollection('media');
         const locationToDelete = `${path}/${filename}`;

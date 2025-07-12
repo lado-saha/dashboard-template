@@ -1,9 +1,8 @@
-// app/api/mock/organization/[orgId]/agencies/[agencyId]/customers/[customerId]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { CustomerDto, UpdateCustomerRequest } from '@/types/organization';
+import { UpdateCustomerRequest } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
   try {
     const { orgId, agencyId, customerId } = await params;
     const customer = dbManager.getItemById('orgCustomers', customerId);
@@ -11,23 +10,23 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Customer ${customerId} not found for agency ${agencyId} in org ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(customer);
-  } catch (error)  { return NextResponse.json({ message: "Failed to get agency customer", error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ message: "Failed to get agency customer", error: error.message }, { status: 500 }); }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
   try {
     const { orgId, agencyId, customerId } = await params;
-    const body = await _request.json() as UpdateCustomerRequest;
+    const body = await request.json() as UpdateCustomerRequest;
     const existing = dbManager.getItemById('orgCustomers', customerId);
     if (!existing || existing.organization_id !== orgId || existing.agency_id !== agencyId) {
       return NextResponse.json({ message: `Customer ${customerId} not found for agency ${agencyId}.` }, { status: 404 });
     }
     const updatedCustomer = dbManager.updateItem('orgCustomers', customerId, body);
     return NextResponse.json(updatedCustomer, { status: 202 });
-  } catch (error)  { return NextResponse.json({ message: "Failed to update agency customer", error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ message: "Failed to update agency customer", error: error.message }, { status: 500 }); }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, customerId: string } }) {
   try {
     const { orgId, agencyId, customerId } = await params;
     const existing = dbManager.getItemById('orgCustomers', customerId);
@@ -37,5 +36,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('orgCustomers', customerId);
     if (!deleted) return NextResponse.json({ message: `Customer ${customerId} not found.` }, { status: 404 });
     return NextResponse.json({ message: "Agency customer deleted." }, { status: 202 });
-  } catch (error)  { return NextResponse.json({ message: "Failed to delete agency customer", error: error.message }, { status: 500 }); }
+  } catch (error: any) { return NextResponse.json({ message: "Failed to delete agency customer", error: error.message }, { status: 500 }); }
 }

@@ -21,7 +21,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     if (!employee) {
       // If not found as an employee, maybe it a BusinessActor to be made an employee
       // For simplicity, wel assume it should exist or we create a new one.
-      // This mock will simply update/create an employee record with the agency_id.
+      
       return NextResponse.json({ message: `Employee/User with ID ${body.employee_id} not found to affect to agency.` }, { status: 404 });
     }
 

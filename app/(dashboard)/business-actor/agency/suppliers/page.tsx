@@ -1,13 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-export default function AgencySuppliersPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Agency Suppliers</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>This page will list and manage suppliers for the active agency.</p>
-      </CardContent>
-    </Card>
-  );
+import { Metadata } from "next";
+import { AgencySuppliersClientPage } from "./suppliers-client";
+
+
+export const metadata: Metadata = {
+  title: "Manage Agency Suppliers",
+  description: "View, add, and manage your agency's suppliers.",
+};
+
+export default async function AgencySuppliersPage() {
+  return <AgencySuppliersClientPage />;
 }

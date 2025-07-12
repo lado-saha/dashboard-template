@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import {
   CustomerDto,
   CreateCustomerRequest,
   UpdateCustomerRequest,
+  AgencyDto,
 } from "@/types/organization";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -22,26 +22,31 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Users, Search as SearchIcon } from "lucide-react";
+import {
+  PlusCircle,
+  Users,
+  Search as SearchIcon,
+  Building,
+} from "lucide-react";
 import { getCustomerColumns } from "@/components/organization/customers/columns";
 import { CustomerCard } from "@/components/organization/customers/customer-card";
 import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { FeedbackCard } from "@/components/ui/feedback-card";
 import { PageHeader } from "@/components/ui/page-header";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { CustomerForm } from "@/components/organization/customers/customer-form";
-
-interface CustomersClientPageProps {
-  initialData: CustomerDto[];
-}
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  CustomerForm,
+  CustomerFormData,
+} from "@/components/organization/customers/customer-form";
+import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
+import { DataTableFilterOption } from "@/types/table";
 
 export function CustomersClientPage() {
-  const router = useRouter();
   const { activeOrganizationId, activeOrganizationDetails } =
     useActiveOrganization();
-
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [agencies, setAgencies] = useState<AgencyDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<CustomerDto[]>([]);
@@ -52,18 +57,32 @@ export function CustomersClientPage() {
 
   const refreshData = useCallback(async () => {
     if (!activeOrganizationId) {
-      // If there's no active org, don't try to fetch.
       setIsLoading(false);
-      setCustomers([]); // Ensure data is cleared
+      setCustomers([]);
       return;
     }
     setIsLoading(true);
     setError(null);
     try {
-      const data = await organizationRepository.getOrgCustomers(
-        activeOrganizationId
+      // [CHANGE] Fetch agencies and all customers in parallel
+      const [agenciesData, hqCustomersData] = await Promise.all([
+        organizationRepository.getAgencies(activeOrganizationId),
+        organizationRepository.getOrgCustomers(activeOrganizationId),
+      ]);
+      setAgencies(agenciesData || []);
+
+      const agencyCustomerPromises = (agenciesData || []).map((agency) =>
+        organizationRepository.getAgencyCustomers(
+          activeOrganizationId,
+          agency.agency_id!
+        )
       );
-      setCustomers(data || []);
+      const allAgencyCustomersNested = await Promise.all(
+        agencyCustomerPromises
+      );
+      const allAgencyCustomers = allAgencyCustomersNested.flat();
+
+      setCustomers([...(hqCustomersData || []), ...allAgencyCustomers]);
     } catch (err: any) {
       setError(err.message || "Could not load customer data.");
     } finally {
@@ -96,12 +115,19 @@ export function CustomersClientPage() {
     setIsDeleteDialogOpen(false);
 
     const promise = Promise.all(
-      itemsToDelete.map((item) =>
-        organizationRepository.deleteOrgCustomer(
+      itemsToDelete.map((item) => {
+        if (item.agency_id) {
+          return organizationRepository.deleteAgencyCustomer(
+            activeOrganizationId,
+            item.agency_id,
+            item.customer_id!
+          );
+        }
+        return organizationRepository.deleteOrgCustomer(
           activeOrganizationId,
           item.customer_id!
-        )
-      )
+        );
+      })
     );
     toast.promise(promise, {
       loading: `Deleting ${itemsToDelete.length} customer(s)...`,
@@ -118,33 +144,88 @@ export function CustomersClientPage() {
     });
   };
 
-  const handleFormSubmit = async (
-    data: CreateCustomerRequest | UpdateCustomerRequest
-  ): Promise<boolean> => {
+  const handleFormSubmit = async (data: CustomerFormData): Promise<boolean> => {
     if (!activeOrganizationId) {
       toast.error("No active organization.");
       return false;
     }
+
+    const customerPayload: CreateCustomerRequest | UpdateCustomerRequest = {
+      first_name: data.first_name,
+      last_name: data.last_name,
+      short_description: data.short_description,
+      long_description: data.long_description,
+    };
+
     try {
-      const promise = editingCustomer?.customer_id
-        ? organizationRepository.updateOrgCustomer(
+      let customerResponse: CustomerDto;
+      if (editingCustomer?.customer_id) {
+        // --- EDIT LOGIC ---
+        const updatePromise = organizationRepository.updateOrgCustomer(
+          activeOrganizationId,
+          editingCustomer.customer_id,
+          customerPayload as UpdateCustomerRequest
+        );
+        toast.promise(updatePromise, {
+          loading: "Updating customer details...",
+          success: "Customer updated!",
+          error: (err) => err.message,
+        });
+        customerResponse = await updatePromise;
+        // Check if agency assignment changed
+        if (data.agency_id !== editingCustomer.agency_id) {
+          if (data.agency_id) {
+            // Assigning to a new agency
+            await toast.promise(
+              organizationRepository.affectCustomerToAgency(
+                activeOrganizationId,
+                data.agency_id,
+                { customer_id: editingCustomer.customer_id }
+              ),
+              {
+                loading: `Assigning to agency...`,
+                success: "Assigned to new agency!",
+                error: (err) => err.message,
+              }
+            );
+          } else {
+            // This implies moving back to HQ. The API spec doesn't have an "un-affect" endpoint.
+            // Often, affecting to a special "HQ" ID or simply updating the main record would handle this.
+            // For now, we assume affecting handles re-assignment and we'll need a way to un-assign.
+            toast.info(
+              "Moving customer to Headquarters (un-affect logic to be confirmed)."
+            );
+          }
+        }
+      } else {
+        // --- CREATE LOGIC ---
+        customerResponse = await toast.promise(
+          organizationRepository.createOrgCustomer(
             activeOrganizationId,
-            editingCustomer.customer_id,
-            data as UpdateCustomerRequest
-          )
-        : organizationRepository.createOrgCustomer(
-            activeOrganizationId,
-            data as CreateCustomerRequest
+            customerPayload as CreateCustomerRequest
+          ),
+          {
+            loading: "Creating customer...",
+            success: "Customer created!",
+            error: (err) => err.message,
+          }
+        );
+        // If an agency was selected during creation, affect the new customer to it
+        if (data.agency_id && customerResponse.customer_id) {
+          await toast.promise(
+            organizationRepository.affectCustomerToAgency(
+              activeOrganizationId,
+              data.agency_id,
+              { customer_id: customerResponse.customer_id }
+            ),
+            {
+              loading: `Assigning to agency...`,
+              success: "Assigned to agency!",
+              error: (err) => err.message,
+            }
           );
-
-      await toast.promise(promise, {
-        loading: `${editingCustomer ? "Updating" : "Creating"} customer...`,
-        success: `Customer ${
-          editingCustomer ? "updated" : "created"
-        } successfully!`,
-        error: (err) => err.message,
-      });
-
+        }
+      }
       refreshData();
       setIsFormModalOpen(false);
       return true;
@@ -155,12 +236,33 @@ export function CustomersClientPage() {
 
   const columns = useMemo<ColumnDef<CustomerDto>[]>(
     () =>
-      getCustomerColumns({
-        onEditAction: handleOpenFormModal,
-        onDeleteAction: (item) => handleDeleteConfirmation([item]),
-      }),
-    []
+      getCustomerColumns(
+        {
+          onEditAction: handleOpenFormModal,
+          onDeleteAction: (item) => handleDeleteConfirmation([item]),
+        },
+        agencies
+      ),
+    [agencies]
   );
+
+  const agencyFilterOptions: DataTableFilterOption[] = useMemo(
+    () => [
+      { value: "headquarters", label: "Headquarters" },
+      ...agencies.map((a) => ({ value: a.agency_id!, label: a.short_name! })),
+    ],
+    [agencies]
+  );
+
+  if (!activeOrganizationId && !isLoading) {
+    return (
+      <FeedbackCard
+        icon={Building}
+        title="No Organization Selected"
+        description="Please select an active organization to manage customers."
+      />
+    );
+  }
 
   return (
     <>
@@ -177,7 +279,9 @@ export function CustomersClientPage() {
         pageHeader={
           <PageHeader
             title="Customers"
-            description={`Manage customers for ${activeOrganizationDetails?.long_name}`}
+            description={`Manage all customers for ${
+              activeOrganizationDetails?.long_name || "your organization"
+            }`}
             action={
               <Button onClick={() => handleOpenFormModal()}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Customer
@@ -185,9 +289,17 @@ export function CustomersClientPage() {
             }
           />
         }
+        filterControls={(table) => (
+          <DataTableFacetedFilter
+            column={table.getColumn("agency_id")}
+            title="Agency"
+            options={agencyFilterOptions}
+          />
+        )}
         renderGridItemAction={(customer) => (
           <CustomerCard
             customer={customer}
+            agencies={agencies}
             onEditAction={handleOpenFormModal}
             onDeleteAction={(item) => handleDeleteConfirmation([item])}
           />
@@ -212,17 +324,19 @@ export function CustomersClientPage() {
           />
         }
       />
-
       <Dialog open={isFormModalOpen} onOpenChange={setIsFormModalOpen}>
         <DialogContent>
+          <DialogTitle className="sr-only">
+            {editingCustomer ? "Edit Customer" : "Add New Customer"}
+          </DialogTitle>
           <CustomerForm
             mode={editingCustomer ? "edit" : "create"}
             initialData={editingCustomer}
             onSubmitAction={handleFormSubmit}
+            agencies={agencies}
           />
         </DialogContent>
       </Dialog>
-
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

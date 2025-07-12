@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     return NextResponse.json({ message: "Failed to get certifications", error: error.message }, { status: 500 });
   }
 }
-// app/api/mock/organization/[orgId]/certifications/create/route.ts
+
 
 export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {

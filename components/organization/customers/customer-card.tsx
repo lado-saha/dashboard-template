@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CustomerDto } from "@/types/organization";
+import { AgencyDto, CustomerDto } from "@/types/organization";
 import {
   Card,
   CardContent,
@@ -23,16 +23,19 @@ import {
   Trash2,
   DollarSign,
   CreditCard,
+  Building2,
 } from "lucide-react";
 
 interface CustomerCardProps {
   customer: CustomerDto;
+  agencies: AgencyDto[]; // [ADD] Pass agencies list
   onEditAction: (customer: CustomerDto) => void;
   onDeleteAction: (customer: CustomerDto) => void;
 }
 
 export function CustomerCard({
   customer,
+  agencies,
   onEditAction,
   onDeleteAction,
 }: CustomerCardProps) {
@@ -40,6 +43,7 @@ export function CustomerCard({
     customer.last_name || ""
   }`.trim();
   const fallback = fullName ? fullName.charAt(0).toUpperCase() : "C";
+  const agency = agencies.find((a) => a.agency_id === customer.agency_id);
 
   return (
     <Card className="flex flex-col h-full shadow-sm hover:shadow-lg transition-shadow">
@@ -89,6 +93,10 @@ export function CustomerCard({
         <div className="flex items-center text-muted-foreground">
           <DollarSign className="mr-2 h-4 w-4" />
           <span>Last Amount: {customer.amount_paid || "N/A"}</span>
+        </div>
+        <div className="flex items-center text-muted-foreground pt-2">
+          <Building2 className="mr-2 h-4 w-4" />
+          <span>{agency ? agency.short_name : "Headquarters"}</span>
         </div>
       </CardContent>
       <CardFooter>

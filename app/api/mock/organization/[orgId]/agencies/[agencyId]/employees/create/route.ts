@@ -1,4 +1,4 @@
-// app/api/mock/organization/[orgId]/agencies/[agencyId]/employees/create/route.ts
+
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { EmployeeResponse, CreateEmployeeRequest, EmployeeDto } from '@/types/organization';

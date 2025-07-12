@@ -127,7 +127,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     return this.fetchMockApi<OrganizationDto[]>(`/domain/${domainId}`);
   }
   async getOrganizationById(orgId: string): Promise<OrganizationDto | null> {
-    return this.fetchMockApi<OrganizationDto | null>(`/${orgId}/details`);
+    return this.fetchMockApi<OrganizationDto | null>(`/${orgId}`, {}, MOCK_API_ORG_BASE);
   }
   async createOrganization(
     data: CreateOrganizationRequest
@@ -141,7 +141,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     data: UpdateOrganizationRequest
   ): Promise<OrganizationDto> {
-    return this.fetchMockApi<OrganizationDto>(`/${orgId}/update`, {
+    return this.fetchMockApi<OrganizationDto>(`/${orgId}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -521,7 +521,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<EmployeeDto[]> {
     return this.fetchMockApi<EmployeeDto[]>(
-      `/${orgId}/agencies/${agencyId}/employees`
+      `/${orgId}/agencies/${agencyId}/employees`,
     );
   }
   async createAgencyEmployee(
@@ -709,7 +709,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<CustomerDto[]> {
     return this.fetchMockApi<CustomerDto[]>(
-      `/${orgId}/agencies/${agencyId}/customers`
+      `/${orgId}/agencies/${agencyId}/customers`,
     );
   }
   async createAgencyCustomer(
