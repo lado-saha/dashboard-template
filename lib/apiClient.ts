@@ -122,11 +122,11 @@ export async function yowyobApiRequest<T = any>(
         errorData = await response.json();
         errorMessage = errorData?.message || errorMessage;
         if (errorData?.errors) errorMessage += ` (${Object.values(errorData.errors).join(', ')})`;
-      } catch (e: any) { }
+      } catch (e) { }
       console.error(`YOWYOB API Error (via proxy): ${errorMessage} for ${targetUrl}`, { data: errorData, options: config });
       if (!(isUserAuthAction && (response.status === 401 || response.status === 403))) {
       }
-      const error = new Error(errorMessage) as any;
+      const error = new Error(errorMessage) as Error & { status?: number; data?: any };
       error.status = response.status; error.data = errorData;
       throw error;
     }
@@ -352,7 +352,7 @@ export const yowyobOrganizationApi = {
   getBusinessActorsByType: (type: BusinessActorType) => yowyobApiRequest<BusinessActorDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/types/${type}`),
   uploadOrganizationImages: (orgId: string, formData: FormData) => yowyobApiRequest<ImageDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${orgId}/add`, { method: "PUT", body: formData, isFormData: true }),
   getOrganizationImageInfo: (imageId: string) => yowyobApiRequest<ImageDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${imageId}`),
-  getThirdParties: (orgId: string, params: GetThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties?${new URLSearchParams(params as any).toString()}`),
+  getThirdParties: (orgId: string, params: GetThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties?${new URLSearchParams(params as Record<string, string>).toString()}`),
   createThirdParty: (orgId: string, type: ThirdPartyType, data: CreateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${type}`, { method: "POST", body: JSON.stringify(data) }),
   getThirdPartyById: (orgId: string, thirdPartyId: string) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`),
   updateThirdParty: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "PUT", body: JSON.stringify(data) }),

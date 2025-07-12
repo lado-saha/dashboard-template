@@ -8,7 +8,7 @@ export async function GET(_request: NextRequest, { params }: { params: { baId: s
     const actor = dbManager.getItemById('businessActors', params.baId);
     if (!actor) return NextResponse.json({ message: `Business Actor ${params.baId} not found.` }, { status: 404 });
     return NextResponse.json(actor);
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }
 export async function PUT(_request: NextRequest, { params }: { params: { baId: string } }) {
   try {
@@ -16,12 +16,12 @@ export async function PUT(_request: NextRequest, { params }: { params: { baId: s
     const updated = dbManager.updateItem('businessActors', params.baId, body);
     if (!updated) return NextResponse.json({ message: `Business Actor ${params.baId} not found.` }, { status: 404 });
     return NextResponse.json(updated, { status: 202 });
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }
 export async function DELETE(_request: NextRequest, { params }: { params: { baId: string } }) {
   try {
     const deleted = dbManager.deleteItem('businessActors', params.baId);
     if (!deleted) return NextResponse.json({ message: `Business Actor ${params.baId} not found.` }, { status: 404 });
     return NextResponse.json({ message: "Deleted" }, { status: 202 });
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }

@@ -32,7 +32,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
         last_name: "Customer",  // Placeholder
         partner_type: "CUSTOMER",
       };
-      customer = dbManager.addItem('orgCustomers', newCustomerData as any);
+      customer = dbManager.addItem('orgCustomers', newCustomerData );
     }
 
     if (!customer) {

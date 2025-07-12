@@ -357,7 +357,7 @@ export interface EmployeeResponse extends Auditable {
   employee_id?: string; // format: uuid
   last_name?: string;
   first_name?: string;
-  organisation_id?: string; // format: uuid
+  organization_id?: string; // format: uuid
   agency_id?: string; // format: uuid
   employee_role?: EmployeeRole;
   department?: string;

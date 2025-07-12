@@ -5,7 +5,7 @@ import {
   UserDto, RoleDto, PermissionDto, RolePermissionDto, RbacResource,
 } from "@/types/auth";
 import {
- OrganizationDto, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto,
+  OrganizationDto, ContactDto, AddressDto, AgencyDto, EmployeeDto, BusinessDomainDto,
   ImageDto, ThirdPartyDto, ProposedActivityDto, SalesPersonDto, CustomerDto, ProviderDto, ProspectDto,
   PracticalInformationDto, CertificationDto, ApplicationDto, ApplicationKeyDto, BusinessActorDto,
 } from "@/types/organization";
@@ -150,7 +150,7 @@ export const dbManager = {
       updated_at: new Date().toISOString(),
     } as LocalJsonDBCollections[C][number];
 
-    (collection as any[]).push(newItem);
+    (collection as Array<LocalJsonDBCollections[C][number]>).push(newItem);
     dbManager.saveCollection(collectionName, collection);
     return newItem;
   },
@@ -161,7 +161,7 @@ export const dbManager = {
   ): LocalJsonDBCollections[C][number] | null => {
     const collection = dbManager.getCollection(collectionName);
     const idKey = getPrimaryKeyField(collectionName);
-    const itemIndex = (collection as Identifiable[]).findIndex(item => (item as any)[idKey] === id);
+    const itemIndex = (collection as Identifiable[]).findIndex(item => (item)[idKey] === id);
 
     if (itemIndex > -1) {
       (collection as Identifiable[])[itemIndex] = {
@@ -177,13 +177,13 @@ export const dbManager = {
   getItemById: <C extends CollectionName>(collectionName: C, id: string): LocalJsonDBCollections[C][number] | null => {
     const collection = dbManager.getCollection(collectionName);
     const idKey = getPrimaryKeyField(collectionName);
-    return (collection as Identifiable[]).find(item => (item as any)[idKey] === id) as LocalJsonDBCollections[C][number] | null;
+    return (collection as Identifiable[]).find(item => (item)[idKey] === id) as LocalJsonDBCollections[C][number] | null;
   },
   deleteItem: <C extends CollectionName>(collectionName: C, id: string): boolean => {
     let collection = dbManager.getCollection(collectionName);
     const initialLength = collection.length;
     const idKey = getPrimaryKeyField(collectionName);
-    const newCollection = (collection as Identifiable[]).filter(item => (item as any)[idKey] !== id);
+    const newCollection = (collection as Identifiable[]).filter(item => (item)[idKey] !== id);
     if (newCollection.length < initialLength) {
       dbManager.saveCollection(collectionName, newCollection as LocalJsonDBCollections[C]);
       return true;

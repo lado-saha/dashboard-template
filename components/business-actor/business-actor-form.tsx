@@ -186,7 +186,7 @@ export function BusinessActorForm({
         );
         avatarUrl =
           typeof res === "object" && res !== null && "url" in res
-            ? (res as any).url
+            ? String((res as { url: string }).url)
             : undefined;
       } else if (data.avatar_picture === null) {
         avatarUrl = null;
@@ -209,7 +209,7 @@ export function BusinessActorForm({
         );
         profileUrl =
           typeof res === "object" && res !== null && "url" in res
-            ? (res as any).url
+            ? String((res as { url: string }).url)
             : undefined;
       } else if (data.profile_picture === null) {
         profileUrl = null;

@@ -46,7 +46,7 @@ export default function ManageEmployeesPage() {
       ]);
       setAllItems(employeesData || []);
       setAgencies(agenciesData || []);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Could not load employee data.");
     } finally {
       setIsLoading(false);

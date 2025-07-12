@@ -1,16 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-export default function CustomersPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Customers Management</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>
-          This page will be used to manage the organization customers. Coming
-          soon.
-        </p>
-      </CardContent>
-    </Card>
-  );
+import { Metadata } from "next";
+import { CustomersClientPage } from "./customers-client";
+
+// This metadata is static because the server doesn't know the active organization.
+// The client can update the document title dynamically if needed.
+export const metadata: Metadata = {
+  title: "Manage Customers",
+  description: "View, add, and manage your organization's customers.",
+};
+
+// This Server Component is now very simple.
+export default async function CustomersPage() {
+  // It cannot access client-side context, so it cannot fetch initial data.
+  // It delegates all logic and data fetching to the Client Component.
+  return <CustomersClientPage />;
 }

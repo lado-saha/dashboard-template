@@ -6,7 +6,7 @@ import { getUserIdFromMockToken } from '@/lib/data-repo/local-store/mock-auth-ut
 export async function POST(request: NextRequest) { // [CHANGE] Use the request object
   try {
     // [THE FIX] Get the business actor ID (which is the user ID) from the token
-    const businessActorId = getUserIdFromMockToken(request);
+    const businessActorId = await getUserIdFromMockToken(request);
     if (!businessActorId) {
       return NextResponse.json({ message: "Unauthorized: No valid user token provided." }, { status: 401 });
     }

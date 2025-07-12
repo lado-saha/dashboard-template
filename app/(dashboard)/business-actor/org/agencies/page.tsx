@@ -56,7 +56,7 @@ export default function ManageAgenciesPage() {
         activeOrganizationId
       );
       setAgencies(data || []);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Could not load agencies.");
     } finally {
       setIsLoading(false);

@@ -8,13 +8,13 @@ export async function GET(_request: NextRequest) {
   try {
     const actors = dbManager.getCollection('businessActors');
     return NextResponse.json(actors);
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }
 
 export async function POST(request: NextRequest) { // [CHANGE] Use the request object
   try {
     // [THE FIX] Get the user ID from the token sent by the client
-    const userId = getUserIdFromMockToken(request);
+    const userId = await getUserIdFromMockToken(request);
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized: No valid user token provided." }, { status: 401 });
     }
@@ -33,5 +33,5 @@ export async function POST(request: NextRequest) { // [CHANGE] Use the request o
 
     const newActor = dbManager.addItem('businessActors', newActorData);
     return NextResponse.json(newActor, { status: 201 });
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }

@@ -9,5 +9,5 @@ export async function GET(_request: NextRequest, { params }: { params: { applica
     const allKeys = dbManager.getCollection('applicationKeysData');
     const appKeys = allKeys.filter(key => key.application_id === applicationId);
     return NextResponse.json(appKeys);
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }

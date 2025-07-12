@@ -7798,7 +7798,7 @@
           "first_name": {
             "type": "string"
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },

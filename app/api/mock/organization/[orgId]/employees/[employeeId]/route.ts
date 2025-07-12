@@ -7,7 +7,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   try {
     const { orgId, employeeId } = await params;
     const employee = dbManager.getItemById('employees', employeeId);
-    if (!employee || employee.organisation_id !== orgId) { // Also check orgId match
+    if (!employee || employee.organization_id !== orgId) { // Also check orgId match
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(employee);
@@ -21,7 +21,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     const { orgId, employeeId } = await params;
     const body = await _request.json() as UpdateEmployeeRequest;
     const existingEmployee = dbManager.getItemById('employees', employeeId);
-    if (!existingEmployee || existingEmployee.organisation_id !== orgId) {
+    if (!existingEmployee || existingEmployee.organization_id !== orgId) {
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });
     }
     const updatedEmployeeFull = dbManager.updateItem('employees', employeeId, body);
@@ -32,7 +32,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
         employee_id: updatedEmployeeFull.employee_id,
         first_name: updatedEmployeeFull.first_name,
         last_name: updatedEmployeeFull.last_name,
-        organisation_id: updatedEmployeeFull.organisation_id,
+        organization_id: updatedEmployeeFull.organization_id,
         agency_id: updatedEmployeeFull.agency_id,
         employee_role: updatedEmployeeFull.employee_role,
         department: updatedEmployeeFull.department,
@@ -49,7 +49,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
   try {
     const { orgId, employeeId } = await params;
     const existingEmployee = dbManager.getItemById('employees', employeeId);
-    if (!existingEmployee || existingEmployee.organisation_id !== orgId) {
+    if (!existingEmployee || existingEmployee.organization_id !== orgId) {
       return NextResponse.json({ message: `Employee with ID ${employeeId} not found for organization ${orgId}.` }, { status: 404 });
     }
     const deleted = dbManager.deleteItem('employees', employeeId);

@@ -457,7 +457,7 @@ export default function UnifiedSettingsPage() {
                   value={settings.theme}
                   onValueChange={(val) => {
                     setNextTheme(val);
-                    updateDisplayPreferences({ theme: val as any });
+                    updateDisplayPreferences({ theme: val  });
                   }}
                   options={[
                     { value: "light", label: "Light" },
@@ -471,7 +471,7 @@ export default function UnifiedSettingsPage() {
                   id="dateFormat"
                   value={settings.dateFormat}
                   onValueChange={(val) =>
-                    updateDisplayPreferences({ dateFormat: val as any })
+                    updateDisplayPreferences({ dateFormat: val  })
                   }
                   options={[
                     { value: "mm-dd-yyyy", label: "MM-DD-YYYY" },
@@ -531,7 +531,7 @@ export default function UnifiedSettingsPage() {
                   <RadioGroup
                     value={settings.layout}
                     onValueChange={(val) =>
-                      updateDisplayPreferences({ layout: val as any })
+                      updateDisplayPreferences({ layout: val  })
                     }
                     className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
                   >
@@ -692,7 +692,7 @@ export default function UnifiedSettingsPage() {
                 id="notifFreq"
                 value={settings.notifications.frequency}
                 onValueChange={(val) =>
-                  updateNotificationPreferences({ frequency: val as any })
+                  updateNotificationPreferences({ frequency: val  })
                 }
                 options={[
                   { value: "real-time", label: "Real-time" },
@@ -769,7 +769,7 @@ export default function UnifiedSettingsPage() {
                 id="visibility"
                 value={settings.privacy.visibility}
                 onValueChange={(val) =>
-                  updatePrivacyPreferences({ visibility: val as any })
+                  updatePrivacyPreferences({ visibility: val  })
                 }
                 options={[
                   { value: "public", label: "Public" },
@@ -786,7 +786,7 @@ export default function UnifiedSettingsPage() {
                 id="dataRetention"
                 value={settings.privacy.dataRetention}
                 onValueChange={(val) =>
-                  updatePrivacyPreferences({ dataRetention: val as any })
+                  updatePrivacyPreferences({ dataRetention: val  })
                 }
                 options={[
                   { value: "6-months", label: "6 Months" },

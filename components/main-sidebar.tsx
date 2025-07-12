@@ -36,6 +36,8 @@ import {
   UserCog,
   Power,
   Info,
+  Handshake,
+  UserPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -84,6 +86,54 @@ const baOrgNavigation = [
     isOrgSpecific: true,
   },
   {
+    name: "Customers",
+    href: "/business-actor/org/customers",
+    icon: UsersRound,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Suppliers",
+    href: "/business-actor/org/suppliers",
+    icon: Truck,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Sales People",
+    href: "/business-actor/org/sales-people",
+    icon: UserCheck,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Prospects",
+    href: "/business-actor/org/prospects",
+    icon: UserPlus,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Third Parties",
+    href: "/business-actor/org/third-parties",
+    icon: Handshake,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Products",
+    href: "/business-actor/org/products",
+    icon: Package,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Services",
+    href: "/business-actor/org/services",
+    icon: Combine,
+    isOrgSpecific: true,
+  },
+  {
+    name: "Proposed Activities",
+    href: "/business-actor/org/proposed-activities",
+    icon: Lightbulb,
+    isOrgSpecific: true,
+  },
+  {
     name: "Certifications",
     href: "/business-actor/org/certifications",
     icon: Award,
@@ -96,6 +146,7 @@ const baOrgNavigation = [
     isOrgSpecific: true,
   },
 ];
+
 const agencyNavigation = [
   {
     name: "Agency Dashboard",
@@ -117,18 +168,37 @@ const agencyNavigation = [
     href: "/business-actor/agency/customers",
     icon: UsersRound,
   },
+  {
+    name: "Agency Suppliers",
+    href: "/business-actor/agency/suppliers",
+    icon: Truck,
+  },
+  {
+    name: "Agency Sales People",
+    href: "/business-actor/agency/sales-people",
+    icon: UserCheck,
+  },
+  {
+    name: "Agency Prospects",
+    href: "/business-actor/agency/prospects",
+    icon: UserPlus,
+  },
 ];
+
 const baGlobalNavigation = [
   { name: "My BA Profile", href: "/business-actor/profile", icon: UserCog },
   { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
   { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
+  { name: "API & Webhooks", href: "/business-actor/webhooks", icon: Webhook },
 ];
+
 const userNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "Services", href: "/services", icon: Briefcase },
   { name: "Invoices", href: "/invoices", icon: FileText },
   { name: "My Bonus", href: "/bonus", icon: HandCoins },
 ];
+
 const superAdminNavigation = [
   { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
   {

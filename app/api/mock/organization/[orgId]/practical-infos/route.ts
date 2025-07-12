@@ -1,7 +1,17 @@
-// app/api/mock/organization/[orgId]/practical-infos/create/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { PracticalInformationDto, CreatePracticalInformationRequest } from '@/types/organization';
+import { CreatePracticalInformationRequest, PracticalInformationDto } from '@/types/organization';
+
+export async function GET(_request: NextRequest, { params }: { params: { orgId: string } }) {
+  try {
+    const { orgId } = await params;
+    const allInfos = dbManager.getCollection('practicalInformation');
+    const orgInfos = allInfos.filter(info => info.organization_id === orgId);
+    return NextResponse.json(orgInfos);
+  } catch (error) {
+    return NextResponse.json({ message: "Failed to get practical information list", error: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
@@ -17,7 +27,8 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     };
     const createdInfo = dbManager.addItem('practicalInformation', newData);
     return NextResponse.json(createdInfo, { status: 201 });
-  } catch (error)  {
+  } catch (error) {
     return NextResponse.json({ message: "Failed to create practical information", error: error.message }, { status: 500 });
   }
 }
+

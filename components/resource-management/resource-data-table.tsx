@@ -182,7 +182,7 @@ export function ResourceDataTable<TData extends Record<string, any>, TValue>({
         </CardContent>
       </Card>
       {!isLoading && !error && table.getPageCount() > 1 && (
-        <DataTablePagination table={table} />
+        <DataTablePagination table={table} viewMode={viewMode} />
       )}
     </div>
   );

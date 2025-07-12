@@ -16,7 +16,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     ];
     // You might want to associate these with the orgId in your organizationImages.json
     const orgImages = dbManager.getCollection('organizationImages');
-    dummyImages.forEach(img => orgImages.push({ ...img, organization_id: orgId } as any)); // Add org_id if your ImageDto has it
+    dummyImages.forEach(img => orgImages.push({ ...img, organization_id: orgId } )); // Add org_id if your ImageDto has it
     dbManager.saveCollection('organizationImages', orgImages);
 
     return NextResponse.json(dummyImages, { status: 200 });

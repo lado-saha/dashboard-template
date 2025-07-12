@@ -26,7 +26,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     }
 
     // Update the employee agency_id (if they were org-level) or just confirm the link
-    const updatedEmployee = dbManager.updateItem('employees', body.employee_id, { agency_id: agencyId, organisation_id: orgId });
+    const updatedEmployee = dbManager.updateItem('employees', body.employee_id, { agency_id: agencyId, organization_id: orgId });
 
     if (!updatedEmployee) {
       return NextResponse.json({ message: `Could not affect employee ${body.employee_id} to agency ${agencyId}.` }, { status: 500 });
@@ -36,7 +36,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
       employee_id: updatedEmployee.employee_id,
       first_name: updatedEmployee.first_name,
       last_name: updatedEmployee.last_name,
-      organisation_id: updatedEmployee.organisation_id,
+      organization_id: updatedEmployee.organization_id,
       agency_id: updatedEmployee.agency_id,
       employee_role: updatedEmployee.employee_role,
       department: updatedEmployee.department,

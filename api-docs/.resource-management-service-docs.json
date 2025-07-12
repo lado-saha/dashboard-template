@@ -4386,7 +4386,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -4526,7 +4526,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -4663,7 +4663,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -4809,7 +4809,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -4957,7 +4957,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -5064,7 +5064,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -5600,7 +5600,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -5735,7 +5735,7 @@
               "PRIVATE"
             ]
           },
-          "organisation_id": {
+          "organization_id": {
             "type": "string",
             "format": "uuid"
           },

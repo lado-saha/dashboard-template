@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Third party ${thirdPartyId} not found for org ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(tp);
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
 }
 
 export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, thirdPartyId: string } }) {
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updated = dbManager.updateItem('thirdParties', thirdPartyId, body);
     return NextResponse.json(updated, { status: 202 });
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, thirdPartyId: string } }) {
@@ -37,5 +37,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('thirdParties', thirdPartyId);
     if (!deleted) return NextResponse.json({ message: "Not found" }, { status: 404 });
     return NextResponse.json(null, { status: 204 }); // 204 No Content as per spec
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }) }
 }

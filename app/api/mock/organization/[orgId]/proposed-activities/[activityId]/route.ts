@@ -11,7 +11,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
       return NextResponse.json({ message: `Activity ${activityId} not found for org ${orgId}.` }, { status: 404 });
     }
     return NextResponse.json(activity);
-  } catch (e:any) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
+  } catch(e) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
 }
 
 export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, activityId: string } }) {
@@ -24,7 +24,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updated = dbManager.updateItem('proposedActivities', activityId, body);
     return NextResponse.json(updated, { status: 202 });
-  } catch (e:any) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
+  } catch(e) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, activityId: string } }) {
@@ -37,5 +37,5 @@ export async function DELETE(_request: NextRequest, { params }: { params: { orgI
     const deleted = dbManager.deleteItem('proposedActivities', activityId);
     if(!deleted) return NextResponse.json({ message: "Not found"}, {status: 404});
     return NextResponse.json({ message: "Activity deleted." }, { status: 202 });
-  } catch (e:any) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
+  } catch(e) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
 }

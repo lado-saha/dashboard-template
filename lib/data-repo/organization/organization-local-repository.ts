@@ -303,7 +303,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string
   ): Promise<PracticalInformationDto[]> {
     return this.fetchMockApi<PracticalInformationDto[]>(
-      `/${orgId}/practical-infos/list`
+      `/${orgId}/practical-infos`
     );
   }
   async createPracticalInformation(
@@ -311,7 +311,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreatePracticalInformationRequest
   ): Promise<PracticalInformationDto> {
     return this.fetchMockApi<PracticalInformationDto>(
-      `/${orgId}/practical-infos/create`,
+      `/${orgId}/practical-infos`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -346,7 +346,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   // Certifications
   async getCertifications(orgId: string): Promise<CertificationDto[]> {
     return this.fetchMockApi<CertificationDto[]>(
-      `/${orgId}/certifications/list`
+      `/${orgId}/certifications`
     );
   }
   async createCertification(
@@ -354,7 +354,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateCertificationRequest
   ): Promise<CertificationDto> {
     return this.fetchMockApi<CertificationDto>(
-      `/${orgId}/certifications/create`,
+      `/${orgId}/certifications`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -378,7 +378,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   }
   async deleteCertification(orgId: string, certId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/certifications/${certId}/delete`,
+      `/${orgId}/certifications/${certId}`,
       { method: "DELETE" }
     );
   }
@@ -387,9 +387,9 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   async getAllBusinessDomains(
     params?: GetBusinessDomainRequest
   ): Promise<BusinessDomainDto[]> {
-    const q = params ? `?${new URLSearchParams(params as any)}` : "";
+    const q = params ? `?${new URLSearchParams(params as Record<string, string>)}` : "";
     return this.fetchMockApi<BusinessDomainDto[]>(
-      `/list${q}`,
+      `${q}`,
       {},
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-domains"
     );
@@ -407,7 +407,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateBusinessDomainRequest
   ): Promise<BusinessDomainDto> {
     return this.fetchMockApi<BusinessDomainDto>(
-      "/create",
+      "",
       { method: "POST", body: JSON.stringify(data) },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-domains"
     );
@@ -417,14 +417,14 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateBusinessDomainRequest
   ): Promise<BusinessDomainDto> {
     return this.fetchMockApi<BusinessDomainDto>(
-      `/${domainId}/update`,
+      `/${domainId}`,
       { method: "PUT", body: JSON.stringify(data) },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-domains"
     );
   }
   async deleteBusinessDomain(domainId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${domainId}/delete`,
+      `/${domainId}`,
       { method: "DELETE" },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-domains"
     );
@@ -480,13 +480,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // Employees (Org-scoped)
   async getOrgEmployees(orgId: string): Promise<EmployeeDto[]> {
-    return this.fetchMockApi<EmployeeDto[]>(`/${orgId}/employees/list`);
+    return this.fetchMockApi<EmployeeDto[]>(`/${orgId}/employees`);
   }
   async createOrgEmployee(
     orgId: string,
     data: CreateEmployeeRequest
   ): Promise<EmployeeResponse> {
-    return this.fetchMockApi<EmployeeResponse>(`/${orgId}/employees/create`, {
+    return this.fetchMockApi<EmployeeResponse>(`/${orgId}/employees`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -521,7 +521,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<EmployeeDto[]> {
     return this.fetchMockApi<EmployeeDto[]>(
-      `/${orgId}/agencies/${agencyId}/employees/list`
+      `/${orgId}/agencies/${agencyId}/employees`
     );
   }
   async createAgencyEmployee(
@@ -577,13 +577,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // SalesPersons (Org-scoped)
   async getOrgSalesPersons(orgId: string): Promise<SalesPersonDto[]> {
-    return this.fetchMockApi<SalesPersonDto[]>(`/${orgId}/sales-people/list`);
+    return this.fetchMockApi<SalesPersonDto[]>(`/${orgId}/sales-people`);
   }
   async createOrgSalesPerson(
     orgId: string,
     data: CreateSalesPersonRequest
   ): Promise<SalesPersonDto> {
-    return this.fetchMockApi<SalesPersonDto>(`/${orgId}/sales-people/create`, {
+    return this.fetchMockApi<SalesPersonDto>(`/${orgId}/sales-people`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -602,7 +602,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateSalesPersonRequest
   ): Promise<SalesPersonDto> {
     return this.fetchMockApi<SalesPersonDto>(
-      `/${orgId}/sales-people/${salesPersonId}/update`,
+      `/${orgId}/sales-people/${salesPersonId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -611,7 +611,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     salesPersonId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/sales-people/${salesPersonId}/delete`,
+      `/${orgId}/sales-people/${salesPersonId}`,
       { method: "DELETE" }
     );
   }
@@ -622,7 +622,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<SalesPersonDto[]> {
     return this.fetchMockApi<SalesPersonDto[]>(
-      `/${orgId}/agencies/${agencyId}/sales-people/list`
+      `/${orgId}/agencies/${agencyId}/sales-people`
     );
   }
   async createAgencySalesPerson(
@@ -631,7 +631,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateSalesPersonRequest
   ): Promise<SalesPersonDto> {
     return this.fetchMockApi<SalesPersonDto>(
-      `/${orgId}/agencies/${agencyId}/sales-people/create`,
+      `/${orgId}/agencies/${agencyId}/sales-people`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -651,7 +651,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateSalesPersonRequest
   ): Promise<SalesPersonDto> {
     return this.fetchMockApi<SalesPersonDto>(
-      `/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}/update`,
+      `/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -661,20 +661,20 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     salesPersonId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}/delete`,
+      `/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`,
       { method: "DELETE" }
     );
   }
 
   // Customers (Organization-linked)
   async getOrgCustomers(orgId: string): Promise<CustomerDto[]> {
-    return this.fetchMockApi<CustomerDto[]>(`/${orgId}/customers/list`);
+    return this.fetchMockApi<CustomerDto[]>(`/${orgId}/customers`);
   }
   async createOrgCustomer(
     orgId: string,
     data: CreateCustomerRequest
   ): Promise<CustomerDto> {
-    return this.fetchMockApi<CustomerDto>(`/${orgId}/customers/create`, {
+    return this.fetchMockApi<CustomerDto>(`/${orgId}/customers`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -693,12 +693,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateCustomerRequest
   ): Promise<CustomerDto> {
     return this.fetchMockApi<CustomerDto>(
-      `/${orgId}/customers/${customerId}/update`,
+      `/${orgId}/customers/${customerId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteOrgCustomer(orgId: string, customerId: string): Promise<void> {
-    return this.fetchMockApi<void>(`/${orgId}/customers/${customerId}/delete`, {
+    return this.fetchMockApi<void>(`/${orgId}/customers/${customerId}`, {
       method: "DELETE",
     });
   }
@@ -709,7 +709,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<CustomerDto[]> {
     return this.fetchMockApi<CustomerDto[]>(
-      `/${orgId}/agencies/${agencyId}/customers/list`
+      `/${orgId}/agencies/${agencyId}/customers`
     );
   }
   async createAgencyCustomer(
@@ -718,7 +718,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateCustomerRequest
   ): Promise<CustomerDto> {
     return this.fetchMockApi<CustomerDto>(
-      `/${orgId}/agencies/${agencyId}/customers/create`,
+      `/${orgId}/agencies/${agencyId}/customers`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -738,7 +738,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateCustomerRequest
   ): Promise<CustomerDto> {
     return this.fetchMockApi<CustomerDto>(
-      `/${orgId}/agencies/${agencyId}/customers/${customerId}/update`,
+      `/${orgId}/agencies/${agencyId}/customers/${customerId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -748,7 +748,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     customerId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/agencies/${agencyId}/customers/${customerId}/delete`,
+      `/${orgId}/agencies/${agencyId}/customers/${customerId}`,
       { method: "DELETE" }
     );
   }
@@ -765,13 +765,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // Suppliers (Providers) (Org-scoped)
   async getOrgSuppliers(orgId: string): Promise<ProviderDto[]> {
-    return this.fetchMockApi<ProviderDto[]>(`/${orgId}/suppliers/list`);
+    return this.fetchMockApi<ProviderDto[]>(`/${orgId}/suppliers`);
   }
   async createOrgSupplier(
     orgId: string,
     data: CreateProviderRequest
   ): Promise<ProviderDto> {
-    return this.fetchMockApi<ProviderDto>(`/${orgId}/suppliers/create`, {
+    return this.fetchMockApi<ProviderDto>(`/${orgId}/suppliers`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -790,12 +790,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateProviderRequest
   ): Promise<ProviderDto> {
     return this.fetchMockApi<ProviderDto>(
-      `/${orgId}/suppliers/${providerId}/update`,
+      `/${orgId}/suppliers/${providerId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteOrgSupplier(orgId: string, providerId: string): Promise<void> {
-    return this.fetchMockApi<void>(`/${orgId}/suppliers/${providerId}/delete`, {
+    return this.fetchMockApi<void>(`/${orgId}/suppliers/${providerId} `, {
       method: "DELETE",
     });
   }
@@ -806,7 +806,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<ProviderDto[]> {
     return this.fetchMockApi<ProviderDto[]>(
-      `/${orgId}/agencies/${agencyId}/suppliers/list`
+      `/${orgId}/agencies/${agencyId}/suppliers`
     );
   }
   async createAgencySupplier(
@@ -815,7 +815,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateProviderRequest
   ): Promise<ProviderDto> {
     return this.fetchMockApi<ProviderDto>(
-      `/${orgId}/agencies/${agencyId}/suppliers/create`,
+      `/${orgId}/agencies/${agencyId}/suppliers`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -835,7 +835,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateProviderRequest
   ): Promise<ProviderDto> {
     return this.fetchMockApi<ProviderDto>(
-      `/${orgId}/agencies/${agencyId}/suppliers/${providerId}/update`,
+      `/${orgId}/agencies/${agencyId}/suppliers/${providerId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -845,7 +845,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     providerId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/agencies/${agencyId}/suppliers/${providerId}/delete`,
+      `/${orgId}/agencies/${agencyId}/suppliers/${providerId} `,
       { method: "DELETE" }
     );
   }
@@ -862,13 +862,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
 
   // Prospects - (Org-scoped)
   async getOrgProspects(orgId: string): Promise<ProspectDto[]> {
-    return this.fetchMockApi<ProspectDto[]>(`/${orgId}/prospects/list`);
+    return this.fetchMockApi<ProspectDto[]>(`/${orgId}/prospects`);
   }
   async createOrgProspect(
     orgId: string,
     data: CreateProspectRequest
   ): Promise<ProspectDto> {
-    return this.fetchMockApi<ProspectDto>(`/${orgId}/prospects/create`, {
+    return this.fetchMockApi<ProspectDto>(`/${orgId}/prospects`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -887,12 +887,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateProspectRequest
   ): Promise<ProspectDto> {
     return this.fetchMockApi<ProspectDto>(
-      `/${orgId}/prospects/${prospectId}/update`,
+      `/${orgId}/prospects/${prospectId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteOrgProspect(orgId: string, prospectId: string): Promise<void> {
-    return this.fetchMockApi<void>(`/${orgId}/prospects/${prospectId}/delete`, {
+    return this.fetchMockApi<void>(`/${orgId}/prospects/${prospectId} `, {
       method: "DELETE",
     });
   }
@@ -903,7 +903,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     agencyId: string
   ): Promise<ProspectDto[]> {
     return this.fetchMockApi<ProspectDto[]>(
-      `/${orgId}/agencies/${agencyId}/prospects/list`
+      `/${orgId}/agencies/${agencyId}/prospects`
     );
   }
   async createAgencyProspect(
@@ -912,7 +912,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateProspectRequest
   ): Promise<ProspectDto> {
     return this.fetchMockApi<ProspectDto>(
-      `/${orgId}/agencies/${agencyId}/prospects/create`,
+      `/${orgId}/agencies/${agencyId}/prospects`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -932,7 +932,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateProspectRequest
   ): Promise<ProspectDto> {
     return this.fetchMockApi<ProspectDto>(
-      `/${orgId}/agencies/${agencyId}/prospects/${prospectId}/update`,
+      `/${orgId}/agencies/${agencyId}/prospects/${prospectId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -942,7 +942,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     prospectId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/agencies/${agencyId}/prospects/${prospectId}/delete`,
+      `/${orgId}/agencies/${agencyId}/prospects/${prospectId} `,
       { method: "DELETE" }
     );
   }
@@ -976,7 +976,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   }
   async deleteBusinessActor(baId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${baId}/delete`,
+      `/${baId} `,
       { method: "DELETE" },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/business-actors"
     );
@@ -1027,7 +1027,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     params: GetThirdPartyRequest
   ): Promise<ThirdPartyDto[]> {
     return this.fetchMockApi<ThirdPartyDto[]>(
-      `/${orgId}/third-parties?${new URLSearchParams(params as any)}`
+      `/${orgId}/third-parties?${new URLSearchParams(params as Record<string, string>)}`
     );
   }
   async createThirdParty(
@@ -1036,7 +1036,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateThirdPartyRequest
   ): Promise<ThirdPartyDto> {
     return this.fetchMockApi<ThirdPartyDto>(
-      `/${orgId}/third-parties/${type}/create`,
+      `/${orgId}/third-parties/${type}`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -1054,13 +1054,13 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateThirdPartyRequest
   ): Promise<ThirdPartyDto> {
     return this.fetchMockApi<ThirdPartyDto>(
-      `/${orgId}/third-parties/${thirdPartyId}/update`,
+      `/${orgId}/third-parties/${thirdPartyId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteThirdParty(orgId: string, thirdPartyId: string): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/third-parties/${thirdPartyId}/delete`,
+      `/${orgId}/third-parties/${thirdPartyId} `,
       { method: "DELETE" }
     );
   }
@@ -1081,7 +1081,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     params: { organizationId: string }
   ): Promise<ProposedActivityDto[]> {
     return this.fetchMockApi<ProposedActivityDto[]>(
-      `/${orgId}/proposed-activities/list?${new URLSearchParams(
+      `/${orgId}/proposed-activities?${new URLSearchParams(
         params
       ).toString()}`
     );
@@ -1091,7 +1091,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateProposedActivityRequest
   ): Promise<ProposedActivityDto> {
     return this.fetchMockApi<ProposedActivityDto>(
-      `/${orgId}/proposed-activities/create`,
+      `/${orgId}/proposed-activities`,
       { method: "POST", body: JSON.stringify(data) }
     );
   }
@@ -1109,7 +1109,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: UpdateProposedActivityRequest
   ): Promise<ProposedActivityDto> {
     return this.fetchMockApi<ProposedActivityDto>(
-      `/${orgId}/proposed-activities/${activityId}/update`,
+      `/${orgId}/proposed-activities/${activityId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
@@ -1118,7 +1118,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     activityId: string
   ): Promise<void> {
     return this.fetchMockApi<void>(
-      `/${orgId}/proposed-activities/${activityId}/delete`,
+      `/${orgId}/proposed-activities/${activityId}`,
       { method: "DELETE" }
     );
   }
@@ -1126,7 +1126,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   // Applications & Keys
   async getAllApplications(): Promise<ApplicationDto[]> {
     return this.fetchMockApi<ApplicationDto[]>(
-      `/list`,
+      ``,
       {},
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/applications"
     );
@@ -1135,7 +1135,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     data: CreateApplicationRequest
   ): Promise<ApplicationDto> {
     return this.fetchMockApi<ApplicationDto>(
-      `/create`,
+      ``,
       { method: "POST", body: JSON.stringify(data) },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/applications"
     );
@@ -1144,14 +1144,14 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     applicationId: string
   ): Promise<ApplicationKeyDto[]> {
     return this.fetchMockApi<ApplicationKeyDto[]>(
-      `/${applicationId}/keys/list`,
+      `/${applicationId}/keys`,
       {},
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/applications"
     );
   }
   async createApiKey(applicationId: string): Promise<ApplicationKeyDto> {
     return this.fetchMockApi<ApplicationKeyDto>(
-      `/${applicationId}/keys/create`,
+      `/${applicationId}/keys`,
       { method: "POST" },
       MOCK_API_GLOBAL_ORG_ENTITIES_BASE + "/applications"
     );

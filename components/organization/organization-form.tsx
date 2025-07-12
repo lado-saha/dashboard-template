@@ -156,7 +156,7 @@ export function OrganizationForm({
         keywords: Array.isArray(initialData?.keywords)
           ? initialData.keywords.join(", ")
           : "",
-        number_of_employees: (initialData as any)?.number_of_employees || null,
+        number_of_employees: (initialData )?.number_of_employees || null,
         address_line_1: defaultAddress?.address_line_1 || "",
         address_line_2: defaultAddress?.address_line_2 || "",
         city: defaultAddress?.city || "",

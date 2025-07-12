@@ -9,5 +9,5 @@ export async function GET(_request: NextRequest, { params }: { params: { type: s
     const allActors = dbManager.getCollection('businessActors');
     const filtered = allActors.filter(actor => actor.type === type);
     return NextResponse.json(filtered);
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }

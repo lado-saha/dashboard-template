@@ -82,7 +82,7 @@ export default function ManagePracticalInfoPage() {
         activeOrganizationId
       );
       setAllItems(data || []);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Could not load practical information.");
     } finally {
       setIsLoading(false);

@@ -33,17 +33,22 @@ export const authOptions: NextAuthOptions = {
             if (!userId) {
               throw new Error("User ID is missing from login response.");
             }
-            let businessActorProfile = null;
 
+            // [THE FIX] Re-introduce the check for a Business Actor profile.
+            let businessActorId: string | null = null;
             try {
-              // businessActorProfile = await organizationRepository.getBusinessActorById(userId);
-              const allBusinessActors = await organizationRepository.getAllBusinessActors();
-              businessActorProfile = allBusinessActors.find(actor => actor.user_id === userId) || null;
-            } catch (error) {
-              // A 404 is expected for normal users, so we ignore it.
-              // Any other error should be logged but not block login.
+              // Make a single, targeted request to see if a BA profile exists for this user ID.
+              const businessActorProfile = await organizationRepository.getBusinessActorById(userId);
+              if (businessActorProfile) {
+                // If a profile is found, the user is a Business Actor.
+                businessActorId = businessActorProfile.business_actor_id || userId;
+              }
+            } catch (error: any) {
+              // A 404 is an expected, valid outcome for a user who is not a BA.
+              // We can safely ignore it and proceed with login.
               if (error.status !== 404) {
-                console.error("Error fetching Business Actor profile during login:", error.message);
+                console.error("Error checking for Business Actor profile during login:", error.message);
+                // For other errors (e.g., 500), we log them but don't block login.
               }
             }
 
@@ -60,14 +65,13 @@ export const authOptions: NextAuthOptions = {
               accessToken: loginResponse.access_token.token,
               roles: loginResponse.roles,
               permissions: loginResponse.permissions,
-              // **"POISON" THE SESSION HERE**
-              businessActorId: businessActorProfile?.business_actor_id || null,
+              // The businessActorId will be the user's ID if they are a BA, otherwise it will be null.
+              businessActorId: businessActorId,
             };
           }
           return null;
-        } catch (error) {
-          console.error("Authorize Error:", error);
-          throw new Error(error.message || "Invalid credentials");
+        } catch (error: any) {
+          throw new Error(error.message || "An unexpected error occurred during login.");
         }
       },
     }),
@@ -85,7 +89,6 @@ export const authOptions: NextAuthOptions = {
         token.phone_number = user.phone_number;
         token.email_verified = user.email_verified;
         token.phone_number_verified = user.phone_number_verified;
-        // **Pass the new property to the token**
         token.businessActorId = user.businessActorId;
       }
       return token;
@@ -102,7 +105,6 @@ export const authOptions: NextAuthOptions = {
         session.user.phone_number = token.phone_number as string;
         session.user.email_verified = token.email_verified as boolean;
         session.user.phone_number_verified = token.phone_number_verified as boolean;
-        // **Pass the new property to the session**
         session.user.businessActorId = token.businessActorId as string | null;
       }
       return session;

@@ -97,7 +97,7 @@ export const SignUpForm = () => {
           // Redirect to login with a query param to indicate a new user
           router.push("/login?new_user=true");
         }, 2000);
-      } catch (err: any) {
+      } catch (err) {
         const apiErrorMessage =
           err.message || "An unknown error occurred during sign up.";
         setError(apiErrorMessage);

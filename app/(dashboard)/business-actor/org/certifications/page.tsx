@@ -44,7 +44,7 @@ export default function ManageCertificationsPage() {
     try {
       const data = await organizationRepository.getCertifications(activeOrganizationId);
       setAllItems(data || []);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Could not load certifications.");
     } finally {
       setIsLoading(false);

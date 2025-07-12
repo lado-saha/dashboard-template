@@ -16,5 +16,5 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     }
     const updated = dbManager.updateItem('thirdParties', thirdPartyId, { is_active: body.active });
     return NextResponse.json(updated, { status: 202 });
-  } catch (e:any) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
+  } catch(e) { return NextResponse.json({ message: e.message || "Error"}, {status: 500})}
 }

@@ -18,5 +18,5 @@ export async function POST(_request: NextRequest, { params }: { params: { applic
     };
     const createdKey = dbManager.addItem('applicationKeysData', newKey);
     return NextResponse.json(createdKey, { status: 200 }); // Spec says 200 OK
-  } catch (e: any) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
+  } catch(e) { return NextResponse.json({ message: e.message || "Error" }, { status: 500 }); }
 }

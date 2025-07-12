@@ -14,7 +14,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
 
     const newEmployeeData: Omit<EmployeeDto, 'employee_id' | 'created_at' | 'updated_at' | 'user_id' | 'partner_type' | 'partner_details' | 'is_manager'> = {
       ...body,
-      organisation_id: orgId,
+      organization_id: orgId,
       agency_id: agencyId, // Key difference: assign agencyId
     };
     const createdEmployeeFull = dbManager.addItem('employees', newEmployeeData);
@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
         employee_id: createdEmployeeFull.employee_id,
         first_name: createdEmployeeFull.first_name,
         last_name: createdEmployeeFull.last_name,
-        organisation_id: createdEmployeeFull.organisation_id,
+        organization_id: createdEmployeeFull.organization_id,
         agency_id: createdEmployeeFull.agency_id,
         employee_role: createdEmployeeFull.employee_role,
         department: createdEmployeeFull.department,
