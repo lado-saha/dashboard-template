@@ -4,7 +4,7 @@ import { UpdateSalesPersonRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, salesPersonId: string } }) {
   try {
-    const { orgId, salesPersonId } = params;
+    const { orgId, salesPersonId } = await params;
     const sp = dbManager.getItemById('salesPersons', salesPersonId);
     if (!sp || sp.organization_id !== orgId) {
       return NextResponse.json({ message: `SalesPerson ID ${salesPersonId} not found for org ${orgId}.` }, { status: 404 });
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function PUT(request: NextRequest, { params }: { params: { orgId: string, salesPersonId: string } }) {
   try {
-    const { orgId, salesPersonId } = params;
+    const { orgId, salesPersonId } = await params;
     const body = await request.json() as UpdateSalesPersonRequest;
     const existing = dbManager.getItemById('salesPersons', salesPersonId);
     if (!existing || existing.organization_id !== orgId) {
@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
 
 export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, salesPersonId: string } }) {
   try {
-    const { orgId, salesPersonId } = params;
+    const { orgId, salesPersonId } = await params;
     const existing = dbManager.getItemById('salesPersons', salesPersonId);
     if (!existing || existing.organization_id !== orgId) {
       return NextResponse.json({ message: `SalesPerson ID ${salesPersonId} not found for org ${orgId}.` }, { status: 404 });

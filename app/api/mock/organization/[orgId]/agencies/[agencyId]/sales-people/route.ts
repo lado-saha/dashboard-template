@@ -4,7 +4,7 @@ import { SalesPersonDto, CreateSalesPersonRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const allSalesPersons = dbManager.getCollection('salesPersons');
     const agencySalesPersons = allSalesPersons.filter(sp => sp.organization_id === orgId && sp.agency_id === agencyId);
     return NextResponse.json(agencySalesPersons);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
   try {
-    const { orgId, agencyId } = params;
+    const { orgId, agencyId } = await params;
     const body = await request.json() as CreateSalesPersonRequest;
 
     if (!body.name) {

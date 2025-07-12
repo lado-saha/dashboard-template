@@ -4,7 +4,7 @@ import { ProviderDto, CreateProviderRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allProviders = dbManager.getCollection('providers');
     // Org-level suppliers are those linked to the org but NOT to a specific agency
     const orgProviders = allProviders.filter(p => p.organization_id === orgId && !p.agency_id);
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateProviderRequest;
     
     if (!body.first_name && !body.last_name) {

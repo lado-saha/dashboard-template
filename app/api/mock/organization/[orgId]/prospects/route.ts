@@ -4,7 +4,7 @@ import { ProspectDto, CreateProspectRequest } from '@/types/organization';
 
 export async function GET(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const allProspects = dbManager.getCollection('prospects');
     const orgProspects = allProspects.filter(p => p.organization_id === orgId && !p.agency_id);
     return NextResponse.json(orgProspects);
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
 
 export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     const body = await request.json() as CreateProspectRequest;
 
     if (!body.first_name && !body.last_name) {

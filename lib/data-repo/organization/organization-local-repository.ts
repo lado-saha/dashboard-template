@@ -132,7 +132,7 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
   async createOrganization(
     data: CreateOrganizationRequest
   ): Promise<OrganizationDto> {
-    return this.fetchMockApi<OrganizationDto>("/create", {
+    return this.fetchMockApi<OrganizationDto>("", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -1026,8 +1026,9 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     orgId: string,
     params: GetThirdPartyRequest
   ): Promise<ThirdPartyDto[]> {
+    // This route remains the same as it doesn't conflict.
     return this.fetchMockApi<ThirdPartyDto[]>(
-      `/${orgId}/third-parties?${new URLSearchParams(params as Record<string, string>)}`
+      `/${orgId}/third-parties?${new URLSearchParams(params as any)}`
     );
   }
   async createThirdParty(
@@ -1035,15 +1036,18 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     type: ThirdPartyType,
     data: CreateThirdPartyRequest
   ): Promise<ThirdPartyDto> {
+    // [CHANGE] The route is now static, and the type is part of the body.
+    const payload = { ...data, type: type };
     return this.fetchMockApi<ThirdPartyDto>(
-      `/${orgId}/third-parties/${type}`,
-      { method: "POST", body: JSON.stringify(data) }
+      `/${orgId}/third-parties/create`,
+      { method: "POST", body: JSON.stringify(payload) }
     );
   }
   async getThirdPartyById(
     orgId: string,
     thirdPartyId: string
   ): Promise<ThirdPartyDto | null> {
+    // [CHANGE] The dynamic segment is now explicitly named.
     return this.fetchMockApi<ThirdPartyDto | null>(
       `/${orgId}/third-parties/${thirdPartyId}`
     );
@@ -1053,14 +1057,16 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     thirdPartyId: string,
     data: UpdateThirdPartyRequest
   ): Promise<ThirdPartyDto> {
+    // [CHANGE] The dynamic segment is now explicitly named.
     return this.fetchMockApi<ThirdPartyDto>(
       `/${orgId}/third-parties/${thirdPartyId}`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
   async deleteThirdParty(orgId: string, thirdPartyId: string): Promise<void> {
+    // [CHANGE] The dynamic segment is now explicitly named.
     return this.fetchMockApi<void>(
-      `/${orgId}/third-parties/${thirdPartyId} `,
+      `/${orgId}/third-parties/${thirdPartyId}`,
       { method: "DELETE" }
     );
   }
@@ -1069,12 +1075,12 @@ export class OrganizationLocalRepository implements IOrganizationRepository {
     thirdPartyId: string,
     data: UpdateThirdPartyStatusRequest
   ): Promise<ThirdPartyDto> {
+    // [CHANGE] The dynamic segment is now explicitly named.
     return this.fetchMockApi<ThirdPartyDto>(
       `/${orgId}/third-parties/${thirdPartyId}/status`,
       { method: "PUT", body: JSON.stringify(data) }
     );
   }
-
   // Proposed Activities
   async getProposedActivities(
     orgId: string,
