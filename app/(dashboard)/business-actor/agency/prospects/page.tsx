@@ -1,13 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-export default function AgencyProspectsPage() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Agency Prospects</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>This page will list and manage prospects for the active agency.</p>
-      </CardContent>
-    </Card>
-  );
+import { Metadata } from "next";
+import { AgencyProspectsClientPage } from "./prospects-client";
+
+export const metadata: Metadata = {
+  title: "Manage Agency Prospects",
+  description: "View, add, and manage your agency's prospects.",
+};
+
+export default async function AgencyProspectsPage() {
+  return <AgencyProspectsClientPage />;
 }
