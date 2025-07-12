@@ -90,7 +90,7 @@ export function AgencySalesPeopleClientPage() {
     }
   };
 
-  const columns = useMemo<ColumnDef<SalesPersonDto>[]>(() => getSalesPersonColumns({ onEditAction: handleOpenFormModal, onDeleteAction: (item) => handleDeleteConfirmation([item]) }, []), []);
+  const columns = useMemo<ColumnDef<SalesPersonDto>[]>(() => getSalesPersonColumns({ onEditAction: handleOpenFormModal, onDeleteAction: (item) => handleDeleteConfirmation([item]) }, [activeAgencyDetails!].filter(Boolean)), [activeAgencyDetails]);
 
   if (!activeAgencyId && !isLoading) {
     return <FeedbackCard icon={Building} title="No Agency Selected" description="Please select an active agency to manage its sales people." />;

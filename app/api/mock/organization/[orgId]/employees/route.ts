@@ -7,12 +7,13 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
     const { orgId } = await params;
     const allEmployees = dbManager.getCollection('employees');
     // Filter for employees directly under the organization (agency_id is null or matches orgId if that the convention)
-    const orgEmployees = allEmployees.filter(emp => emp.organization_id === orgId && (!emp.agency_id || emp.agency_id === orgId));
+    const orgEmployees = allEmployees.filter(emp => emp.organization_id === orgId);
     return NextResponse.json(orgEmployees);
   } catch (error) {
     return NextResponse.json({ message: "Failed to get organization employees", error: error.message }, { status: 500 });
   }
 }
+
 export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;

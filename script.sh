@@ -1,181 +1,14 @@
 #!/bin/bash
 
-echo "🚀 Starting comprehensive Employee Management UI Generation..."
+echo "🚀 Starting Full Employee Management Feature Enhancement..."
 
-# --- 1. Create Directories ---
-echo "📁 Creating directories..."
-mkdir -p components/organization/employees
-mkdir -p app/\(dashboard\)/business-actor/org/employees
-mkdir -p app/\(dashboard\)/business-actor/agency/employees
-
-# --- 2. Reusable Components for Employees ---
-
-# Create components/organization/employees/columns.tsx
-code "components/organization/employees/columns.tsx"
-cat > components/organization/employees/columns.tsx << 'EOF'
-"use client";
-
-import { ColumnDef } from "@tanstack/react-table";
-import { EmployeeDto, AgencyDto } from "@/types/organization";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit3, Trash2, Building2 } from "lucide-react";
-import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { Badge } from "@/components/ui/badge";
-
-interface EmployeeRowActionsProps {
-  employee: EmployeeDto;
-  onEditAction: (employeeId: string) => void;
-  onDeleteAction: (employee: EmployeeDto) => void;
-}
-
-const RowActions: React.FC<EmployeeRowActionsProps> = ({ employee, onEditAction, onDeleteAction }) => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0 data-[state=open]:bg-muted">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[160px]">
-        <DropdownMenuItem onClick={() => onEditAction(employee.employee_id!)}><Edit3 className="mr-2 h-4 w-4" /> Edit Details</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onDeleteAction(employee)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-export const getEmployeeColumns = (
-  actionHandlers: Omit<EmployeeRowActionsProps, "employee">,
-  agencies: AgencyDto[]
-): ColumnDef<EmployeeDto>[] => [
-  {
-    id: "select",
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />,
-    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "first_name",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
-    cell: ({ row }) => {
-      const employee = row.original;
-      const fullName = `${employee.first_name || ""} ${employee.last_name || ""}`.trim();
-      const fallback = fullName ? fullName.charAt(0).toUpperCase() : "E";
-      return (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border"><AvatarImage src={employee.logo} alt={fullName} /><AvatarFallback>{fallback}</AvatarFallback></Avatar>
-          <div>
-            <div className="font-medium">{fullName}</div>
-            <div className="text-xs text-muted-foreground">{employee.short_description || "No title"}</div>
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "employee_role",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
-    cell: ({ row }) => <Badge variant="outline" className="capitalize">{row.getValue("employee_role")?.toString().replace(/_/g, ' ').toLowerCase() || "N/A"}</Badge>,
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
-  },
-  {
-    accessorKey: "department",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Department" />,
-    filterFn: (row, id, value) => value.includes(row.getValue(id)),
-  },
-  {
-    accessorKey: "agency_id",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Assignment" />,
-    cell: ({ row }) => {
-      const agencyId = row.getValue("agency_id");
-      if (!agencyId) return <div className="text-sm text-muted-foreground">Headquarters</div>;
-      const agency = agencies.find(a => a.agency_id === agencyId);
-      return (
-        <div className="text-sm text-muted-foreground flex items-center gap-2">
-          <Building2 className="h-4 w-4 flex-shrink-0" />
-          <span className="truncate">{agency ? agency.short_name : "Unknown Agency"}</span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => value.includes(row.getValue(id) || "headquarters"),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => <RowActions employee={row.original} {...actionHandlers} />,
-  },
-];
-EOF
-
-# Create components/organization/employees/employee-card.tsx
-code "components/organization/employees/employee-card.tsx"
-cat > components/organization/employees/employee-card.tsx << 'EOF'
-"use client";
-
-import React from "react";
-import { EmployeeDto, AgencyDto } from "@/types/organization";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit3, Trash2, Building2, Briefcase } from "lucide-react";
-
-interface EmployeeCardProps {
-  employee: EmployeeDto;
-  agency?: AgencyDto | null;
-  onEditAction: (employeeId: string) => void;
-  onDeleteAction: (employee: EmployeeDto) => void;
-}
-
-export function EmployeeCard({ employee, agency, onEditAction, onDeleteAction }: EmployeeCardProps) {
-  const fullName = `${employee.first_name || ""} ${employee.last_name || ""}`.trim();
-  const fallback = fullName ? fullName.charAt(0).toUpperCase() : "E";
-  const roleDisplay = employee.employee_role?.replace(/_/g, " ").toLowerCase() || "N/A";
-
-  return (
-    <Card className="flex flex-col h-full shadow-sm hover:shadow-lg transition-shadow group">
-      <CardHeader className="flex-row items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 border-2 border-background ring-1 ring-ring"><AvatarImage src={employee.logo} alt={fullName} /><AvatarFallback className="text-lg bg-muted">{fallback}</AvatarFallback></Avatar>
-          <div>
-            <CardTitle className="text-base font-semibold line-clamp-1">{fullName}</CardTitle>
-            <p className="text-xs text-muted-foreground line-clamp-1">{employee.short_description || "No job title"}</p>
-          </div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEditAction(employee.employee_id!)}><Edit3 className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDeleteAction(employee)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </CardHeader>
-      <CardContent className="flex-grow space-y-3 pt-0">
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" className="capitalize text-xs items-center font-normal"><Briefcase className="mr-1.5 h-3 w-3" />{roleDisplay}</Badge>
-          {employee.department && <Badge variant="outline" className="capitalize text-xs items-center font-normal">{employee.department}</Badge>}
-        </div>
-        <div className="text-sm text-muted-foreground flex items-center gap-2 pt-2">
-          <Building2 className="h-4 w-4 flex-shrink-0" />
-          <span>{agency ? agency.short_name : "Headquarters"}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-EOF
-
-# Create components/organization/employees/employee-form.tsx
+# --- 1. Update EmployeeForm to be Agency-Context Aware ---
+echo "🧠 Making EmployeeForm smarter for agency context..."
 code "components/organization/employees/employee-form.tsx"
 cat > components/organization/employees/employee-form.tsx << 'EOF'
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -212,18 +45,19 @@ const formSteps = [
 ];
 
 interface EmployeeFormProps {
-  initialData?: Partial<EmployeeDto>;
   agencies: AgencyDto[];
   mode: "create" | "edit";
   onSubmitAction: (data: EmployeeFormData) => Promise<boolean>;
+  initialData?: Partial<EmployeeDto>;
+  // [ADD] Prop to lock the form to a specific agency
+  scopedAgencyId?: string | null;
 }
 
-export function EmployeeForm({ initialData, agencies, mode, onSubmitAction }: EmployeeFormProps) {
+export function EmployeeForm({ initialData, agencies, mode, onSubmitAction, scopedAgencyId }: EmployeeFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(fullEmployeeSchema),
-    mode: "onChange",
     defaultValues: {
       first_name: initialData?.first_name || "",
       last_name: initialData?.last_name || "",
@@ -232,7 +66,8 @@ export function EmployeeForm({ initialData, agencies, mode, onSubmitAction }: Em
       short_description: initialData?.short_description || "",
       long_description: initialData?.long_description || "",
       logo: initialData?.logo || "",
-      agency_id: initialData?.agency_id || null,
+      // [CHANGE] If scoped to an agency, use that ID, otherwise use initial data.
+      agency_id: scopedAgencyId !== undefined ? scopedAgencyId : (initialData?.agency_id || null),
     },
   });
 
@@ -269,19 +104,28 @@ export function EmployeeForm({ initialData, agencies, mode, onSubmitAction }: Em
           )}
           {currentStep === 1 && (
             <div className="space-y-4">
-              <FormField control={form.control} name="agency_id" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Agency Assignment</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(value === "headquarters" ? null : value)} defaultValue={field.value || "headquarters"}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Select an agency" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      <SelectItem value="headquarters">Headquarters</SelectItem>
-                      {agencies.map((agency) => (<SelectItem key={agency.agency_id} value={agency.agency_id!}>{agency.long_name}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="agency_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Agency Assignment</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value === "headquarters" ? null : value)}
+                      defaultValue={field.value || "headquarters"}
+                      // [CHANGE] Disable the select if we are scoped to a specific agency
+                      disabled={scopedAgencyId !== undefined}
+                    >
+                      <FormControl><SelectTrigger><SelectValue placeholder="Select an agency" /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        <SelectItem value="headquarters">Headquarters</SelectItem>
+                        {agencies.map((agency) => (<SelectItem key={agency.agency_id} value={agency.agency_id!}>{agency.long_name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           )}
         </div>
@@ -291,26 +135,8 @@ export function EmployeeForm({ initialData, agencies, mode, onSubmitAction }: Em
 }
 EOF
 
-# --- 3. Organization-Level Employee Pages ---
-echo "🏢 Implementing Organization-Level Employee pages..."
-
-# Create app/(dashboard)/business-actor/org/employees/page.tsx
-code "app/(dashboard)/business-actor/org/employees/page.tsx"
-cat > app/\(dashboard\)/business-actor/org/employees/page.tsx << 'EOF'
-import { Metadata } from "next";
-import { OrgEmployeesClientPage } from "./employees-client";
-
-export const metadata: Metadata = {
-  title: "Manage Employees",
-  description: "View, add, and manage all employees across your organization.",
-};
-
-export default async function OrgEmployeesPage() {
-  return <OrgEmployeesClientPage />;
-}
-EOF
-
-# Create app/(dashboard)/business-actor/org/employees/employees-client.tsx
+# --- 2. Update Organization-Level Employee Page to Restore Filters ---
+echo "🏢 Restoring filters to Organization-Level Employee page..."
 code "app/(dashboard)/business-actor/org/employees/employees-client.tsx"
 cat > app/\(dashboard\)/business-actor/org/employees/employees-client.tsx << 'EOF'
 "use client";
@@ -382,6 +208,10 @@ export function OrgEmployeesClientPage() {
   };
 
   const roleOptions: DataTableFilterOption[] = useMemo(() => EmployeeRoleValues.map(role => ({ label: role.replace(/_/g, " "), value: role })), []);
+  const departmentOptions: DataTableFilterOption[] = useMemo(() => {
+    const departments = new Set(employees.map((item) => item.department).filter(Boolean));
+    return Array.from(departments).map((dept) => ({ label: dept!, value: dept! }));
+  }, [employees]);
   const agencyOptions: DataTableFilterOption[] = useMemo(() => {
     const options = agencies.map(agency => ({ label: agency.long_name!, value: agency.agency_id! }));
     options.unshift({ label: "Headquarters", value: "headquarters" });
@@ -410,6 +240,7 @@ export function OrgEmployeesClientPage() {
         filterControls={(table) => (
           <>
             <DataTableFacetedFilter column={table.getColumn("employee_role")} title="Role" options={roleOptions} />
+            <DataTableFacetedFilter column={table.getColumn("department")} title="Department" options={departmentOptions} />
             <DataTableFacetedFilter column={table.getColumn("agency_id")} title="Agency" options={agencyOptions} />
           </>
         )}
@@ -431,152 +262,10 @@ export function OrgEmployeesClientPage() {
 }
 EOF
 
-# Create app/(dashboard)/business-actor/org/employees/create/page.tsx
-code "app/(dashboard)/business-actor/org/employees/create/page.tsx"
-cat > app/\(dashboard\)/business-actor/org/employees/create/page.tsx << 'EOF'
-"use client";
+# --- 3. Update Agency-Level Employee Pages for CRUD ---
+echo "🏢 Implementing Agency-Level Employee CRUD..."
 
-import { EmployeeForm } from "@/components/organization/employees/employee-form";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { useRouter } from "next/navigation";
-import { organizationRepository } from "@/lib/data-repo/organization";
-import { EmployeeFormData } from "@/components/organization/employees/employee-form";
-import { toast } from "sonner";
-
-export default function CreateEmployeePage() {
-  const router = useRouter();
-  const { activeOrganizationId, agenciesForCurrentOrg } = useActiveOrganization();
-
-  const handleCreate = async (data: EmployeeFormData): Promise<boolean> => {
-    if (!activeOrganizationId) { toast.error("No active organization selected."); return false; }
-    try {
-      await organizationRepository.createOrgEmployee(activeOrganizationId, data);
-      toast.success("Employee created successfully!");
-      router.push("/business-actor/org/employees");
-      router.refresh();
-      return true;
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create employee.");
-      return false;
-    }
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <EmployeeForm
-        organizationId={activeOrganizationId!}
-        agencies={agenciesForCurrentOrg}
-        mode="create"
-        onSuccessAction={() => {}} // The form wrapper handles submission now
-        onSubmitAction={handleCreate}
-      />
-    </div>
-  );
-}
-EOF
-
-# Create app/(dashboard)/business-actor/org/employees/[employeeId]/page.tsx
-code "app/(dashboard)/business-actor/org/employees/[employeeId]/page.tsx"
-cat > app/\(dashboard\)/business-actor/org/employees/[employeeId]/page.tsx << 'EOF'
-import { Metadata } from "next";
-import { organizationRepository } from "@/lib/data-repo/organization";
-import { EditEmployeeClientPage } from "./edit-employee-client";
-
-type Props = { params: { orgId: string; employeeId: string } };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // Note: We can't get orgId from context here. A better URL would be /orgs/{orgId}/employees/{empId}
-  // For now, we fetch without orgId scoping, which is not ideal but works for this structure.
-  const employee = await organizationRepository.getOrgEmployeeById(params.orgId, params.employeeId).catch(() => null);
-  if (!employee) return { title: "Employee Not Found" };
-  return { title: `Edit ${employee.first_name} ${employee.last_name}` };
-}
-
-export default async function EditOrgEmployeePage({ params }: Props) {
-  const employee = await organizationRepository.getOrgEmployeeById(params.orgId, params.employeeId).catch(() => null);
-  return <EditEmployeeClientPage initialData={employee} />;
-}
-EOF
-
-# Create app/(dashboard)/business-actor/org/employees/[employeeId]/edit-employee-client.tsx
-code "app/(dashboard)/business-actor/org/employees/[employeeId]/edit-employee-client.tsx"
-cat > app/\(dashboard\)/business-actor/org/employees/[employeeId]/edit-employee-client.tsx << 'EOF'
-"use client";
-
-import React from "react";
-import { useRouter } from "next/navigation";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { organizationRepository } from "@/lib/data-repo/organization";
-import { EmployeeDto } from "@/types/organization";
-import { EmployeeForm, EmployeeFormData } from "@/components/organization/employees/employee-form";
-import { toast } from "sonner";
-import { FeedbackCard } from "@/components/ui/feedback-card";
-import { User } from "lucide-react";
-
-interface EditEmployeeClientPageProps {
-  initialData: EmployeeDto | null;
-}
-
-export function EditEmployeeClientPage({ initialData }: EditEmployeeClientPageProps) {
-  const router = useRouter();
-  const { activeOrganizationId, agenciesForCurrentOrg } = useActiveOrganization();
-
-  const handleUpdate = async (data: EmployeeFormData): Promise<boolean> => {
-    if (!activeOrganizationId || !initialData?.employee_id) {
-      toast.error("Cannot update employee: Missing context or ID.");
-      return false;
-    }
-    try {
-      await organizationRepository.updateOrgEmployee(activeOrganizationId, initialData.employee_id, data);
-      toast.success("Employee updated successfully!");
-      router.push("/business-actor/org/employees");
-      router.refresh();
-      return true;
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update employee.");
-      return false;
-    }
-  };
-
-  if (!initialData) {
-    return <FeedbackCard icon={User} title="Employee Not Found" description="The employee you are trying to edit does not exist." />;
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto">
-      <EmployeeForm
-        organizationId={activeOrganizationId!}
-        agencies={agenciesForCurrentOrg}
-        mode="edit"
-        initialData={initialData}
-        onSuccessAction={() => {}}
-        onSubmitAction={handleUpdate}
-      />
-    </div>
-  );
-}
-EOF
-
-# --- 4. Agency-Level Employee Pages ---
-echo "🏢 Implementing Agency-Level Employee pages..."
-
-# Create app/(dashboard)/business-actor/agency/employees/page.tsx
-code "app/(dashboard)/business-actor/agency/employees/page.tsx"
-cat > app/\(dashboard\)/business-actor/agency/employees/page.tsx << 'EOF'
-import { Metadata } from "next";
-import { AgencyEmployeesClientPage } from "./employees-client";
-
-export const metadata: Metadata = {
-  title: "Manage Agency Employees",
-  description: "View and manage employees assigned to this agency.",
-};
-
-export default function AgencyEmployeesPage() {
-  return <AgencyEmployeesClientPage />;
-}
-EOF
-
-# Create app/(dashboard)/business-actor/agency/employees/employees-client.tsx
+# Update app/(dashboard)/business-actor/agency/employees/employees-client.tsx
 code "app/(dashboard)/business-actor/agency/employees/employees-client.tsx"
 cat > app/\(dashboard\)/business-actor/agency/employees/employees-client.tsx << 'EOF'
 "use client";
@@ -585,7 +274,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
-import { EmployeeDto } from "@/types/organization";
+import { EmployeeDto, CreateEmployeeRequest, UpdateEmployeeRequest } from "@/types/organization";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -658,9 +347,9 @@ export function AgencyEmployeesClientPage() {
         onDeleteItemsAction={handleDeleteConfirmation}
         viewModeStorageKey="agency-employees-view-mode"
         exportFileName="agency_employees.csv"
-        pageHeader={<PageHeader title="Agency Employees" description={`Manage the team for ${activeAgencyDetails?.long_name}`} action={<Button disabled><PlusCircle className="mr-2 h-4 w-4" /> Add Employee to Agency</Button>} />}
+        pageHeader={<PageHeader title="Agency Employees" description={`Manage the team for ${activeAgencyDetails?.long_name}`} action={<Button onClick={() => router.push('/business-actor/agency/employees/create')}><PlusCircle className="mr-2 h-4 w-4" /> Add Employee</Button>} />}
         renderGridItemAction={(employee) => <EmployeeCard employee={employee} agency={activeAgencyDetails} onEditAction={handleEditAction} onDeleteAction={(item) => handleDeleteConfirmation([item])} />}
-        emptyState={<FeedbackCard icon={Users} title="No Employees in this Agency" description="Assign an existing employee or create a new one for this agency." />}
+        emptyState={<FeedbackCard icon={Users} title="No Employees in this Agency" description="Assign an existing employee or create a new one for this agency." actionButton={<Button onClick={() => router.push('/business-actor/agency/employees/create')}><PlusCircle className="mr-2 h-4 w-4" /> Add Employee</Button>} />}
         filteredEmptyState={<FeedbackCard icon={SearchIcon} title="No Employees Found" description="Your search did not match any employees in this agency." />}
       />
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -674,24 +363,66 @@ export function AgencyEmployeesClientPage() {
 }
 EOF
 
+# Create app/(dashboard)/business-actor/agency/employees/create/page.tsx
+code "app/(dashboard)/business-actor/agency/employees/create/page.tsx"
+cat > app/\(dashboard\)/business-actor/agency/employees/create/page.tsx << 'EOF'
+"use client";
+
+import { EmployeeForm } from "@/components/organization/employees/employee-form";
+import { useActiveOrganization } from "@/contexts/active-organization-context";
+import { useRouter } from "next/navigation";
+import { organizationRepository } from "@/lib/data-repo/organization";
+import { EmployeeFormData } from "@/components/organization/employees/employee-form";
+import { toast } from "sonner";
+
+export default function CreateAgencyEmployeePage() {
+  const router = useRouter();
+  const { activeOrganizationId, activeAgencyId, activeAgencyDetails } = useActiveOrganization();
+
+  const handleCreate = async (data: EmployeeFormData): Promise<boolean> => {
+    if (!activeOrganizationId || !activeAgencyId) {
+      toast.error("No active agency selected.");
+      return false;
+    }
+    try {
+      await organizationRepository.createAgencyEmployee(activeOrganizationId, activeAgencyId, data);
+      toast.success("Employee created and assigned to agency successfully!");
+      router.push("/business-actor/agency/employees");
+      router.refresh();
+      return true;
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create employee.");
+      return false;
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <EmployeeForm
+        agencies={activeAgencyDetails ? [activeAgencyDetails] : []}
+        mode="create"
+        onSubmitAction={handleCreate}
+        scopedAgencyId={activeAgencyId} // Lock the form to the current agency
+      />
+    </div>
+  );
+}
+EOF
+
 # Create app/(dashboard)/business-actor/agency/employees/[employeeId]/page.tsx
 code "app/(dashboard)/business-actor/agency/employees/[employeeId]/page.tsx"
 cat > app/\(dashboard\)/business-actor/agency/employees/[employeeId]/page.tsx << 'EOF'
 import { Metadata } from "next";
-import { organizationRepository } from "@/lib/data-repo/organization";
 import { EditAgencyEmployeeClientPage } from "./edit-employee-client";
 
-type Props = { params: { orgId: string; agencyId: string; employeeId: string } };
+export const metadata: Metadata = {
+  title: "Edit Agency Employee",
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const employee = await organizationRepository.getAgencyEmployeeById(params.orgId, params.agencyId, params.employeeId).catch(() => null);
-  if (!employee) return { title: "Employee Not Found" };
-  return { title: `Edit ${employee.first_name} ${employee.last_name}` };
-}
+type Props = { params: { employeeId: string } };
 
 export default async function EditAgencyEmployeePage({ params }: Props) {
-  const employee = await organizationRepository.getAgencyEmployeeById(params.orgId, params.agencyId, params.employeeId).catch(() => null);
-  return <EditAgencyEmployeeClientPage initialData={employee} />;
+  return <EditAgencyEmployeeClientPage employeeId={params.employeeId} />;
 }
 EOF
 
@@ -700,7 +431,7 @@ code "app/(dashboard)/business-actor/agency/employees/[employeeId]/edit-employee
 cat > app/\(dashboard\)/business-actor/agency/employees/[employeeId]/edit-employee-client.tsx << 'EOF'
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
@@ -708,15 +439,33 @@ import { EmployeeDto } from "@/types/organization";
 import { EmployeeForm, EmployeeFormData } from "@/components/organization/employees/employee-form";
 import { toast } from "sonner";
 import { FeedbackCard } from "@/components/ui/feedback-card";
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 
 interface EditEmployeeClientPageProps {
-  initialData: EmployeeDto | null;
+  employeeId: string;
 }
 
-export function EditAgencyEmployeeClientPage({ initialData }: EditEmployeeClientPageProps) {
+export function EditAgencyEmployeeClientPage({ employeeId }: EditEmployeeClientPageProps) {
   const router = useRouter();
-  const { activeOrganizationId, activeAgencyId, agenciesForCurrentOrg } = useActiveOrganization();
+  const { activeOrganizationId, activeAgencyId, activeAgencyDetails } = useActiveOrganization();
+  const [initialData, setInitialData] = useState<EmployeeDto | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!activeOrganizationId || !activeAgencyId || !employeeId) return;
+    setIsLoading(true);
+    try {
+      const data = await organizationRepository.getAgencyEmployeeById(activeOrganizationId, activeAgencyId, employeeId);
+      setInitialData(data);
+    } catch (error) {
+      toast.error("Failed to fetch employee details for this agency.");
+      setInitialData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeOrganizationId, activeAgencyId, employeeId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleUpdate = async (data: EmployeeFormData): Promise<boolean> => {
     if (!activeOrganizationId || !activeAgencyId || !initialData?.employee_id) {
@@ -735,6 +484,10 @@ export function EditAgencyEmployeeClientPage({ initialData }: EditEmployeeClient
     }
   };
 
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-[400px]"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
   if (!initialData) {
     return <FeedbackCard icon={User} title="Employee Not Found" description="The employee you are trying to edit does not exist in this agency." />;
   }
@@ -742,17 +495,16 @@ export function EditAgencyEmployeeClientPage({ initialData }: EditEmployeeClient
   return (
     <div className="max-w-4xl mx-auto">
       <EmployeeForm
-        organizationId={activeOrganizationId!}
-        agencies={agenciesForCurrentOrg}
+        agencies={activeAgencyDetails ? [activeAgencyDetails] : []}
         mode="edit"
         initialData={initialData}
-        onSuccessAction={() => {}}
         onSubmitAction={handleUpdate}
+        scopedAgencyId={activeAgencyId} // Lock the form to the current agency
       />
     </div>
   );
 }
 EOF
 
-echo "✅ Employee Management feature files created successfully."
-echo "🔴 IMPORTANT: You must now update 'components/main-sidebar.tsx' to add the new navigation links to the 'baOrgNavigation' and 'agencyNavigation' arrays."
+echo "✅ Full Employee Management feature implemented successfully."
+echo "ℹ️ Remember to add the new routes to the sidebar if they are not already present."

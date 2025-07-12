@@ -38,6 +38,8 @@ import {
   Info,
   Handshake,
   UserPlus,
+  Shield,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -206,8 +208,16 @@ const superAdminNavigation = [
     href: "/super-admin/business-actors",
     icon: Building,
   },
-  { name: "Customers", href: "/super-admin/customers", icon: Users },
+  { name: "Organizations", href: "/super-admin/organizations", icon: Users },
+  { name: "Users", href: "/super-admin/users", icon: User },
+  { name: "Roles", href: "/super-admin/roles", icon: Shield },
+  {
+    name: "Business Domains",
+    href: "/super-admin/business-domains",
+    icon: Briefcase,
+  },
 ];
+
 const bottomNavigation = [
   { name: "Help & Support", href: "/help", icon: HelpCircle },
   { name: "Settings", href: "/settings", icon: Settings },
@@ -307,14 +317,14 @@ export function MainSidebar() {
         </Tooltip>
       );
     }
-    if (isBusinessActor) {
+    if (isBusinessActor && isWorkspace) {
       return (
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <Button
               onClick={() => {
                 clearActiveOrganization();
-                router.push("/dashboard");
+                router.replace("/dashboard");
                 toast.info("Exited Business Workspace.");
               }}
               variant="ghost"

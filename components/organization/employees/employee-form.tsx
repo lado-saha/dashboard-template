@@ -1,19 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, FieldErrors } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   AgencyDto,
   EmployeeDto,
-  EmployeeRole,
   EmployeeRoleValues,
 } from "@/types/organization";
-import { organizationRepository } from "@/lib/data-repo/organization";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { FormWrapper } from "@/components/ui/form-wrapper";
 import {
   Form,
   FormControl,
@@ -31,23 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { ImageUploader } from "@/components/ui/image-uploader";
-import {
-  Loader2,
-  User,
-  ChevronLeft,
-  Building2,
-  ChevronRight,
-} from "lucide-react";
-import { FormWizard } from "@/components/ui/form-wizard";
-import { FormWrapper } from "@/components/ui/form-wrapper";
+import { User, Building2 } from "lucide-react";
 
 const employeeDetailsSchema = z.object({
   first_name: z.string().min(2, "First name is required."),
@@ -55,10 +36,15 @@ const employeeDetailsSchema = z.object({
   employee_role: z.enum(EmployeeRoleValues, {
     required_error: "Employee role is required.",
   }),
-  department: z.string().min(2, "Department is required.").optional(),
+  department: z
+    .string()
+    .min(2, "Department is required.")
+    .optional()
+    .or(z.literal("")),
   short_description: z.string().max(100, "Title is too long.").optional(),
   long_description: z.string().max(500, "Description is too long.").optional(),
   logo: z.string().url("Invalid URL").optional().or(z.literal("")),
+  logoFile: z.any().optional(),
 });
 
 const assignmentSchema = z.object({
@@ -66,46 +52,43 @@ const assignmentSchema = z.object({
 });
 
 const fullEmployeeSchema = employeeDetailsSchema.merge(assignmentSchema);
-type EmployeeFormData = z.infer<typeof fullEmployeeSchema>;
+export type EmployeeFormData = z.infer<typeof fullEmployeeSchema>;
 
 const formSteps = [
   {
     id: "details",
     name: "Employee Details",
     icon: User,
-    fields: Object.keys(
-      employeeDetailsSchema.shape
-    ) as (keyof EmployeeFormData)[],
+    fields: Object.keys(employeeDetailsSchema.shape),
   },
   {
     id: "assignment",
     name: "Agency Assignment",
     icon: Building2,
-    fields: Object.keys(assignmentSchema.shape) as (keyof EmployeeFormData)[],
+    fields: Object.keys(assignmentSchema.shape),
   },
 ];
 
 interface EmployeeFormProps {
-  organizationId: string;
-  initialData?: Partial<EmployeeDto>;
+  agencies: AgencyDto[];
   mode: "create" | "edit";
-  onSuccessAction: () => void;
+  onSubmitAction: (data: EmployeeFormData) => Promise<boolean>;
+  initialData?: Partial<EmployeeDto>;
+  // [ADD] Prop to lock the form to a specific agency
+  scopedAgencyId?: string | null;
 }
 
 export function EmployeeForm({
-  organizationId,
   initialData,
+  agencies,
   mode,
-  onSuccessAction,
+  onSubmitAction,
+  scopedAgencyId,
 }: EmployeeFormProps) {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [agencies, setAgencies] = useState<AgencyDto[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
 
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(fullEmployeeSchema),
-    mode: "onChange",
     defaultValues: {
       first_name: initialData?.first_name || "",
       last_name: initialData?.last_name || "",
@@ -114,43 +97,24 @@ export function EmployeeForm({
       short_description: initialData?.short_description || "",
       long_description: initialData?.long_description || "",
       logo: initialData?.logo || "",
-      agency_id: initialData?.agency_id || null,
+      // [CHANGE] If scoped to an agency, use that ID, otherwise use initial data.
+      agency_id:
+        scopedAgencyId !== undefined
+          ? scopedAgencyId
+          : initialData?.agency_id || null,
     },
   });
 
-  useEffect(() => {
-    organizationRepository
-      .getAgencies(organizationId, true)
-      .then(setAgencies)
-      .catch(() => toast.error("Could not load agency list."));
-  }, [organizationId]);
-
-  async function onSubmit(data: EmployeeFormData) {
+  const handleSubmit = async (data: EmployeeFormData) => {
     setIsLoading(true);
-    try {
-      if (mode === "edit" && initialData?.employee_id) {
-        await organizationRepository.updateOrgEmployee(
-          organizationId,
-          initialData.employee_id,
-          data
-        );
-        toast.success("Employee updated successfully!");
-      } else {
-        await organizationRepository.createOrgEmployee(organizationId, data);
-        toast.success("Employee created successfully!");
-      }
-      onSuccessAction();
-    } catch (error) {
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    const success = await onSubmitAction(data);
+    if (!success) setIsLoading(false);
+  };
 
   return (
     <FormWrapper
       form={form}
-      onFormSubmit={onSubmit}
+      onFormSubmit={handleSubmit}
       isLoading={isLoading}
       title={
         mode === "create"
@@ -195,16 +159,17 @@ export function EmployeeForm({
               </div>
               <FormField
                 control={form.control}
-                name="logo"
+                name="logoFile"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Profile Photo</FormLabel>
                     <FormControl>
                       <ImageUploader
-                        currentImageUrl={field.value}
-                        onImageSelectedAction={(file, url) =>
-                          field.onChange(url || "")
-                        }
+                        currentImageUrl={form.getValues("logo")}
+                        onImageSelectedAction={(file, url) => {
+                          field.onChange(file);
+                          form.setValue("logo", url || "");
+                        }}
                         label=""
                         fallbackName={`${form.getValues(
                           "first_name"
@@ -294,12 +259,14 @@ export function EmployeeForm({
                 name="agency_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Agency</FormLabel>
+                    <FormLabel>Agency Assignment</FormLabel>
                     <Select
                       onValueChange={(value) =>
                         field.onChange(value === "headquarters" ? null : value)
                       }
                       defaultValue={field.value || "headquarters"}
+                      // [CHANGE] Disable the select if we are scoped to a specific agency
+                      disabled={scopedAgencyId !== undefined}
                     >
                       <FormControl>
                         <SelectTrigger>

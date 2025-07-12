@@ -7,16 +7,19 @@ import { organizationRepository } from "@/lib/data-repo/organization";
 import { EmployeeFormData } from "@/components/organization/employees/employee-form";
 import { toast } from "sonner";
 
-export default function CreateEmployeePage() {
+export default function CreateAgencyEmployeePage() {
   const router = useRouter();
-  const { activeOrganizationId, agenciesForCurrentOrg } = useActiveOrganization();
+  const { activeOrganizationId, activeAgencyId, activeAgencyDetails } = useActiveOrganization();
 
   const handleCreate = async (data: EmployeeFormData): Promise<boolean> => {
-    if (!activeOrganizationId) { toast.error("No active organization selected."); return false; }
+    if (!activeOrganizationId || !activeAgencyId) {
+      toast.error("No active agency selected.");
+      return false;
+    }
     try {
-      await organizationRepository.createOrgEmployee(activeOrganizationId, data);
-      toast.success("Employee created successfully!");
-      router.push("/business-actor/org/employees");
+      await organizationRepository.createAgencyEmployee(activeOrganizationId, activeAgencyId, data);
+      toast.success("Employee created and assigned to agency successfully!");
+      router.push("/business-actor/agency/employees");
       router.refresh();
       return true;
     } catch (error: any) {
@@ -28,11 +31,10 @@ export default function CreateEmployeePage() {
   return (
     <div className="mx-auto">
       <EmployeeForm
-      
-        agencies={agenciesForCurrentOrg}
+        agencies={activeAgencyDetails ? [activeAgencyDetails] : []}
         mode="create"
-  
         onSubmitAction={handleCreate}
+        scopedAgencyId={activeAgencyId} // Lock the form to the current agency
       />
     </div>
   );

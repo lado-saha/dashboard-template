@@ -1,9 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Metadata } from "next";
+import { AgencyEmployeesClientPage } from "./employees-client";
+
+export const metadata: Metadata = {
+  title: "Manage Agency Employees",
+  description: "View and manage employees assigned to this agency.",
+};
+
 export default function AgencyEmployeesPage() {
-  return (
-    <Card>
-      <CardHeader><CardTitle>Agency Employees</CardTitle></CardHeader>
-      <CardContent><p>This page will list and manage employees for the active agency.</p></CardContent>
-    </Card>
-  );
+  return <AgencyEmployeesClientPage />;
 }

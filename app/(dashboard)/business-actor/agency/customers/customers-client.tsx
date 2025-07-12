@@ -90,7 +90,7 @@ export function AgencyCustomersClientPage() {
     }
   };
 
-  const columns = useMemo<ColumnDef<CustomerDto>[]>(() => getCustomerColumns({ onEditAction: handleOpenFormModal, onDeleteAction: (item) => handleDeleteConfirmation([item]) }, []), []);
+  const columns = useMemo<ColumnDef<CustomerDto>[]>(() => getCustomerColumns({ onEditAction: handleOpenFormModal, onDeleteAction: (item) => handleDeleteConfirmation([item])}, [activeAgencyDetails!].filter(Boolean)),[activeAgencyDetails]);
 
   if (!activeAgencyId && !isLoading) {
     return <FeedbackCard icon={Building} title="No Agency Selected" description="Please select an active agency to manage its customers." />;
