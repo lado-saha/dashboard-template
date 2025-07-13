@@ -1,41 +1,64 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDistanceToNow } from 'date-fns';
+import { Users, Building, Briefcase, Truck } from 'lucide-react';
+import React from "react";
 
-// Mock Data
-const activities = [
-  { user: "Liam Johnson", avatar: "https://i.pravatar.cc/150?u=a1", action: "added a new employee:", target: "Olivia Davis" },
-  { user: "Emma Williams", avatar: "https://i.pravatar.cc/150?u=a2", action: "updated the agency:", target: "Innovate East" },
-  { user: "Noah Brown", avatar: "https://i.pravatar.cc/150?u=a3", action: "created a new customer profile:", target: "TechCorp Inc." },
-  { user: "Ava Jones", avatar: "https://i.pravatar.cc/150?u=a4", action: "added a new supplier:", target: "Global Supplies" },
-  { user: "William Garcia", avatar: "https://i.pravatar.cc/150?u=a5", action: "changed the status of:", target: "Main Project" },
-];
+export interface ActivityItem {
+  id: string;
+  type: 'Employee' | 'Agency' | 'Customer' | 'Supplier';
+  action: 'created' | 'updated';
+  timestamp: string;
+  targetName: string;
+}
 
-export function RecentActivity() {
+const typeConfig = {
+    Employee: { icon: Users, color: 'bg-sky-100 dark:bg-sky-900/40', textColor: 'text-sky-600 dark:text-sky-400' },
+    Agency: { icon: Building, color: 'bg-amber-100 dark:bg-amber-900/40', textColor: 'text-amber-600 dark:text-amber-400' },
+    Customer: { icon: Briefcase, color: 'bg-green-100 dark:bg-green-900/40', textColor: 'text-green-600 dark:text-green-400' },
+    Supplier: { icon: Truck, color: 'bg-slate-100 dark:bg-slate-800/60', textColor: 'text-slate-600 dark:text-slate-400' },
+};
+
+
+export function RecentActivity({ activities }: { activities: ActivityItem[] }) {
   return (
     <Card className="col-span-4 md:col-span-3">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>An overview of recent actions within your organization.</CardDescription>
+        <CardDescription>An overview of the latest actions within your organization.</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[350px]">
-          <div className="space-y-6">
-            {activities.map((activity, index) => (
-              <div key={index} className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={activity.avatar} alt="Avatar" />
-                  <AvatarFallback>{activity.user.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    <span className="font-semibold text-primary">{activity.user}</span> {activity.action}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{activity.target}</p>
+            {activities.length > 0 ? (
+                <div className="space-y-6">
+                    {activities.map((activity) => {
+                        const config = typeConfig[activity.type];
+                        const Icon = config.icon;
+                        return (
+                        <div key={activity.id} className="flex items-center">
+                            <Avatar className={`h-9 w-9 flex items-center justify-center ${config.color}`}>
+                                <Icon className={`h-5 w-5 ${config.textColor}`} />
+                            </Avatar>
+                            <div className="ml-4 space-y-1">
+                                <p className="text-sm font-medium leading-none">
+                                    <span className="font-semibold text-primary">{activity.targetName}</span>
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {activity.type} {activity.action} • {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                                </p>
+                            </div>
+                        </div>
+                        )
+                    })}
                 </div>
-              </div>
-            ))}
-          </div>
+            ) : (
+                <div className="flex h-[300px] items-center justify-center text-center text-sm text-muted-foreground">
+                    <p>No recent activity to display.</p>
+                </div>
+            )}
         </ScrollArea>
       </CardContent>
     </Card>

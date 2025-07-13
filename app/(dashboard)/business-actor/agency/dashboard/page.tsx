@@ -7,6 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default async function AgencyDashboardPage() {
-  // The client component will fetch all data based on the active agency context
   return <AgencyDashboardClientPage />;
 }

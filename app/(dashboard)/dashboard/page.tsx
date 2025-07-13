@@ -12,7 +12,7 @@ export default function UserDashboardPage() {
   const { data: session, status } = useSession();
   const { userOrganizations, isLoadingUserOrgs } = useActiveOrganization();
 
-  if (status === 'loading' || isLoadingUserOrgs) {
+  if (status === 'loading' || (session?.user?.businessActorId && isLoadingUserOrgs)) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

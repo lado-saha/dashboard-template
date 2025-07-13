@@ -11,8 +11,6 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cart
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 interface SuperAdminDashboardData {
   users: UserDto[];
@@ -25,7 +23,10 @@ interface SuperAdminDashboardClientPageProps {
   initialData: SuperAdminDashboardData;
 }
 
-const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--primary) / 0.8)", "hsl(var(--primary) / 0.6)", "hsl(var(--primary) / 0.4)"];
+const PIE_COLORS = [
+    "hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", 
+    "hsl(var(--chart-4))", "hsl(var(--chart-5))"
+];
 
 export function SuperAdminDashboardClientPage({ initialData }: SuperAdminDashboardClientPageProps) {
   const { users, organizations, businessActors } = initialData;
@@ -76,16 +77,16 @@ export function SuperAdminDashboardClientPage({ initialData }: SuperAdminDashboa
                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }} />
               </PieChart>
             </ResponsiveContainer>
         </DashboardCard>
         <DashboardCard title="Business Actor Types" description="Breakdown of business actors by their primary role." icon={Briefcase}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={baTypeData} layout="vertical" margin={{ left: 20, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" stroke="#888888" fontSize={12} />
-                  <YAxis type="category" dataKey="name" stroke="#888888" fontSize={12} width={120} tickLine={false} axisLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} width={120} tickLine={false} axisLine={false} />
                   <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
                   <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Count" barSize={25} />
               </BarChart>
@@ -123,7 +124,6 @@ export function SuperAdminDashboardClientPage({ initialData }: SuperAdminDashboa
             </Table>
         </ScrollArea>
       </DashboardCard>
-
     </div>
   );
 }

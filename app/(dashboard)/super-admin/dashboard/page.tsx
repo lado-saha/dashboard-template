@@ -8,8 +8,7 @@ export const metadata: Metadata = {
   description: "Platform-wide overview of all users, organizations, and activities.",
 };
 
-// This page can be cached and revalidated periodically
-export const revalidate = 300; // 5 minutes
+export const revalidate = 60; // Revalidate data every 60 seconds
 
 async function getDashboardData() {
   try {
