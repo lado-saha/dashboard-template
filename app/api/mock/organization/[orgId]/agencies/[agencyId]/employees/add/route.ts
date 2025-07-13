@@ -17,7 +17,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
     // We are "affecting" or linking them to this agency.
     // or create a new employment record linking user to agency.
 
-    let employee = dbManager.getItemById('employees', body.employee_id);
+  const employee = dbManager.getItemById('employees', body.employee_id);
     if (!employee) {
       // If not found as an employee, maybe it a BusinessActor to be made an employee
       // For simplicity, wel assume it should exist or we create a new one.

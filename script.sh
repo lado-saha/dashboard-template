@@ -1,647 +1,431 @@
 #!/bin/bash
 
-echo "🚀 Starting UI Refinement: Dashboard, Role Switcher, and Footer..."
+echo "🚀 Refining Dashboards: Making them data-driven and dynamic..."
 
-# --- 1. Remove the Pricing Page ---
-echo "🗑️ Removing obsolete /pricing page..."
-rm -f app/pricing/page.tsx
-
-# --- 2. Create the AppFooter Component ---
-echo "✍️ Creating a professional AppFooter component..."
-code "components/app-footer.tsx"
-cat > components/app-footer.tsx << 'EOF'
+# 1. Refactor the main Organization Dashboard Client
+echo "🔥 Overhauling the main Organization Dashboard..."
+mkdir -p "$(pwd)/app/(dashboard)/business-actor/dashboard"
+cat << 'EOF' > "$(pwd)/app/(dashboard)/business-actor/dashboard/dashboard-client.tsx"
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
-import { Globe, Shield, FileText, MessageSquareHeart } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-
-interface AppFooterProps {
-  className?: string;
-}
-
-export function AppFooter({ className }: AppFooterProps) {
-  const currentYear = new Date().getFullYear();
-
-  const footerLinks = [
-    { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms of Service", href: "/terms-of-service" },
-    { name: "Help Center", href: "/help" },
-  ];
-
-  return (
-    <footer className={cn("bg-background border-t text-muted-foreground print:hidden", className)}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-          <div className="flex items-center justify-center md:justify-start gap-2">
-            <Image src="/logo.svg" alt="YowYob Logo" width={28} height={28} />
-            <span className="text-lg font-semibold text-foreground">YowYob</span>
-          </div>
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 md:col-span-1">
-            {footerLinks.map((item) => (
-              <Link key={item.name} href={item.href} className="text-sm hover:text-primary transition-colors">
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <Separator className="mb-6" />
-        <div className="py-6 flex flex-col sm:flex-row justify-between items-center text-xs">
-          <p>© {currentYear} YowYob Inc. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-EOF
-
-# --- 3. Implement the Role Elevation Switcher ---
-echo "👑 Creating the DevRoleSwitcher component..."
-code "components/dev/role-switcher.tsx"
-cat > components/dev/role-switcher.tsx << 'EOF'
-"use client";
-
-import * as React from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { User, ShieldAlert } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-
-type Role = "user" | "super-admin";
-
-interface DevRoleSwitcherProps {
-  className?: string;
-}
-
-export function DevRoleSwitcher({ className }: DevRoleSwitcherProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const currentRole: Role = pathname.startsWith('/super-admin') ? 'super-admin' : 'user';
-
-  const handleRoleChange = (newRole: Role) => {
-    if (newRole === 'super-admin') {
-      router.push(`/super-admin/dashboard`);
-    } else {
-      router.push(`/dashboard`);
-    }
-  };
-
-  // This component will only render in the development environment
-  if (process.env.NODE_ENV !== 'development') {
-    return null;
-  }
-
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Select value={currentRole} onValueChange={handleRoleChange}>
-        <SelectTrigger className="w-auto h-9 text-xs sm:text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0 focus-visible:ring-0 shadow-sm border-dashed border-amber-500/50">
-          <SelectValue placeholder="Switch Role..." />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="user" className="text-xs sm:text-sm">
-            <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /><span>User View</span></div>
-          </SelectItem>
-          <SelectItem value="super-admin" className="text-xs sm:text-sm">
-            <div className="flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-muted-foreground" /><span>Super Admin View</span></div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-EOF
-
-# --- 4. Update TopNav and Main Layout ---
-echo "🎨 Updating TopNav and main Layout..."
-# Update components/top-nav.tsx
-code "components/top-nav.tsx"
-cat > components/top-nav.tsx << 'EOF'
-"use client";
-
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Search } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { UserNav } from "./user-nav";
-import { ModeToggle } from "./mode-toggle";
-import { Button } from "./ui/button";
-import { signOut } from "next-auth/react";
-import { DevRoleSwitcher } from "../dev/role-switcher"; // [ADD] Import the switcher
+import { organizationRepository } from "@/lib/data-repo/organization";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard, StatCardSkeleton } from "@/components/dashboard/organization/stat-card";
+import { SalesChart } from "@/components/dashboard/organization/sales-chart";
+import { RecentActivity } from "@/components/dashboard/organization/recent-activity";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FeedbackCard } from "@/components/ui/feedback-card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { DollarSign, Users, Building, Truck, Briefcase, UserPlus, Users2 } from "lucide-react";
+import { AgencyDto, EmployeeDto, CustomerDto, ProviderDto } from "@/types/organization";
 
-interface TopNavProps {
-  onOpenCommandPalette: () => void;
+interface DashboardData {
+  employeeCount: number;
+  agencyCount: number;
+  customerCount: number;
+  supplierCount: number;
+  topAgencies: AgencyDto[];
+  employees: EmployeeDto[];
+  customers: CustomerDto[];
+  suppliers: ProviderDto[];
+  error?: string | null;
 }
 
-export function TopNav({ onOpenCommandPalette }: TopNavProps) {
-  const pathname = usePathname();
-  const { activeOrganizationDetails, activeAgencyDetails } = useActiveOrganization();
+const initialData: DashboardData = {
+  employeeCount: 0,
+  agencyCount: 0,
+  customerCount: 0,
+  supplierCount: 0,
+  topAgencies: [],
+  employees: [],
+  customers: [],
+  suppliers: [],
+};
 
-  // Breadcrumb logic remains the same
-  const getBreadcrumbs = () => { /* ... same logic ... */ };
+export function DashboardClientPage() {
+  const router = useRouter();
+  const { activeOrganizationId, activeOrganizationDetails, isLoadingOrgDetails } = useActiveOrganization();
+  const [data, setData] = useState<DashboardData>(initialData);
+  const [isLoading, setIsLoading] = useState(true);
 
-  return (
-    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="hidden items-center gap-1.5 text-sm md:flex flex-wrap mr-4">
-          {getBreadcrumbs()}
-        </div>
-        <div className="md:hidden">
-          <span className="text-sm font-medium">{/* ... same logic ... */}</span>
-        </div>
-        <div className="flex items-center gap-x-3 sm:gap-x-4">
-          <DevRoleSwitcher /> {/* [ADD] The switcher */}
-          <Button variant="outline" size="sm" className="h-9 gap-2" onClick={onOpenCommandPalette}>
-            <Search className="h-4 w-4" />
-            <span className="hidden lg:inline-block">Search...</span>
-            <kbd className="hidden lg:inline-block pointer-events-none select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </Button>
-          <ModeToggle />
-          <UserNav onLogoutAction={() => signOut({ callbackUrl: "/login" })} />
-        </div>
-      </div>
-    </header>
-  );
-}
-EOF
+  const fetchData = useCallback(async () => {
+    if (!activeOrganizationId) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const [employees, agencies, customers, suppliers] = await Promise.all([
+        organizationRepository.getOrgEmployees(activeOrganizationId),
+        organizationRepository.getAgencies(activeOrganizationId),
+        organizationRepository.getOrgCustomers(activeOrganizationId),
+        organizationRepository.getOrgSuppliers(activeOrganizationId),
+      ]);
+      setData({
+        employeeCount: employees?.length || 0,
+        agencyCount: agencies?.length || 0,
+        customerCount: customers?.length || 0,
+        supplierCount: suppliers?.length || 0,
+        topAgencies: agencies?.sort((a, b) => (b.average_revenue || 0) - (a.average_revenue || 0)).slice(0, 5) || [],
+        employees: employees || [],
+        customers: customers || [],
+        suppliers: suppliers || [],
+      });
+    } catch (error: any) {
+      setData({ ...initialData, error: "Failed to load dashboard data." });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeOrganizationId]);
 
-# Update app/(dashboard)/layout.tsx to include the footer
-code "app/(dashboard)/layout.tsx"
-cat > app/\(dashboard\)/layout.tsx << 'EOF'
-"use client";
+  useEffect(() => {
+    if (activeOrganizationId) fetchData();
+    else if (!isLoadingOrgDetails) setIsLoading(false);
+  }, [activeOrganizationId, isLoadingOrgDetails, fetchData]);
 
-import { MainSidebar } from "@/components/main-sidebar";
-import { TopNav } from "@/components/top-nav";
-import { ActiveOrganizationProvider } from "@/contexts/active-organization-context";
-import { CommandPalette } from "@/components/command-palette";
-import { useCommandPalette } from "@/hooks/use-command-palette";
-import { AppFooter } from "@/components/app-footer"; // [ADD] Import footer
-
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { isOpen, setIsOpen } = useCommandPalette();
-
-  return (
-    <ActiveOrganizationProvider>
-      <CommandPalette isOpen={isOpen} setIsOpen={setIsOpen} />
-      <div className="flex min-h-screen">
-        <MainSidebar />
-        <div className="flex flex-1 flex-col overflow-x-hidden">
-          <TopNav onOpenCommandPalette={() => setIsOpen(true)} />
-          <main className="flex-1 bg-muted/30 p-4 pt-20 sm:p-6 md:p-8">
-            <div className="mx-auto">{children}</div>
-          </main>
-          <AppFooter /> {/* [ADD] The footer */}
-        </div>
-      </div>
-    </ActiveOrganizationProvider>
-  );
-}
-EOF
-
-# --- 5. Refactor the Main User Dashboard ---
-echo "✨ Overhauling the main User Dashboard..."
-code "app/(dashboard)/dashboard/page.tsx"
-cat > app/\(dashboard\)/dashboard/page.tsx << 'EOF'
-"use client";
-
-import React from 'react';
-import { useSession } from "next-auth/react";
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowRight, Building, Loader2, LifeBuoy, Settings } from 'lucide-react';
-import { useActiveOrganization } from '@/contexts/active-organization-context';
-
-export default function UserDashboardPage() {
-  const { data: session, status } = useSession();
-  const { userOrganizations, isLoadingUserOrgs } = useActiveOrganization();
-
-  if (status === 'loading' || isLoadingUserOrgs) {
+  if (isLoading || isLoadingOrgDetails) {
     return (
-      <div className="flex items-center justify-center min-h-[80vh]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="ml-4 text-muted-foreground">Loading Dashboard...</p>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center"><Skeleton className="h-10 w-1/3" /><Skeleton className="h-10 w-48" /></div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}</div>
+        <div className="grid gap-4 lg:grid-cols-7"><Skeleton className="lg:col-span-4 h-96 w-full" /><Skeleton className="lg:col-span-3 h-96 w-full" /></div>
       </div>
     );
   }
 
-  const isBusinessActor = !!session?.user.businessActorId;
+  if (!activeOrganizationId) {
+    return <FeedbackCard icon={Building} title="No Organization Selected" description="Please select an organization from the switcher in the sidebar to view its dashboard." />;
+  }
+
+  const totalRevenue = data.topAgencies.reduce((acc, agency) => acc + (agency.average_revenue || 0), 0);
+  const departmentDistribution = data.employees.reduce((acc, emp) => {
+    const dept = emp.department || "Unassigned";
+    acc[dept] = (acc[dept] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const departmentData = Object.entries(departmentDistribution).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome, {session?.user.first_name || "User"}!</h1>
-          <p className="text-muted-foreground">This is your personal space. Manage your settings or jump into your business workspace.</p>
-        </div>
+      <PageHeader title={activeOrganizationDetails?.long_name || "Dashboard"} description="Welcome to your organization's command center." />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Est. Annual Revenue" value={`$${(totalRevenue * 12).toLocaleString()}`} icon={DollarSign} />
+        <StatCard title="Total Customers" value={data.customerCount.toLocaleString()} icon={Users} />
+        <StatCard title="Total Agencies" value={data.agencyCount.toLocaleString()} icon={Building} />
+        <StatCard title="Total Employees" value={data.employeeCount.toLocaleString()} icon={UserPlus} />
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {isBusinessActor ? (
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <Building className="h-8 w-8 text-primary mb-2" />
-              <CardTitle>Business Workspace</CardTitle>
-              <CardDescription>You have {userOrganizations.length} organization(s). Jump in to manage your business operations.</CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Button asChild>
-                <Link href="/business-actor/organizations">Enter Workspace <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ) : (
-          <Card className="border-primary/50 hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <Building className="h-8 w-8 text-primary mb-2" />
-              <CardTitle>Become a Business Actor</CardTitle>
-              <CardDescription>Unlock powerful tools to manage your organization, list services, and grow your business.</CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Button asChild>
-                <Link href="/business-actor/onboarding">Get Started <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <Settings className="h-8 w-8 text-primary mb-2" />
-            <CardTitle>Account Settings</CardTitle>
-            <CardDescription>Manage your personal profile, notification preferences, and account security.</CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button asChild variant="outline">
-              <Link href="/settings">Go to Settings</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
+        <SalesChart />
+        <RecentActivity employees={data.employees} customers={data.customers} suppliers={data.suppliers} />
       </div>
-
       <Card>
-        <CardHeader>
-            <LifeBuoy className="h-8 w-8 text-primary mb-2" />
-            <CardTitle>Need Help?</CardTitle>
-            <CardDescription>Find answers to common questions or get in touch with our support team.</CardDescription>
-        </CardHeader>
-        <CardFooter>
-            <Button asChild variant="secondary">
-                <Link href="/help">Visit Help Center</Link>
-            </Button>
-        </CardFooter>
+        <CardHeader><CardTitle>Organization Entities Overview</CardTitle><CardDescription>A detailed breakdown of your key operational entities.</CardDescription></CardHeader>
+        <CardContent>
+          <Tabs defaultValue="agencies" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+              <TabsTrigger value="agencies"><Users2 className="mr-2 h-4 w-4" />Agencies</TabsTrigger>
+              <TabsTrigger value="employees"><Users className="mr-2 h-4 w-4" />Employees</TabsTrigger>
+              <TabsTrigger value="customers"><Briefcase className="mr-2 h-4 w-4" />Customers</TabsTrigger>
+              <TabsTrigger value="suppliers"><Truck className="mr-2 h-4 w-4" />Suppliers</TabsTrigger>
+            </TabsList>
+            <TabsContent value="agencies" className="pt-6 space-y-4">
+              <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{data.agencyCount} total agencies.</p><Button variant="outline" size="sm" onClick={() => router.push("/business-actor/org/agencies")}>Manage All</Button></div>
+              <div className="space-y-4">{data.topAgencies.map(agency => (<div key={agency.agency_id} className="space-y-1"><div className="flex justify-between text-sm"><p className="font-medium">{agency.short_name}</p><p className="text-muted-foreground">${(agency.average_revenue || 0).toLocaleString()}/mo</p></div><Progress value={totalRevenue > 0 ? ((agency.average_revenue || 0) / totalRevenue) * 100 : 0} /></div>))}</div>
+            </TabsContent>
+            <TabsContent value="employees" className="pt-6">
+              <div className="flex items-center justify-between mb-4"><p className="text-sm text-muted-foreground">{data.employeeCount} total employees.</p><Button variant="outline" size="sm" onClick={() => router.push("/business-actor/org/employees")}>Manage All</Button></div>
+              <ResponsiveContainer width="100%" height={250}><BarChart data={departmentData} layout="vertical" margin={{ left: 10, right: 30 }}><CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" stroke="#888888" fontSize={12} /><YAxis type="category" dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} width={100} /><Tooltip cursor={{ fill: "hsl(var(--muted))" }} contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} /><Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Employees" barSize={20} /></BarChart></ResponsiveContainer>
+            </TabsContent>
+            <TabsContent value="customers" className="pt-6">
+              <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{data.customerCount} total customers.</p><Button variant="outline" size="sm" onClick={() => router.push("/business-actor/org/customers")}>Manage All</Button></div><div className="h-[250px] flex items-center justify-center text-muted-foreground italic">New customer acquisition chart coming soon...</div>
+            </TabsContent>
+            <TabsContent value="suppliers" className="pt-6">
+              <div className="flex items-center justify-between"><p className="text-sm text-muted-foreground">{data.supplierCount} total suppliers.</p><Button variant="outline" size="sm" onClick={() => router.push("/business-actor/org/suppliers")}>Manage All</Button></div><div className="h-[250px] flex items-center justify-center text-muted-foreground italic">Supplier category breakdown chart coming soon...</div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
       </Card>
     </div>
   );
 }
 EOF
+code "$(pwd)/app/(dashboard)/business-actor/dashboard/dashboard-client.tsx"
 
-# --- 6. Update Sidebar with Roles Link ---
-echo "📜 Adding Roles link to MainSidebar for Super Admins..."
-code "components/main-sidebar.tsx"
-cat > components/main-sidebar.tsx << 'EOF'
+# 2. Refactor the Agency Dashboard Client
+echo "📊 Enhancing the Agency Dashboard..."
+mkdir -p "$(pwd)/app/(dashboard)/business-actor/agency/dashboard"
+cat << 'EOF' > "$(pwd)/app/(dashboard)/business-actor/agency/dashboard/dashboard-client.tsx"
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import {
-  Award, Briefcase, Building, Combine, FileText, FolderHeart, HandCoins, HelpCircle,
-  LayoutGrid, Lightbulb, LogOut, Landmark, Menu, MessagesSquare, Package, Server,
-  Settings, Share2, SidebarClose, Truck, UserCheck, Users, Users2, UsersRound,
-  Wallet, Webhook, ArrowLeft, UserCog, Power, Shield,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { OrganizationSwitcher } from "@/components/organization/organization-switcher";
+import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { Separator } from "./ui/separator";
-import { AgencySwitcher } from "./organization/agencies/agency-switcher";
-import { toast } from "sonner";
+import { organizationRepository } from "@/lib/data-repo/organization";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard, StatCardSkeleton } from "@/components/dashboard/organization/stat-card";
+import { TeamRoster } from "@/components/dashboard/agency/team-roster";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FeedbackCard } from "@/components/ui/feedback-card";
+import { DollarSign, Users, Briefcase, UserPlus, Truck, Lightbulb, Building } from "lucide-react";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { EmployeeDto, CustomerDto, ProspectDto, ProviderDto } from "@/types/organization";
 
-// --- Navigation Definitions ---
-const baOrgNavigation = [
-  { name: "Organizations Hub", href: "/business-actor/organizations", icon: Building },
-  { name: "Org. Dashboard", href: "/business-actor/dashboard", icon: LayoutGrid, isOrgSpecific: true },
-  { name: "Org. Profile", href: "/business-actor/org/profile", icon: Landmark, isOrgSpecific: true },
-  { name: "Agencies", href: "/business-actor/org/agencies", icon: Users2, isOrgSpecific: true },
-  { name: "Employees", href: "/business-actor/org/employees", icon: Users, isOrgSpecific: true },
-  { name: "Certifications", href: "/business-actor/org/certifications", icon: Award, isOrgSpecific: true },
-  { name: "Practical Info", href: "/business-actor/org/practical-info", icon: Info, isOrgSpecific: true },
-];
-const agencyNavigation = [
-  { name: "Agency Dashboard", href: "/business-actor/agency/dashboard", icon: LayoutGrid },
-  { name: "Agency Profile", href: "/business-actor/agency/profile", icon: Landmark },
-  { name: "Agency Employees", href: "/business-actor/agency/employees", icon: Users },
-  { name: "Agency Customers", href: "/business-actor/agency/customers", icon: UsersRound },
-];
-const baGlobalNavigation = [
-  { name: "My BA Profile", href: "/business-actor/profile", icon: UserCog },
-  { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
-  { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
-];
-const userNavigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
-  { name: "Services", href: "/services", icon: Briefcase },
-  { name: "Invoices", href: "/invoices", icon: FileText },
-  { name: "My Bonus", href: "/bonus", icon: HandCoins },
-];
-const superAdminNavigation = [
-  { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
-  { name: "Business Actors", href: "/super-admin/business-actors", icon: Building },
-  { name: "Users", href: "/super-admin/users", icon: Users },
-  { name: "Roles & Permissions", href: "/super-admin/roles", icon: Shield },
-  { name: "Business Domains", href: "/super-admin/business-domains", icon: Server },
-];
-const bottomNavigation = [
-  { name: "Help & Support", href: "/help", icon: HelpCircle },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
-
-export function MainSidebar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { data: session } = useSession();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { activeOrganizationId, activeAgencyDetails, clearActiveAgency, clearActiveOrganization } = useActiveOrganization();
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsCollapsed(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const { isBusinessActor, isSuperAdmin } = useMemo(() => ({
-    isBusinessActor: !!session?.user.businessActorId,
-    isSuperAdmin: session?.user.roles?.includes('SUPER_ADMIN_ROLE'),
-  }), [session]);
-
-  const isAgencyContext = pathname.startsWith("/business-actor/agency");
-
-  let mainNav: any[] = userNavigation;
-  let globalNav: any[] = [];
-  let sidebarTitle = "My Account";
-  let homeLink = "/dashboard";
-  let ContextSwitcher = null;
-
-  if (isSuperAdmin) {
-    mainNav = superAdminNavigation;
-    sidebarTitle = "Platform Admin";
-    homeLink = "/super-admin/dashboard";
-  } else if (isBusinessActor) {
-    if (isAgencyContext) {
-      mainNav = agencyNavigation;
-      sidebarTitle = activeAgencyDetails?.short_name || "Agency";
-      homeLink = "/business-actor/agency/dashboard";
-      ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
-    } else {
-      mainNav = baOrgNavigation;
-      globalNav = baGlobalNavigation;
-      sidebarTitle = "BA Workspace";
-      homeLink = "/business-actor/organizations";
-      ContextSwitcher = () => <OrganizationSwitcher isCollapsed={isCollapsed} />;
-    }
-  }
-
-  const ExitButton = () => { /* ... same logic ... */ };
-  const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType; isOrgSpecific?: boolean; } }) => { /* ... same logic ... */ };
-
-  return (
-    <TooltipProvider>
-      {/* ... The rest of the JSX remains the same, no need to regenerate all of it ... */}
-    </TooltipProvider>
-  );
+interface AgencyDashboardData {
+  employeeCount: number;
+  customerCount: number;
+  prospectCount: number;
+  supplierCount: number;
+  employees: EmployeeDto[];
+  error?: string | null;
 }
-EOF
 
-# Final re-touch on MainSidebar to ensure the components are correctly implemented
-code "components/main-sidebar.tsx"
-cat > components/main-sidebar.tsx << 'EOF'
-"use client";
+const initialData: AgencyDashboardData = {
+  employeeCount: 0,
+  customerCount: 0,
+  prospectCount: 0,
+  supplierCount: 0,
+  employees: [],
+};
 
-import React, { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import {
-  Award, Briefcase, Building, Combine, FileText, FolderHeart, HandCoins, HelpCircle,
-  LayoutGrid, Lightbulb, LogOut, Landmark, Menu, MessagesSquare, Package, Server,
-  Settings, Share2, SidebarClose, Truck, UserCheck, Users, Users2, UsersRound,
-  Wallet, Webhook, ArrowLeft, UserCog, Power, Shield,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { OrganizationSwitcher } from "@/components/organization/organization-switcher";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { Separator } from "./ui/separator";
-import { AgencySwitcher } from "./organization/agencies/agency-switcher";
-import { toast } from "sonner";
-
-// --- Navigation Definitions ---
-const baOrgNavigation = [
-  { name: "Organizations Hub", href: "/business-actor/organizations", icon: Building },
-  { name: "Org. Dashboard", href: "/business-actor/dashboard", icon: LayoutGrid, isOrgSpecific: true },
-  { name: "Org. Profile", href: "/business-actor/org/profile", icon: Landmark, isOrgSpecific: true },
-  { name: "Agencies", href: "/business-actor/org/agencies", icon: Users2, isOrgSpecific: true },
-  { name: "Employees", href: "/business-actor/org/employees", icon: Users, isOrgSpecific: true },
-  { name: "Customers", href: "/business-actor/org/customers", icon: Briefcase, isOrgSpecific: true },
-  { name: "Suppliers", href: "/business-actor/org/suppliers", icon: Truck, isOrgSpecific: true },
-  { name: "Certifications", href: "/business-actor/org/certifications", icon: Award, isOrgSpecific: true },
-  { name: "Practical Info", href: "/business-actor/org/practical-info", icon: Info, isOrgSpecific: true },
-];
-const agencyNavigation = [
-  { name: "Agency Dashboard", href: "/business-actor/agency/dashboard", icon: LayoutGrid },
-  { name: "Agency Profile", href: "/business-actor/agency/profile", icon: Landmark },
-  { name: "Agency Employees", href: "/business-actor/agency/employees", icon: Users },
-  { name: "Agency Customers", href: "/business-actor/agency/customers", icon: UsersRound },
-];
-const baGlobalNavigation = [
-  { name: "My BA Profile", href: "/business-actor/profile", icon: UserCog },
-  { name: "Wallet", href: "/business-actor/wallet", icon: Wallet },
-  { name: "Bonus Config", href: "/business-actor/bonus", icon: HandCoins },
-];
-const userNavigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
-  { name: "Services", href: "/services", icon: Briefcase },
-  { name: "Invoices", href: "/invoices", icon: FileText },
-  { name: "My Bonus", href: "/bonus", icon: HandCoins },
-];
-const superAdminNavigation = [
-  { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
-  { name: "Users", href: "/super-admin/users", icon: Users },
-  { name: "Roles & Permissions", href: "/super-admin/roles", icon: Shield },
-  { name: "Business Domains", href: "/super-admin/business-domains", icon: Server },
-];
-const bottomNavigation = [
-  { name: "Help & Support", href: "/help", icon: HelpCircle },
-  { name: "Settings", href: "/settings", icon: Settings },
+// Mock data for the sales chart since API doesn't provide it
+const illustrativeSalesData = [
+  { name: 'Jan', Sales: 4000 }, { name: 'Feb', Sales: 3000 }, { name: 'Mar', Sales: 5000 },
+  { name: 'Apr', Sales: 4500 }, { name: 'May', Sales: 6000 }, { name: 'Jun', Sales: 5500 },
 ];
 
-export function MainSidebar() {
-  const pathname = usePathname();
+export function AgencyDashboardClientPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { activeOrganizationId, activeAgencyDetails, clearActiveAgency, clearActiveOrganization } = useActiveOrganization();
+  const { activeOrganizationId, activeAgencyId, activeAgencyDetails, isLoadingAgencyDetails } = useActiveOrganization();
+  const [data, setData] = useState<AgencyDashboardData>(initialData);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    if (!activeOrganizationId || !activeAgencyId) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const [employees, customers, prospects, suppliers] = await Promise.all([
+        organizationRepository.getAgencyEmployees(activeOrganizationId, activeAgencyId),
+        organizationRepository.getAgencyCustomers(activeOrganizationId, activeAgencyId),
+        organizationRepository.getAgencyProspects(activeOrganizationId, activeAgencyId),
+        organizationRepository.getAgencySuppliers(activeOrganizationId, activeAgencyId),
+      ]);
+      setData({
+        employeeCount: employees?.length || 0,
+        customerCount: customers?.length || 0,
+        prospectCount: prospects?.length || 0,
+        supplierCount: suppliers?.length || 0,
+        employees: employees || [],
+      });
+    } catch (error: any) {
+      setData({ ...initialData, error: "Failed to load agency dashboard data." });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeOrganizationId, activeAgencyId]);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsCollapsed(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (activeAgencyId) fetchData();
+    else if (!isLoadingAgencyDetails) setIsLoading(false);
+  }, [activeAgencyId, isLoadingAgencyDetails, fetchData]);
 
-  const { isBusinessActor, isSuperAdmin } = useMemo(() => ({
-    isBusinessActor: !!session?.user.businessActorId,
-    isSuperAdmin: session?.user.roles?.includes('SUPER_ADMIN_ROLE'),
-  }), [session]);
-
-  const isAgencyContext = pathname.startsWith("/business-actor/agency");
-
-  let mainNav: any[] = userNavigation;
-  let globalNav: any[] = [];
-  let sidebarTitle = "My Account";
-  let homeLink = "/dashboard";
-  let ContextSwitcher = null;
-
-  if (isSuperAdmin) {
-    mainNav = superAdminNavigation;
-    sidebarTitle = "Platform Admin";
-    homeLink = "/super-admin/dashboard";
-  } else if (isBusinessActor) {
-    if (isAgencyContext) {
-      mainNav = agencyNavigation;
-      sidebarTitle = activeAgencyDetails?.short_name || "Agency";
-      homeLink = "/business-actor/agency/dashboard";
-      ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
-    } else {
-      mainNav = baOrgNavigation;
-      globalNav = baGlobalNavigation;
-      sidebarTitle = "BA Workspace";
-      homeLink = "/business-actor/organizations";
-      ContextSwitcher = () => <OrganizationSwitcher isCollapsed={isCollapsed} />;
-    }
-  }
-  
-  const ExitButton = () => {
-    if (isAgencyContext) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button onClick={() => { clearActiveAgency(); router.push("/business-actor/dashboard"); }} variant="ghost" className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10">
-              <ArrowLeft className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")} />
-              {!isCollapsed && "Exit Agency"}
-            </Button>
-          </TooltipTrigger>
-          {isCollapsed && <TooltipContent side="right">Exit Agency</TooltipContent>}
-        </Tooltip>
-      );
-    }
-    if (isBusinessActor) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button onClick={() => { clearActiveOrganization(); router.push('/dashboard'); toast.info("Exited Business Workspace."); }} variant="ghost" className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-amber-500/10 hover:text-amber-600">
-              <Power className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")} />
-              {!isCollapsed && "Exit Workspace"}
-            </Button>
-          </TooltipTrigger>
-          {isCollapsed && <TooltipContent side="right">Exit Workspace</TooltipContent>}
-        </Tooltip>
-      );
-    }
-    return null;
-  };
-
-  const NavItem = ({ item }: { item: { name: string; href: string; icon: React.ElementType; isOrgSpecific?: boolean; } }) => {
-    const isDisabled = item.isOrgSpecific && !activeOrganizationId;
-    const isActive = !isDisabled && pathname.startsWith(item.href);
-
+  if (isLoading || isLoadingAgencyDetails) {
     return (
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>
-          <Link href={isDisabled ? "#" : item.href} className={cn("flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors h-9", isActive && "bg-sidebar-accent text-sidebar-accent-foreground", !isDisabled && !isActive && "text-sidebar-foreground hover:bg-sidebar-accent/80", isDisabled && "cursor-not-allowed text-muted-foreground/50", isCollapsed && "justify-center px-2")} onClick={() => isMobileOpen && !isDisabled && setIsMobileOpen(false)}>
-            <item.icon className={cn("h-[18px] w-[18px] shrink-0", !isCollapsed && "mr-3")} />
-            {!isCollapsed && <span className="truncate">{item.name}</span>}
-          </Link>
-        </TooltipTrigger>
-        {isCollapsed && <TooltipContent side="right">{item.name}</TooltipContent>}
-      </Tooltip>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center"><Skeleton className="h-10 w-1/3" /><Skeleton className="h-10 w-32" /></div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}</div>
+        <div className="grid gap-4 lg:grid-cols-7"><Skeleton className="lg:col-span-4 h-96 w-full" /><Skeleton className="lg:col-span-3 h-96 w-full" /></div>
+      </div>
     );
-  };
+  }
+
+  if (!activeAgencyId) {
+    return <FeedbackCard icon={Building} title="No Agency Selected" description="Please select an agency from the switcher in the sidebar to view its dashboard." />;
+  }
 
   return (
-    <TooltipProvider>
-      <Button variant="outline" size="icon" className="lg:hidden fixed top-4 left-4 z-[60]" onClick={() => setIsMobileOpen(v => !v)}><Menu className="h-5 w-5" /></Button>
-      <div className={cn("fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen", isCollapsed ? "w-[72px]" : "w-64", isMobileOpen ? "translate-x-0 shadow-xl" : "-translate-x-full lg:translate-x-0")}>
-        <div className={cn("flex h-16 shrink-0 items-center border-b px-4", isCollapsed && "justify-center px-2")}>
-          <Link href={homeLink} className="flex items-center gap-2 font-semibold">
-            <Image src="/logo.svg" alt="Logo" width={32} height={32} priority className="shrink-0" />
-            {!isCollapsed && <span className="text-lg truncate">{sidebarTitle}</span>}
-          </Link>
-          <Button variant="ghost" size="icon" className={cn("h-8 w-8 ml-auto hidden lg:flex")} onClick={() => setIsCollapsed(!isCollapsed)}>
-            <SidebarClose className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
-          </Button>
-          {isMobileOpen && <Button variant="ghost" size="icon" className="h-8 w-8 ml-auto lg:hidden" onClick={() => setIsMobileOpen(false)}><SidebarClose className="h-4 w-4" /></Button>}
-        </div>
-        {ContextSwitcher && <ContextSwitcher />}
-        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <nav className={cn("flex-1 space-y-1 py-4", isCollapsed ? "px-2" : "px-4")}>
-            {mainNav.map((item) => <NavItem key={item.name} item={item} />)}
-            {globalNav.length > 0 && (
-              <>
-                <Separator className="my-3" />
-                {globalNav.map((item) => <NavItem key={item.name} item={item} />)}
-              </>
-            )}
-          </nav>
-          <div className={cn("mt-auto border-t", isCollapsed ? "px-2" : "px-4")}>
-            <div className="space-y-1 py-4">
-              <ExitButton />
-              {bottomNavigation.map((item) => <NavItem key={item.name} item={item} />)}
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button onClick={() => signOut({ callbackUrl: "/login" })} variant="ghost" className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive">
-                    <LogOut className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")} />
-                    {!isCollapsed && "Logout"}
-                  </Button>
-                </TooltipTrigger>
-                {isCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
-              </Tooltip>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <PageHeader title={activeAgencyDetails?.long_name || "Agency Dashboard"} description="A focused overview of this agency's performance." action={<Button variant="outline" size="sm" onClick={() => router.push('/business-actor/org/agencies')}>Back to All Agencies</Button>} />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Monthly Revenue" value={`$${(activeAgencyDetails?.average_revenue || 0).toLocaleString()}`} description="Agency's estimated monthly takings" icon={DollarSign} />
+        <StatCard title="Agency Customers" value={data.customerCount.toLocaleString()} description="Total clients managed" icon={Briefcase} />
+        <StatCard title="Team Members" value={data.employeeCount.toLocaleString()} description="Active employees in this agency" icon={Users} />
+        <StatCard title="New Prospects" value={data.prospectCount.toLocaleString()} description="Potential new leads" icon={Lightbulb} />
       </div>
-      {isMobileOpen && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setIsMobileOpen(false)} />}
-    </TooltipProvider>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-7">
+        <Card className="col-span-4"><CardHeader><CardTitle>Sales Performance</CardTitle><CardDescription>Illustrative sales data for the last 6 months.</CardDescription></CardHeader><CardContent className="pl-2"><ResponsiveContainer width="100%" height={350}><BarChart data={illustrativeSalesData}><XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} /><YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value / 1000}k`} /><Tooltip cursor={{ fill: "hsl(var(--muted))" }} /><Bar dataKey="Sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></CardContent></Card>
+        <TeamRoster employees={data.employees} />
+      </div>
+    </div>
   );
 }
 EOF
+code "$(pwd)/app/(dashboard)/business-actor/agency/dashboard/dashboard-client.tsx"
 
-echo "✅ UI Refinement complete: Dashboard overhauled, Role Switcher added, Footer integrated."
+# 3. Refactor the Super Admin Dashboard Client
+echo "🛡️ Polishing the Super Admin Dashboard..."
+mkdir -p "$(pwd)/app/(dashboard)/super-admin/dashboard"
+cat << 'EOF' > "$(pwd)/app/(dashboard)/super-admin/dashboard/dashboard-client.tsx"
+"use client";
+
+import React, { useMemo } from "react";
+import { UserDto } from "@/types/auth";
+import { OrganizationDto, BusinessActorDto } from "@/types/organization";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/dashboard/organization/stat-card";
+import { DashboardCard } from "@/components/dashboard/dashboard-card";
+import { Users, Building, Briefcase, CheckCircle } from "lucide-react";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, CartesianGrid, Pie, PieChart } from "recharts";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface SuperAdminDashboardData {
+  users: UserDto[];
+  organizations: OrganizationDto[];
+  businessActors: BusinessActorDto[];
+  error?: string | null;
+}
+
+interface SuperAdminDashboardClientPageProps {
+  initialData: SuperAdminDashboardData;
+}
+
+const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--primary) / 0.8)", "hsl(var(--primary) / 0.6)", "hsl(var(--primary) / 0.4)", "hsl(var(--muted))"];
+
+export function SuperAdminDashboardClientPage({ initialData }: SuperAdminDashboardClientPageProps) {
+  const { users, organizations, businessActors } = initialData;
+
+  const orgStatusData = useMemo(() => {
+    const counts = organizations.reduce((acc, org) => {
+      const status = (org.status || "UNKNOWN").replace("_", " ");
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [organizations]);
+
+  const baTypeData = useMemo(() => {
+    const counts = businessActors.reduce((acc, actor) => {
+      const type = (actor.type || "GUEST").replace(/_/g, " ");
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    return Object.entries(counts).map(([name, value]) => ({ name: name.replace(/_/g, " "), value })).sort((a,b) => b.value - a.value);
+  }, [businessActors]);
+
+  const recentUsers = useMemo(() => {
+    return [...users]
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+      .slice(0, 5);
+  }, [users]);
+
+  return (
+    <div className="space-y-8">
+      <PageHeader title="Platform Overview" description="A comprehensive, real-time view of all system activities and entities." />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <StatCard title="Total Users" value={users.length.toLocaleString()} icon={Users} description={`${users.filter(u => u.is_enabled).length} active`} />
+        <StatCard title="Total Organizations" value={organizations.length.toLocaleString()} icon={Building} description={`${organizations.filter(o => o.status === "ACTIVE").length} active`} />
+        <StatCard title="Business Actors" value={businessActors.length.toLocaleString()} icon={Briefcase} description="Total professional profiles" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <DashboardCard title="Organization Status" description="Distribution of organizations by their current status." icon={CheckCircle}>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={orgStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}>
+                {orgStatusData.map((_entry, index) => (<Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />))}
+              </Pie>
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </DashboardCard>
+        <DashboardCard title="Business Actor Types" description="Breakdown of business actors by their primary role." icon={Briefcase}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={baTypeData} layout="vertical" margin={{ left: 20, right: 20 }}><CartesianGrid strokeDasharray="3 3" horizontal={false} /><XAxis type="number" stroke="#888888" fontSize={12} /><YAxis type="category" dataKey="name" stroke="#888888" fontSize={12} width={120} tickLine={false} axisLine={false} /><Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} /><Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Count" barSize={25} /></BarChart>
+          </ResponsiveContainer>
+        </DashboardCard>
+      </div>
+      <DashboardCard title="Recently Registered Users" description="The latest users to join the platform." icon={Users}>
+        <ScrollArea className="h-[300px]">
+          <Table><TableHeader><TableRow><TableHead>User</TableHead><TableHead>Username</TableHead><TableHead>Registered On</TableHead></TableRow></TableHeader><TableBody>{recentUsers.map(user => { const name = `${user.first_name || ''} ${user.last_name || ''}`.trim(); return (<TableRow key={user.id}><TableCell><div className="flex items-center gap-3"><Avatar className="h-9 w-9"><AvatarFallback>{name.charAt(0) || 'U'}</AvatarFallback></Avatar><div className="font-medium">{name}</div></div></TableCell><TableCell className="text-muted-foreground">{user.username}</TableCell><TableCell className="text-muted-foreground">{new Date(user.created_at!).toLocaleDateString()}</TableCell></TableRow>);})}</TableBody></Table>
+        </ScrollArea>
+      </DashboardCard>
+    </div>
+  );
+}
+EOF
+code "$(pwd)/app/(dashboard)/super-admin/dashboard/dashboard-client.tsx"
+
+# 4. Create the Recent Activity Component for the Organization Dashboard
+echo "📦 Creating the RecentActivity component..."
+mkdir -p "$(pwd)/components/dashboard/organization"
+cat << 'EOF' > "$(pwd)/components/dashboard/organization/recent-activity.tsx"
+"use client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { EmployeeDto, CustomerDto, ProviderDto } from "@/types/organization";
+import { Users, Briefcase, Truck, LucideIcon } from "lucide-react";
+
+interface ActivityItem {
+  type: 'Employee' | 'Customer' | 'Supplier';
+  icon: LucideIcon;
+  name: string;
+  description: string;
+  date: string;
+}
+
+export function RecentActivity({ employees, customers, suppliers }: { employees: EmployeeDto[], customers: CustomerDto[], suppliers: ProviderDto[] }) {
+  const combinedActivities: ActivityItem[] = [
+    ...employees.slice(0, 5).map(e => ({ type: 'Employee' as const, icon: Users, name: `${e.first_name} ${e.last_name}`, description: `Joined as ${e.employee_role || 'Member'}`, date: e.created_at! })),
+    ...customers.slice(0, 5).map(c => ({ type: 'Customer' as const, icon: Briefcase, name: `${c.first_name} ${c.last_name}`, description: 'Became a new customer', date: c.created_at! })),
+    ...suppliers.slice(0, 5).map(s => ({ type: 'Supplier' as const, icon: Truck, name: `${s.first_name} ${s.last_name}`, description: `Added as a ${s.product_service_type || 'supplier'}`, date: s.created_at! }))
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 7);
+
+  return (
+    <Card className="col-span-4 lg:col-span-3">
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+        <CardDescription>An overview of recent actions within your organization.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[350px]">
+          {combinedActivities.length > 0 ? (
+            <div className="space-y-6">
+              {combinedActivities.map((activity, index) => (
+                <div key={index} className="flex items-center">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback><activity.icon className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
+                  </Avatar>
+                  <div className="ml-4 space-y-1">
+                    <p className="text-sm font-medium leading-none">{activity.name}</p>
+                    <p className="text-sm text-muted-foreground">{activity.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+             <div className="flex h-[300px] items-center justify-center text-center text-sm text-muted-foreground">
+              <p>No recent activity to display.</p>
+            </div>
+          )}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
+EOF
+code "$(pwd)/components/dashboard/organization/recent-activity.tsx"
+
+echo "✅ All dashboards have been refined and are now powered by live data."

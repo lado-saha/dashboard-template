@@ -10,7 +10,7 @@ export async function POST(_request: NextRequest, { params }: { params: { role_i
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
     }
 
-    let rolePermissions = dbManager.getCollection('authRolePermissions');
+    const rolePermissions = dbManager.getCollection('authRolePermissions');
     const added: RolePermissionDto[] = [];
     permissionIds.forEach(permissionId => {
       if (!rolePermissions.find(rp => rp.role_id === roleId && rp.permission_id === permissionId)) {

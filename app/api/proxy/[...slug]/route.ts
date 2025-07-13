@@ -63,7 +63,7 @@ async function handler(req: NextRequest): Promise<NextResponse> {
       redirect: 'follow',
       cache: 'no-store',
       // This option is required for streaming request bodies in modern fetch implementations.
-      // @ts-ignore - 'duplex' is a valid option in the runtime but may not be in the default TS type.
+      // @ts-expect-error - 'duplex' is a valid option in the runtime but may not be in the default TS type.
       duplex: 'half',
     });
 

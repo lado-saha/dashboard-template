@@ -275,6 +275,7 @@ export function MainSidebar() {
       sidebarTitle = activeAgencyDetails?.short_name || "Agency";
       homeLink = "/business-actor/agency/dashboard";
       ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
+      // Con
     } else {
       mainNav = baOrgNavigation;
       globalNav = baGlobalNavigation;

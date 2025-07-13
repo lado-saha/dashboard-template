@@ -3,7 +3,7 @@ import { IMapRepository } from './map-repository-interface';
 import { MapLocalRepository } from './map-local-repository';
 import { MapRemoteRepository } from './map-remote-repository';
 
-let mapRepositoryInstance: IMapRepository;
+// let mapRepositoryInstance: IMapRepository;
 
 // We use the same global data source flag
 const dataSource = process.env.NEXT_PUBLIC_DATA_SOURCE;
@@ -13,7 +13,7 @@ const dataSource = process.env.NEXT_PUBLIC_DATA_SOURCE;
 //   mapRepositoryInstance = new MapLocalRepository();
 // } else {
 console.log("INFO: Using Remote Map Repository (Nominatim API)");
-mapRepositoryInstance = new MapRemoteRepository();
+const mapRepositoryInstance = new MapRemoteRepository();
 // }
 
 export const mapRepository = mapRepositoryInstance;

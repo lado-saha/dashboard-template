@@ -180,7 +180,7 @@ export const dbManager = {
     return (collection as Identifiable[]).find(item => (item)[idKey] === id) as LocalJsonDBCollections[C][number] | null;
   },
   deleteItem: <C extends CollectionName>(collectionName: C, id: string): boolean => {
-    let collection = dbManager.getCollection(collectionName);
+    const collection = dbManager.getCollection(collectionName);
     const initialLength = collection.length;
     const idKey = getPrimaryKeyField(collectionName);
     const newCollection = (collection as Identifiable[]).filter(item => (item)[idKey] !== id);

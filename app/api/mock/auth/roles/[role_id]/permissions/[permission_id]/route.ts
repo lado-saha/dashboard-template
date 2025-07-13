@@ -8,7 +8,7 @@ export async function POST(_request: NextRequest, { params }: { params: { role_i
     if (!role_id || !permission_id) {
       return NextResponse.json({ message: "Role ID and Permission ID are required." }, { status: 400 });
     }
-    let rolePermissions = dbManager.getCollection('authRolePermissions');
+    const rolePermissions = dbManager.getCollection('authRolePermissions');
     if (rolePermissions.find(rp => rp.role_id === role_id && rp.permission_id === permission_id)) {
       return NextResponse.json({ message: "Permission already assigned to this role." }, { status: 409 });
     }

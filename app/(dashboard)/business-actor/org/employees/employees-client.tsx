@@ -149,7 +149,7 @@ export function OrgEmployeesClientPage() {
         },
         agencies
       ),
-    [agencies]
+    [agencies,]
   );
 
   if (!activeOrganizationId && !isLoading) {

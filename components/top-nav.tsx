@@ -9,6 +9,7 @@ import { UserNav } from "./user-nav";
 import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
 import { signOut } from "next-auth/react";
+import { DevRoleSwitcher } from "./dev/role-switcher";
 
 interface TopNavProps {
   onOpenCommandPalette: () => void;
@@ -70,6 +71,7 @@ export function TopNav({ onOpenCommandPalette }: TopNavProps) {
           {getBreadcrumbs()}
         </div>
         <div className="flex items-center gap-x-2">
+          <DevRoleSwitcher />
           <Button variant="outline" size="sm" className="h-9 gap-2" onClick={onOpenCommandPalette}>
             <Search className="h-4 w-4" />
             <span className="hidden lg:inline-block">Search...</span>

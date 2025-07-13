@@ -6,7 +6,6 @@ export const metadata: Metadata = {
 };
 
 type Props = { params: { employeeId: string } };
-
-export default async function EditAgencyEmployeePage({ params }: Props) {
+export default function EditAgencyEmployeePage({ params }: Props) {
   return <EditAgencyEmployeeClientPage employeeId={params.employeeId} />;
 }

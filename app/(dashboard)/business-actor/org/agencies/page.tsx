@@ -115,7 +115,7 @@ export default function ManageAgenciesPage() {
         onEditAction: handleEditAction,
         onDeleteAction: (item) => handleDeleteConfirmation([item]),
       }),
-    []
+    [handleEditAction, handleEnterAgency, handleDeleteConfirmation]
   );
 
   return (
