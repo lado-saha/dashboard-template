@@ -4,18 +4,18 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateContactRequest, ContactableType } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     entityType: ContactableType;
     entityId: string;
     contactId: string;
-  };
+  }>;
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) { /* ... GET logic ... */
   try {
     const { contactId } = await params;
     const contact = dbManager.getItemById('contacts', contactId);
-    if (!contact || contact.contactable_id !== params.entityId) {
+    if (!contact || contact.contactable_id !== (await params).entityId) {
       return NextResponse.json({ message: `Contact with ID ${contactId} not found for this entity.` }, { status: 404 });
     }
     return NextResponse.json(contact);

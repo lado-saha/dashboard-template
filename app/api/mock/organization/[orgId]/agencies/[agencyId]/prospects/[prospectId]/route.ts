@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateProspectRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, prospectId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, prospectId: string }> }) {
   try {
     const { orgId, agencyId, prospectId } = await params;
     const prospect = dbManager.getItemById('prospects', prospectId);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to get agency prospect", error: error.message }, { status: 500 }); }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, prospectId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, prospectId: string }> }) {
   try {
     const { orgId, agencyId, prospectId } = await params;
     const body = await request.json() as UpdateProspectRequest;
@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to update agency prospect", error: error.message }, { status: 500 }); }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, agencyId: string, prospectId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, prospectId: string }> }) {
   try {
     const { orgId, agencyId, prospectId } = await params;
     const existing = dbManager.getItemById('prospects', prospectId);

@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { EmployeeDto, UpdateEmployeeRequest, EmployeeResponse } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, employeeId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, employeeId: string }> }) {
   try {
     const { orgId, agencyId, employeeId } = await params;
     const employee = dbManager.getItemById('employees', employeeId);
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, employeeId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, employeeId: string }> }) {
   try {
     const { orgId, agencyId, employeeId } = await params;
     const body = await _request.json() as UpdateEmployeeRequest;
@@ -43,7 +43,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string, employeeId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string, employeeId: string }> }) {
   try {
     const { orgId, agencyId, employeeId } = await params;
     const existing = dbManager.getItemById('employees', employeeId);

@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { EmployeeResponse, CreateEmployeeRequest, EmployeeDto } from '@/types/organization';
 
-export async function POST(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string }> }) {
   try {
     const { orgId, agencyId } = await params;
     const body = await _request.json() as CreateEmployeeRequest;
@@ -37,7 +37,7 @@ export async function POST(_request: NextRequest, { params }: { params: { orgId:
 }
 
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string }> }) {
   try {
     const { orgId, agencyId } = await params;
     const allEmployees = dbManager.getCollection('employees');

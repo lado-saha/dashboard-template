@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateCustomerRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ orgId: string, customerId: string }> }) {
   try {
     const { orgId, customerId } = await params;
     const customer = dbManager.getItemById('orgCustomers', customerId);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to get organization customer", error: error.message }, { status: 500 }); }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ orgId: string, customerId: string }> }) {
   try {
     const { orgId, customerId } = await params;
     const body = await request.json() as UpdateCustomerRequest;
@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to update organization customer", error: error.message }, { status: 500 }); }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, customerId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orgId: string, customerId: string }> }) {
   try {
     const { orgId, customerId } = await params;
     const existing = dbManager.getItemById('orgCustomers', customerId);

@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdatePracticalInformationRequest } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string, infoId: string }> }) {
   try {
     const { orgId, infoId } = await params;
     const info = dbManager.getItemById('practicalInformation', infoId);
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ orgId: string, infoId: string }> }) {
   try {
     const { orgId, infoId } = await params;
     const body = await _request.json() as UpdatePracticalInformationRequest;
@@ -31,7 +31,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, infoId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ orgId: string, infoId: string }> }) {
   try {
     const { orgId, infoId } = await params;
     const existing = dbManager.getItemById('practicalInformation', infoId);

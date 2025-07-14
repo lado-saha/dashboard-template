@@ -2,7 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, businessDomainId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ orgId: string, businessDomainId: string }> }) {
   try {
     const { orgId, businessDomainId } = await params;
     const org = dbManager.getItemById('organizationsDetails', orgId);

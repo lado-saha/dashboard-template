@@ -4,9 +4,9 @@ import { ThirdPartyDto, CreateThirdPartyRequest, ThirdPartyType } from '@/types/
 
 // This route now handles the creation for ANY third-party type.
 // The real API uses /.../{type}, but this is the standard workaround for the mock server.
-export async function POST(request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ orgId: string }> }) {
   try {
-    const { orgId } = params;
+    const { orgId } = await params;
     // The request body MUST now include the 'type'
     const body = await request.json() as (CreateThirdPartyRequest & { type: ThirdPartyType });
 
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: { orgId: 
         ...body,
         organization_id: orgId,
         type: body.type, // Get type from the body
-        is_active: true,
+        
     };
     const createdThirdParty = dbManager.addItem('thirdParties', newThirdPartyData);
     return NextResponse.json(createdThirdParty, { status: 201 });

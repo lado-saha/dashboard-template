@@ -4,11 +4,11 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ContactableType } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params:Promise<{
     entityType: ContactableType;
     entityId: string;
     contactId: string;
-  };
+  }>;
 }
 
 export async function PUT(_request: NextRequest, { params }: RouteParams) {

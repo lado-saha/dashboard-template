@@ -2,9 +2,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RolePermissionDto } from '@/types/auth';
 
-export async function POST(_request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ role_id: string }> }) {
   try {
-    const roleId = params.role_id;
+    const roleId = (await params).role_id;
     const permissionIds = await _request.json() as string[];
     if (!roleId || !Array.isArray(permissionIds)) {
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });
@@ -27,9 +27,9 @@ export async function POST(_request: NextRequest, { params }: { params: { role_i
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ role_id: string }> }) {
   try {
-    const roleId = params.role_id;
+    const roleId = (await params).role_id;
     const permissionIdsToRemove = await _request.json() as string[];
     if (!roleId || !Array.isArray(permissionIdsToRemove)) {
       return NextResponse.json({ message: "Role ID and an array of permission IDs are required." }, { status: 400 });

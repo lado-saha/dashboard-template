@@ -61,15 +61,8 @@ export const getCertificationColumns = (
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all rows"
-        className="translate-y-[2px]"
-      />
+     <Checkbox checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? "indeterminate" : false} onCheckedChange={v => table.toggleAllPageRowsSelected(!!v)} aria-label="Select all" />
+
     ),
     cell: ({ row }) => (
       <Checkbox

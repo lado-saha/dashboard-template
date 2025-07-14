@@ -22,7 +22,7 @@ export default function CreateOrganizationPage() {
       await setActiveOrganization(newOrgData.organization_id, newOrgData);
       // We also re-fetch the list to ensure our context is fully up-to-date.
       if (session?.user?.businessActorId) {
-        await fetchUserOrganizationsList(session.user.businessActorId);
+        await fetchUserOrganizationsList();
       } else {
         toast.error(
           "Could not fetch organizations list: missing user session."

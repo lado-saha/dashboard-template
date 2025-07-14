@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CreateEmployeeRequest, EmployeeDto, EmployeeResponse } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const allEmployees = dbManager.getCollection('employees');
@@ -14,7 +14,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function POST(_request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const body = await _request.json() as CreateEmployeeRequest;

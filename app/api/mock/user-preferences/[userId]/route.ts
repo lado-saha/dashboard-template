@@ -55,7 +55,7 @@ function getOrCreateUserPreferences(userId: string): UserPreferencesDto {
   return prefs!;
 }
 
-export async function GET(_request: NextRequest, { params }: { params: { userId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   try {
     const { userId } = await params;
     if (!userId) return NextResponse.json({ message: "User ID is required." }, { status: 400 });
@@ -67,9 +67,9 @@ export async function GET(_request: NextRequest, { params }: { params: { userId:
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { userId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    const userId = params.userId;
+    const userId = (await params).userId;
     if (!userId) return NextResponse.json({ message: "User ID is required." }, { status: 400 });
     const body = await _request.json() as UpdateUserPreferencesRequest;
 

@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateProviderRequest } from '@/types/organization';
 
-export async function GET(request: NextRequest, { params }: { params: { orgId: string, providerId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ orgId: string, providerId: string }> }) {
   try {
     const { orgId, providerId } = await params;
     const provider = dbManager.getItemById('providers', providerId);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to get organization supplier", error: error.message }, { status: 500 }); }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { orgId: string, providerId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ orgId: string, providerId: string }> }) {
   try {
     const { orgId, providerId } = await params;
     const body = await request.json() as UpdateProviderRequest;
@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: { params: { orgId: s
   } catch (error: any) { return NextResponse.json({ message: "Failed to update organization supplier", error: error.message }, { status: 500 }); }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { orgId: string, providerId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orgId: string, providerId: string }> }) {
   try {
     const { orgId, providerId } = await params;
     const existing = dbManager.getItemById('providers', providerId);

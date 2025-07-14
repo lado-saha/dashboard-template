@@ -3,11 +3,11 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CertificationDto, UpdateCertificationRequest } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string, certId: string }> }) {
   try {
     const { certId } = await params;
     const cert = dbManager.getItemById('certifications', certId);
-    if (!cert || cert.organization_id !== params.orgId) {
+    if (!cert || cert.organization_id !== (await params).orgId) {
       return NextResponse.json({ message: `Certification with ID ${certId} not found for this organization.` }, { status: 404 });
     }
     return NextResponse.json(cert);
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ orgId: string, certId: string }> }) {
   try {
     const { orgId, certId } = await params;
     const body = await _request.json() as UpdateCertificationRequest;
@@ -31,7 +31,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, certId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ orgId: string, certId: string }> }) {
   try {
     const { orgId, certId } = await params;
     const existingCert = dbManager.getItemById('certifications', certId);

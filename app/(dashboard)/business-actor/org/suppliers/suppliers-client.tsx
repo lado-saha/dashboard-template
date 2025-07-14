@@ -87,12 +87,12 @@ export function OrgSuppliersClientPage() {
     try {
       let response: ProviderDto;
       if (editingSupplier?.provider_id) {
-        response = await toast.promise(organizationRepository.updateOrgSupplier(activeOrganizationId, editingSupplier.provider_id, payload as UpdateProviderRequest), { loading: 'Updating supplier...', success: 'Supplier updated!', error: (err) => err.message });
+        response = await toast.promise(organizationRepository.updateOrgSupplier(activeOrganizationId, editingSupplier.provider_id, payload as UpdateProviderRequest), { loading: 'Updating supplier...', success: 'Supplier updated!', error: (err) => err.message }).unwrap();
         if (data.agency_id !== editingSupplier.agency_id && data.agency_id) {
           await toast.promise(organizationRepository.affectSupplierToAgency(activeOrganizationId, data.agency_id, { provider_id: editingSupplier.provider_id }), { loading: 'Assigning to agency...', success: 'Assigned to new agency!', error: (err) => err.message });
         }
       } else {
-        response = await toast.promise(organizationRepository.createOrgSupplier(activeOrganizationId, payload as CreateProviderRequest), { loading: 'Creating supplier...', success: 'Supplier created!', error: (err) => err.message });
+        response = await toast.promise(organizationRepository.createOrgSupplier(activeOrganizationId, payload as CreateProviderRequest), { loading: 'Creating supplier...', success: 'Supplier created!', error: (err) => err.message }).unwrap();
         if (data.agency_id && response.provider_id) {
           await toast.promise(organizationRepository.affectSupplierToAgency(activeOrganizationId, data.agency_id, { provider_id: response.provider_id }), { loading: 'Assigning to agency...', success: 'Assigned to agency!', error: (err) => err.message });
         }

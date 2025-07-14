@@ -199,17 +199,19 @@ export function CustomersClientPage() {
         }
       } else {
         // --- CREATE LOGIC ---
-        customerResponse = await toast.promise(
-          organizationRepository.createOrgCustomer(
-            activeOrganizationId,
-            customerPayload as CreateCustomerRequest
-          ),
-          {
-            loading: "Creating customer...",
-            success: "Customer created!",
-            error: (err) => err.message,
-          }
-        );
+        customerResponse = await toast
+          .promise(
+            organizationRepository.createOrgCustomer(
+              activeOrganizationId,
+              customerPayload as CreateCustomerRequest
+            ),
+            {
+              loading: "Creating customer...",
+              success: "Customer created!",
+              error: (err) => err.message,
+            }
+          )
+          .unwrap();
         // If an agency was selected during creation, affect the new customer to it
         if (data.agency_id && customerResponse.customer_id) {
           await toast.promise(

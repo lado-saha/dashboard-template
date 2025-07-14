@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 
-export async function GET(_request: Request, { params }: { params: { domainId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ domainId: string }> }) {
   try {
     const { domainId } = await params;
     const allOrgs = dbManager.getCollection('organizationsDetails');

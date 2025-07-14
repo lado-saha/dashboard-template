@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateOrganizationRequest } from '@/types/organization';
 
-export async function PUT(_request: Request, { params }: { params: { orgId: string } }) {
+export async function PUT(_request: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const body = await _request.json() as UpdateOrganizationRequest;
@@ -14,7 +14,7 @@ export async function PUT(_request: Request, { params }: { params: { orgId: stri
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: { orgId: string } }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const deleted = dbManager.deleteItem('organizationsDetails', orgId);
@@ -35,7 +35,7 @@ export async function DELETE(_request: Request, { params }: { params: { orgId: s
   }
 }
 
-export async function GET(_request: Request, { params }: { params: { orgId: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const org = dbManager.getItemById('organizationsDetails', orgId);

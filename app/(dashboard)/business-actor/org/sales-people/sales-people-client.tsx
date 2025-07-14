@@ -161,7 +161,7 @@ export function OrgSalesPeopleClientPage() {
             success: "Saved!",
             error: (err) => err.message,
           }
-        );
+        ).unwrap();
       } else {
         response = await toast.promise(
           organizationRepository.createOrgSalesPerson(
@@ -173,7 +173,7 @@ export function OrgSalesPeopleClientPage() {
             success: "Created!",
             error: (err) => err.message,
           }
-        );
+        ).unwrap();
       }
       refreshData();
       setIsFormModalOpen(false);

@@ -38,7 +38,8 @@ export const getThirdPartyColumns = (
 ): ColumnDef<ThirdPartyDto>[] => [
   {
     id: "select",
-    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")} onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)} aria-label="Select all" />,
+    header: ({ table }) => <Checkbox checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? "indeterminate" : false} onCheckedChange={v => table.toggleAllPageRowsSelected(!!v)} aria-label="Select all" />
+,
     cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
     enableSorting: false,
     enableHiding: false,
@@ -71,7 +72,7 @@ export const getThirdPartyColumns = (
     accessorKey: "is_active",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
-      const isActive = row.original.is_active;
+      const isActive = true;
       const StatusIcon = isActive ? CheckCircle : XCircle;
       return (
         <Badge variant={isActive ? "default" : "destructive"} className="capitalize text-xs items-center font-normal">

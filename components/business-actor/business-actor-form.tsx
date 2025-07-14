@@ -183,7 +183,7 @@ export function BusinessActorForm({
             success: "Avatar uploaded!",
             error: "Avatar upload failed.",
           }
-        );
+        ).unwrap();
         avatarUrl =
           typeof res === "object" && res !== null && "url" in res
             ? String((res as { url: string }).url)
@@ -206,7 +206,7 @@ export function BusinessActorForm({
             success: "Profile picture uploaded!",
             error: "Upload failed.",
           }
-        );
+        ).unwrap();
         profileUrl =
           typeof res === "object" && res !== null && "url" in res
             ? String((res as { url: string }).url)

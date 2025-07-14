@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { BusinessDomainDto, UpdateBusinessDomainRequest } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { domainId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ domainId: string }> }) {
   try {
     const { domainId } = await params;
     const domain = dbManager.getItemById('businessDomains', domainId);
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: { domainI
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { domainId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ domainId: string }> }) {
   try {
     const { domainId } = await params;
     const body = await _request.json() as UpdateBusinessDomainRequest;
@@ -30,7 +30,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { domainI
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { domainId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ domainId: string }> }) {
   try {
     const { domainId } = await params;
     // Check if any organization uses this domain before deleting (optional for mock)

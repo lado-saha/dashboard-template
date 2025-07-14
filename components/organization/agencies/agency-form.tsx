@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CreateAgencyRequest, AgencyDto, UpdateAgencyRequest } from "@/types/organization";
+import {
+  CreateAgencyRequest,
+  AgencyDto,
+  UpdateAgencyRequest,
+} from "@/types/organization";
 import { organizationRepository } from "@/lib/data-repo/organization";
 import { toast } from "sonner";
 import { FormWrapper } from "@/components/ui/form-wrapper";
@@ -19,7 +23,9 @@ const basicInfoSchema = z.object({
   short_name: z.string().min(2, "Short name is required.").max(50),
   location: z.string().min(2, "Location is required."),
   description: z.string().max(500).optional(),
-  business_domains: z.array(z.string()).min(1, "At least one business domain is required."),
+  business_domains: z
+    .array(z.string())
+    .min(1, "At least one business domain is required."),
   transferable: z.boolean().default(false),
 });
 const legalSchema = z.object({
@@ -35,7 +41,9 @@ const brandingSchema = z.object({
   social_network: z.string().url("Invalid URL").optional().or(z.literal("")),
   images: z.array(z.string().url()).optional(),
 });
-const fullAgencySchema = basicInfoSchema.merge(legalSchema).merge(brandingSchema);
+const fullAgencySchema = basicInfoSchema
+  .merge(legalSchema)
+  .merge(brandingSchema);
 type AgencyFormData = z.infer<typeof fullAgencySchema>;
 
 interface AgencyFormProps {
@@ -46,12 +54,32 @@ interface AgencyFormProps {
 }
 
 const formSteps = [
-  { id: "basic", name: "Basic Info", icon: Info, fields: Object.keys(basicInfoSchema.shape) },
-  { id: "legal", name: "Legal", icon: FileText, fields: Object.keys(legalSchema.shape) },
-  { id: "branding", name: "Branding", icon: Building, fields: Object.keys(brandingSchema.shape) },
+  {
+    id: "basic",
+    name: "Basic Info",
+    icon: Info,
+    fields: Object.keys(basicInfoSchema.shape),
+  },
+  {
+    id: "legal",
+    name: "Legal",
+    icon: FileText,
+    fields: Object.keys(legalSchema.shape),
+  },
+  {
+    id: "branding",
+    name: "Branding",
+    icon: Building,
+    fields: Object.keys(brandingSchema.shape),
+  },
 ];
 
-export function AgencyForm({ organizationId, mode, initialData, onSuccessAction }: AgencyFormProps) {
+export function AgencyForm({
+  organizationId,
+  mode,
+  initialData,
+  onSuccessAction,
+}: AgencyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<AgencyFormData>({
@@ -68,7 +96,11 @@ export function AgencyForm({ organizationId, mode, initialData, onSuccessAction 
       tax_number: initialData?.tax_number || "",
       capital_share: initialData?.capital_share || null,
       average_revenue: initialData?.average_revenue || null,
-      registration_date: initialData?.registration_date && isValid(new Date(initialData.registration_date)) ? new Date(initialData.registration_date) : undefined,
+      registration_date:
+        initialData?.registration_date &&
+        isValid(new Date(initialData.registration_date))
+          ? new Date(initialData.registration_date)
+          : undefined,
       logo: initialData?.logo || "",
       greeting_message: initialData?.greeting_message || "",
       social_network: initialData?.social_network || "",
@@ -80,16 +112,28 @@ export function AgencyForm({ organizationId, mode, initialData, onSuccessAction 
     setIsLoading(true);
     const payload: CreateAgencyRequest | UpdateAgencyRequest = {
       ...data,
+      short_name: data.short_name!, // assert it's present when updating
+      long_name: data.long_name,
+      location: data.location,
+      description: data.description || undefined,
+      business_domains: data.business_domains,
       capital_share: data.capital_share ?? undefined,
       registration_date: data.registration_date?.toISOString(),
       average_revenue: data.average_revenue ?? undefined,
     };
     try {
       if (mode === "edit" && initialData?.agency_id) {
-        const updatedAgency = await organizationRepository.updateAgency(organizationId, initialData.agency_id, payload);
+        const updatedAgency = await organizationRepository.updateAgency(
+          organizationId,
+          initialData.agency_id,
+          payload
+        );
         onSuccessAction(updatedAgency);
       } else {
-        const newAgency = await organizationRepository.createAgency(organizationId, payload as CreateAgencyRequest);
+        const newAgency = await organizationRepository.createAgency(
+          organizationId,
+          payload as CreateAgencyRequest
+        );
         onSuccessAction(newAgency);
       }
     } catch (error: any) {
@@ -104,10 +148,14 @@ export function AgencyForm({ organizationId, mode, initialData, onSuccessAction 
       form={form}
       onFormSubmit={onSubmit}
       isLoading={isLoading}
-      title={mode === 'create' ? "Create New Agency" : `Edit Agency: ${initialData?.short_name}`}
+      title={
+        mode === "create"
+          ? "Create New Agency"
+          : `Edit Agency: ${initialData?.short_name}`
+      }
       description="Fill in the agency's details across all sections."
       steps={formSteps}
-      submitButtonText={mode === 'create' ? "Create Agency" : "Save Changes"}
+      submitButtonText={mode === "create" ? "Create Agency" : "Save Changes"}
     >
       {(currentStep) => (
         <div className="min-h-[400px]">

@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ApplicationKeyDto } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { applicationId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ applicationId: string }> }) {
   try {
     const { applicationId } = await params;
     const allKeys = dbManager.getCollection('applicationKeysData');

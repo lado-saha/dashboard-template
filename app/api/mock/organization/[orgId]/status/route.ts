@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateOrganizationStatusRequest,OrganizationDto } from '@/types/organization';
 
-export async function PUT(_request: Request, { params }: { params: { orgId: string } }) {
+export async function PUT(_request: Request, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     const body = await _request.json() as UpdateOrganizationStatusRequest;

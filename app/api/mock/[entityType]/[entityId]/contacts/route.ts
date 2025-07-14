@@ -4,10 +4,10 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CreateContactRequest, ContactableType, ContactDto } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     entityType: ContactableType; // Generic name
     entityId: string;
-  };
+  }>;
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       c => c.contactable_type === entityType && c.contactable_id === entityId
     );
     return NextResponse.json(filteredContacts);
-  } catch (error)  {
+  } catch (error) {
     return NextResponse.json({ message: "Failed to get contacts", error: error.message }, { status: 500 });
   }
 }
@@ -38,7 +38,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     };
     const createdContact = dbManager.addItem('contacts', newContactData);
     return NextResponse.json(createdContact, { status: 201 });
-  } catch (error)  {
+  } catch (error) {
     return NextResponse.json({ message: "Failed to create contact", error: error.message }, { status: 500 });
   }
 }

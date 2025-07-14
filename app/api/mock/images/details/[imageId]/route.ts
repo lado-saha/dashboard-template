@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ImageDto } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { imageId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ imageId: string }> }) {
   try {
     const { imageId } = await params;
     const imageInfo = dbManager.getItemById('organizationImages', imageId); // Assumes 'id' is the key

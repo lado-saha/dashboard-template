@@ -87,9 +87,9 @@ export function OrgProspectsClientPage() {
     try {
       let response: ProspectDto;
       if (editingProspect?.prospect_id) {
-        response = await toast.promise(organizationRepository.updateOrgProspect(activeOrganizationId, editingProspect.prospect_id, payload as UpdateProspectRequest), { loading: 'Updating prospect...', success: 'Prospect updated!', error: (err) => err.message });
+        response = await toast.promise(organizationRepository.updateOrgProspect(activeOrganizationId, editingProspect.prospect_id, payload as UpdateProspectRequest), { loading: 'Updating prospect...', success: 'Prospect updated!', error: (err) => err.message }).unwrap();
       } else {
-        response = await toast.promise(organizationRepository.createOrgProspect(activeOrganizationId, payload as CreateProspectRequest), { loading: 'Creating prospect...', success: 'Prospect created!', error: (err) => err.message });
+        response = await toast.promise(organizationRepository.createOrgProspect(activeOrganizationId, payload as CreateProspectRequest), { loading: 'Creating prospect...', success: 'Prospect created!', error: (err) => err.message }).unwrap();
       }
       refreshData();
       setIsFormModalOpen(false);

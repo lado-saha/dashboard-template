@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { ImageDto } from '@/types/organization';
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ orgId: string }> }) {
   try {
     const { orgId } = await params;
     // Actual FormData parsing is complex in Next.js Edge/Node runtime for API routes.
@@ -16,7 +16,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
     ];
     // You might want to associate these with the orgId in your organizationImages.json
     const orgImages = dbManager.getCollection('organizationImages');
-    dummyImages.forEach(img => orgImages.push({ ...img, organization_id: orgId } )); // Add org_id if your ImageDto has it
+    dummyImages.forEach(img => orgImages.push({ ...img} )); // Add org_id if your ImageDto has it
     dbManager.saveCollection('organizationImages', orgImages);
 
     return NextResponse.json(dummyImages, { status: 200 });

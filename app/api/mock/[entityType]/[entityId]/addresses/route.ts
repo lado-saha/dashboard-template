@@ -4,10 +4,10 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { CreateAddressRequest, AddressableType, AddressDto } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     entityType: AddressableType;
     entityId: string;
-  };
+  }>;
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -34,7 +34,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       ...body,
       addressable_id: entityId,
       addressable_type: entityType,
-      is_default: body.default || false,
+      // is_default: body.default || false,
     };
     const createdAddress = dbManager.addItem('addresses', newAddressData);
     return NextResponse.json(createdAddress, { status: 201 });

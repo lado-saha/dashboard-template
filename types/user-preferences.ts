@@ -7,7 +7,7 @@ export interface UserNotificationPreferences {
   accountActivity: boolean;
   newFeatures: boolean;
   marketing: boolean;
-  frequency: "real-time" | "daily" | "weekly" | "never";
+  frequency: string;
   quietHoursStart?: string;
   quietHoursEnd?: string;
 }
@@ -15,17 +15,17 @@ export interface UserNotificationPreferences {
 export interface UserPrivacyPreferences {
   analyticsSharing: boolean;
   personalizedAds: boolean;
-  visibility: "public" | "private" | "friends-only";
-  dataRetention: "6-months" | "1-year" | "2-years" | "indefinite";
+  visibility:string;
+  dataRetention: string;
 }
 
 export interface UserDisplayPreferences {
   language: string;
   currency: string;
-  dateFormat: "mm-dd-yyyy" | "dd-mm-yyyy" | "yyyy-mm-dd";
+  dateFormat: string;
   fontSize: number;
-  theme: "light" | "dark" | "system";
-  layout: "default" | "compact" | "expanded";
+  theme: string;
+  layout: string;
   timezone?: string;
   profilePhotoUrl?: string; // NEW: For user uploaded photo
 }

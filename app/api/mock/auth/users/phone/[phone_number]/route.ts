@@ -3,9 +3,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UserDto } from '@/types/auth';
 
-export async function GET(_request: NextRequest, { params }: { params: { phone_number: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ phone_number: string }> }) {
   try {
-    const phoneNumber = params.phone_number;
+    const phoneNumber = (await params).phone_number;
     const users = dbManager.getCollection('authUsers');
     const user = users.find(u => u.phone_number === phoneNumber);
     if (!user) {

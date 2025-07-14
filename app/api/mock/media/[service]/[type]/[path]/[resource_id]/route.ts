@@ -3,12 +3,12 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { MediaDto, UploadMediaResponse, ServiceType, MediaType } from '@/types/media';
 
 interface RouteParams {
-    params: { 
+    params: Promise<{ 
         service: ServiceType; 
         type: MediaType; 
         path: string; 
         resource_id: string; // This segment can be a resource_id for GET/POST or a filename for DELETE
-    }
+    }>
 }
 
 // GET /media/infos/{service}/{type}/{path}/{resource_id}

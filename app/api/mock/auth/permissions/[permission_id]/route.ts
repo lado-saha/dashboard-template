@@ -2,9 +2,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdatePermissionRequest } from '@/types/auth';
 
-export async function GET(_request: NextRequest, { params }: { params: { permission_id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ permission_id: string }> }) {
   try {
-    const permissionId = params.permission_id;
+    const permissionId = (await params).permission_id;
     const permission = dbManager.getItemById('authPermissions', permissionId);
     if (!permission) {
       return NextResponse.json({ message: `Permission with ID ${permissionId} not found.` }, { status: 404 });
@@ -15,9 +15,9 @@ export async function GET(_request: NextRequest, { params }: { params: { permiss
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { permission_id: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ permission_id: string }> }) {
   try {
-    const permissionId = params.permission_id;
+    const permissionId = (await params).permission_id;
     const body = await _request.json() as UpdatePermissionRequest;
     const updatedPermission = dbManager.updateItem('authPermissions', permissionId, body);
     if (!updatedPermission) {
@@ -29,9 +29,9 @@ export async function PUT(_request: NextRequest, { params }: { params: { permiss
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { permission_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ permission_id: string }> }) {
   try {
-    const permissionId = params.permission_id;
+    const permissionId = (await params).permission_id;
     const deleted = dbManager.deleteItem('authPermissions', permissionId);
     // Also remove associated role-permissions
     const rolePermissions = dbManager.getCollection('authRolePermissions');

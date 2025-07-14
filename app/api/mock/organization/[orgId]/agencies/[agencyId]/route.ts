@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateAgencyRequest } from '@/types/organization';
 
-export async function GET(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string }> }) {
   try {
     const { orgId, agencyId } = await params;
     const agency = dbManager.getItemById('agencies', agencyId);
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function PUT(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string }> }) {
   try {
     const { orgId, agencyId } = await params;
     const body = await _request.json() as UpdateAgencyRequest;
@@ -31,7 +31,7 @@ export async function PUT(_request: NextRequest, { params }: { params: { orgId: 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { orgId: string, agencyId: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ orgId: string, agencyId: string }> }) {
   try {
     const { orgId, agencyId } = await params;
     const existingAgency = dbManager.getItemById('agencies', agencyId);

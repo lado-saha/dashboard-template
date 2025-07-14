@@ -4,18 +4,18 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { UpdateAddressRequest, AddressableType } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     entityType: AddressableType;
     entityId: string;
     addressId: string;
-  };
+  }>;
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) { /* ... GET logic ... */ 
   try {
     const { addressId } = await params;
     const address = dbManager.getItemById('addresses', addressId);
-    if (!address || address.addressable_id !== params.entityId) {
+    if (!address || address.addressable_id !== (await params).entityId) {
       return NextResponse.json({ message: `Address with ID ${addressId} not found for this entity.` }, { status: 404 });
     }
     return NextResponse.json(address);

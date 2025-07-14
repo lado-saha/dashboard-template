@@ -3,9 +3,9 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RoleDto, RolePermissionDto, UpdateRoleRequest } from '@/types/auth';
 
-export async function PUT(_request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ role_id: string }> }) {
   try {
-    const roleId = params.role_id;
+    const roleId = (await params).role_id;
     const body = await _request.json() as UpdateRoleRequest;
 
     const updatedRole = dbManager.updateItem('authRoles', roleId, body);
@@ -18,9 +18,9 @@ export async function PUT(_request: NextRequest, { params }: { params: { role_id
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { role_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ role_id: string }> }) {
   try {
-    const roleId = params.role_id;
+    const roleId = (await params).role_id;
     const deleted = dbManager.deleteItem('authRoles', roleId);
     // Also remove associated role-permissions
     const rolePermissions = dbManager.getCollection('authRolePermissions');

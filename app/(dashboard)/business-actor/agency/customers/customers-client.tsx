@@ -66,7 +66,7 @@ export function AgencyCustomersClientPage() {
       loading: `Deleting ${itemsToDelete.length} customer(s)...`,
       success: () => { refreshData(); setItemsToDelete([]); return "Customer(s) deleted."; },
       error: (err) => { setCustomers(originalItems); setItemsToDelete([]); return `Failed to delete: ${err.message}`; },
-    });
+    }).unwrap();
   };
 
   const handleFormSubmit = async (data: CreateCustomerRequest | UpdateCustomerRequest): Promise<boolean> => {

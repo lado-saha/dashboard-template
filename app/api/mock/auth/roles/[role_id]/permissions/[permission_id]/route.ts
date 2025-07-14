@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { RolePermissionDto } from '@/types/auth';
 
-export async function POST(_request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ role_id: string; permission_id: string }> }) {
   try {
     const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
@@ -21,7 +21,7 @@ export async function POST(_request: NextRequest, { params }: { params: { role_i
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { role_id: string; permission_id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ role_id: string; permission_id: string }> }) {
   try {
     const { role_id, permission_id } = await params;
     if (!role_id || !permission_id) {
