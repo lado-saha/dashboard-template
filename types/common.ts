@@ -10,3 +10,4 @@ export interface Auditable extends Timestamps {
 }
 
 export type ViewMode = "list" | "grid";
+

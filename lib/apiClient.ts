@@ -90,7 +90,7 @@ async function yowyobApiRequest<T = any>(
   endpoint: string,
   options: YowyobRequestOptions = {}
 ): Promise<T> {
-  const { authType = 'user', body, ...fetchOptions } = options;
+  const { authType = 'system', body, ...fetchOptions } = options;
 
   if (!serviceBaseUrl) {
     throw new Error(`Service URL is not configured for endpoint: ${endpoint}`);

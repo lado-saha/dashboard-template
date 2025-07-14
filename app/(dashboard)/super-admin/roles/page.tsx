@@ -1,16 +1,19 @@
 import { Metadata } from "next";
-import { RolesClientPage } from "./roles-client";
 import { authRepository } from "@/lib/data-repo/auth";
+import { RoleAssignmentClient } from "./roles-client";
 
 export const metadata: Metadata = {
-  title: "Role & Permission Management",
-  description: "Administer user roles and their associated permissions.",
+  title: "Roles & Permissions",
+  description: "Configure Role-Based Access Control (RBAC) for the platform.",
 };
 
 export default async function SuperAdminRolesPage() {
   const [roles, permissions] = await Promise.all([
-    authRepository.getRoles().catch(() => []),
-    authRepository.getAllPermissions().catch(() => [])
+    authRepository.getRoles(),
+    authRepository.getAllPermissions(),
   ]);
-  return <RolesClientPage initialRoles={roles} initialPermissions={permissions} />;
+
+  return (
+    <RoleAssignmentClient initialRoles={roles} allPermissions={permissions} />
+  );
 }

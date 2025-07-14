@@ -63,9 +63,7 @@ export const LoginForm = () => {
           toast.error(errorMessage);
         } else if (result?.ok) {
           toast.success("Login successful! Redirecting...");
-          const destination = isNewUser
-            ? "/welcome"
-            : callbackUrl || "/dashboard";
+          const destination =  "/dashboard";
           window.location.href =destination
         } else {
           setError("An unexpected error occurred during login.");

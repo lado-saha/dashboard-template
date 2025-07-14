@@ -1,20 +1,20 @@
 import { Metadata } from "next";
 import { organizationRepository } from "@/lib/data-repo/organization";
-import { CustomersClient } from "./customers-client";
+import { CertificationsClient } from "./certifications-client";
 
 export const metadata: Metadata = {
-  title: "Global Customer Overview",
-  description: "View and filter all customers across all organizations.",
+  title: "Global Certification Overview",
+  description: "View and filter all certifications across all organizations.",
 };
 
-export default async function SuperAdminCustomersPage() {
-  const [customers, organizations] = await Promise.all([
+export default async function SuperAdminCertificationsPage() {
+  const [certifications, organizations] = await Promise.all([
     organizationRepository
       .getAllOrganizations()
       .then((orgs) =>
         Promise.all(
           orgs.map((org) =>
-            organizationRepository.getOrgCustomers(org.organization_id!)
+            organizationRepository.getCertifications(org.organization_id!)
           )
         )
       )
@@ -23,8 +23,8 @@ export default async function SuperAdminCustomersPage() {
   ]);
 
   return (
-    <CustomersClient
-      allCustomers={customers}
+    <CertificationsClient
+      allCertifications={certifications}
       allOrganizations={organizations}
     />
   );

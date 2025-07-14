@@ -3,9 +3,9 @@
 import React, { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
-import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useActiveOrganization } from "@/contexts/active-organization-context";
 
 export default function BusinessActorLayout({
   children,
@@ -13,61 +13,41 @@ export default function BusinessActorLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status: sessionStatus } = useSession();
-  const { userOrganizations, isOrgContextInitialized } =
-    useActiveOrganization();
-
+  const { isOrgContextInitialized } = useActiveOrganization();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Wait until we have a definitive session status.
-    if (sessionStatus === "loading") {
+    // Wait until session and org context are fully loaded to prevent premature redirects
+    if (sessionStatus === "loading" || !isOrgContextInitialized) {
       return;
     }
 
-    // 1. First Guard: Ensure the user is authenticated and is a Business Actor.
-    if (sessionStatus === "authenticated") {
-      if (
-        !session.user.businessActorId &&
-        pathname !== "/business-actor/onboarding"
-      ) {
-        toast.error("Access Denied: This area is for Business Actors only.");
-        router.replace("/dashboard");
-        return;
-      }
-    } else {
-      // Unauthenticated
+    // If the user is not authenticated at all, send them to login.
+    if (sessionStatus === "unauthenticated") {
       router.replace("/login");
       return;
     }
 
-    // 2. Second Guard: For a verified BA, ensure they have an organization.
-    // This check runs only after the organization list has been loaded.
-    if (isOrgContextInitialized && session.user.businessActorId) {
-      if (
-        userOrganizations.length === 0 &&
-        pathname !== "/business-actor/organization/create"
-      ) {
-        // If they have no orgs, they MUST be on the creation page.
-        // If they try to go anywhere else (e.g., /business-actor/dashboard), force them to create.
-        toast.info("You must create an organization to continue.");
-        router.replace("/business-actor/organization/create");
-      }
-    }
-  }, [
-    session,
-    sessionStatus,
-    router,
-    userOrganizations,
-    isOrgContextInitialized,
-    pathname,
-  ]);
+    // [THE FIX] The guard logic now includes an exception for the organization creation page.
+    // A user is allowed into this layout if:
+    // 1. They are already a Business Actor (have a businessActorId).
+    // OR
+    // 2. They are on the specific page to create their first organization.
+    const isAllowed =
+      !!session?.user.businessActorId ||
+      pathname.startsWith("/business-actor/organization/create");
 
-  // Show a loading state while we verify the user's BA status and organization count.
-  if (
-    sessionStatus === "loading" ||
-    (session?.user.businessActorId && !isOrgContextInitialized)
-  ) {
+    if (!isAllowed) {
+      toast.error(
+        "Access denied. Create an organization to enter the business workspace."
+      );
+      router.replace("/dashboard");
+    }
+  }, [session, sessionStatus, router, isOrgContextInitialized, pathname]);
+
+  // Show a loading state while verifying access.
+  if (sessionStatus === "loading" || !isOrgContextInitialized) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -78,6 +58,7 @@ export default function BusinessActorLayout({
     );
   }
 
-  // If all checks pass, render the requested child page.
+  // Render the children. The useEffect handles redirection for unauthorized access.
+  // We don't need to conditionally render here, as the redirect will prevent the wrong UI from being shown.
   return <>{children}</>;
 }

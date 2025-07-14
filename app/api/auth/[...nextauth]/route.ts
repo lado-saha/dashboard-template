@@ -26,6 +26,7 @@ export const authOptions: NextAuthOptions = {
             username: credentials.username,
             password: credentials.password,
           };
+          // Step 1: Authenticate the user and get their token and basic info.
           const loginResponse = await authRepository.login(loginRequest);
 
           if (loginResponse && loginResponse.user && loginResponse.access_token) {
@@ -34,22 +35,19 @@ export const authOptions: NextAuthOptions = {
               throw new Error("User ID is missing from login response.");
             }
 
-            // [THE FIX] Re-introduce the check for a Business Actor profile.
+            // [THE FIX] Step 2: Check if the user owns any organizations.
+            // This is now the single source of truth for their "Business Actor" status.
             let businessActorId: string | null = null;
             try {
-              // Make a single, targeted request to see if a BA profile exists for this user ID.
-              const businessActorProfile = await organizationRepository.getBusinessActorById(userId);
-              if (businessActorProfile) {
-                // If a profile is found, the user is a Business Actor.
-                businessActorId = businessActorProfile.business_actor_id || userId;
+              // We need to temporarily use the new token to make this check.
+              const userOrgs = await organizationRepository.getMyOrganizations();
+              if (userOrgs && userOrgs.length > 0) {
+                // If they have organizations, their businessActorId is their userId.
+                businessActorId = userId;
               }
             } catch (error: any) {
-              // A 404 is an expected, valid outcome for a user who is not a BA.
-              // We can safely ignore it and proceed with login.
-              if (error.status !== 404) {
-                console.error("Error checking for Business Actor profile during login:", error.message);
-                // For other errors (e.g., 500), we log them but don't block login.
-              }
+              // Log the error but don't block login. The user will be treated as a standard user.
+              console.error("Could not check for user organizations during login:", error.message);
             }
 
             return {
@@ -65,7 +63,7 @@ export const authOptions: NextAuthOptions = {
               accessToken: loginResponse.access_token.token,
               roles: loginResponse.roles,
               permissions: loginResponse.permissions,
-              // The businessActorId will be the user's ID if they are a BA, otherwise it will be null.
+              // The businessActorId is now correctly set based on organization ownership.
               businessActorId: businessActorId,
             };
           }
@@ -77,7 +75,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -90,6 +88,15 @@ export const authOptions: NextAuthOptions = {
         token.email_verified = user.email_verified;
         token.phone_number_verified = user.phone_number_verified;
         token.businessActorId = user.businessActorId;
+      }
+      // This handles the session update from the client
+      if (trigger === "update" && session) {
+        if (session.activeOrganizationId !== undefined) {
+          token.activeOrganizationId = session.activeOrganizationId;
+        }
+        if (session.businessActorId !== undefined) {
+          token.businessActorId = session.businessActorId;
+        }
       }
       return token;
     },
@@ -106,6 +113,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email_verified = token.email_verified as boolean;
         session.user.phone_number_verified = token.phone_number_verified as boolean;
         session.user.businessActorId = token.businessActorId as string | null;
+
       }
       return session;
     },

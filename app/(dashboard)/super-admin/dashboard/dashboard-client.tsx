@@ -1,129 +1,237 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { UserDto } from "@/types/auth";
-import { OrganizationDto, BusinessActorDto } from "@/types/organization";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatCard } from "@/components/dashboard/organization/stat-card";
-import { DashboardCard } from "@/components/dashboard/dashboard-card";
-import { Users, Building, Briefcase, CheckCircle, Clock } from "lucide-react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Pie, PieChart, Cell } from "recharts";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Pie,
+  PieChart,
+  Cell,
+} from "recharts";
+import { Users, Building, Briefcase, FileText, UserPlus } from "lucide-react";
+import { OrganizationDto, BusinessActorDto } from "@/types/organization";
+import { UserDto } from "@/types/auth";
+import { format } from "date-fns";
 
-interface SuperAdminDashboardData {
-  users: UserDto[];
-  organizations: OrganizationDto[];
-  businessActors: BusinessActorDto[];
-  error?: string | null;
+export interface DashboardData {
+  stats: {
+    totalUsers: number;
+    totalOrgs: number;
+    totalBAs: number;
+  };
+  charts: {
+    orgStatusCounts: Record<string, number>;
+    baTypeCounts: Record<string, number>;
+  };
+  recentActivity: {
+    users: UserDto[];
+    organizations: OrganizationDto[];
+  };
 }
 
-interface SuperAdminDashboardClientPageProps {
-  initialData: SuperAdminDashboardData;
+interface SuperAdminDashboardClientProps {
+  initialData: DashboardData;
 }
 
-const PIE_COLORS = [
-    "hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", 
-    "hsl(var(--chart-4))", "hsl(var(--chart-5))"
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884d8",
+  "#82ca9d",
 ];
 
-export function SuperAdminDashboardClientPage({ initialData }: SuperAdminDashboardClientPageProps) {
-  const { users, organizations, businessActors } = initialData;
+export function SuperAdminDashboardClient({
+  initialData,
+}: SuperAdminDashboardClientProps) {
+  const { stats, charts, recentActivity } = initialData;
 
-  const orgStatusData = useMemo(() => {
-    const counts = organizations.reduce((acc, org) => {
-      const status = org.status || "UNKNOWN";
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [organizations]);
-
-  const baTypeData = useMemo(() => {
-    const counts = businessActors.reduce((acc, actor) => {
-      const type = actor.type || "GUEST";
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    return Object.entries(counts).map(([name, value]) => ({ name: name.replace(/_/g, " "), value }));
-  }, [businessActors]);
-
-  const recentUsers = useMemo(() => {
-    return [...users]
-      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-      .slice(0, 5);
-  }, [users]);
+  const orgStatusData = Object.entries(charts.orgStatusCounts).map(
+    ([name, value]) => ({ name, value })
+  );
+  const baTypeData = Object.entries(charts.baTypeCounts).map(
+    ([name, value]) => ({ name, value })
+  );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Platform Overview"
-        description="A comprehensive, real-time view of all system activities and entities."
+        title="Platform Dashboard"
+        description="A high-level overview of all activity across the YowYob platform."
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard title="Total Users" value={users.length.toLocaleString()} icon={Users} description={`${users.filter(u => u.is_enabled).length} active`} />
-        <StatCard title="Total Organizations" value={organizations.length.toLocaleString()} icon={Building} description={`${organizations.filter(o => o.status === "ACTIVE").length} active`} />
-        <StatCard title="Business Actors" value={businessActors.length.toLocaleString()} icon={Briefcase} description="Total professional profiles" />
+      {/* Stat Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              All registered user accounts.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Organizations
+            </CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalOrgs}</div>
+            <p className="text-xs text-muted-foreground">Across all users.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Business Actors
+            </CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalBAs}</div>
+            <p className="text-xs text-muted-foreground">
+              Users with business profiles.
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <DashboardCard title="Organization Status" description="Distribution of organizations by their current status." icon={CheckCircle}>
+      {/* Charts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Organizations by Status</CardTitle>
+          </CardHeader>
+          <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={orgStatusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}>
+                <Pie
+                  data={orgStatusData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
                   {orgStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }} />
+                <Tooltip />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
-        </DashboardCard>
-        <DashboardCard title="Business Actor Types" description="Breakdown of business actors by their primary role." icon={Briefcase}>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Business Actors by Type</CardTitle>
+          </CardHeader>
+          <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={baTypeData} layout="vertical" margin={{ left: 20, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} width={120} tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Count" barSize={25} />
+              <BarChart data={baTypeData}>
+                <XAxis
+                  dataKey="name"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-        </DashboardCard>
+          </CardContent>
+        </Card>
       </div>
 
-      <DashboardCard title="Recently Registered Users" description="The latest users to join the platform." icon={Users}>
-        <ScrollArea className="h-[300px]">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Registered On</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {recentUsers.map(user => {
-                        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                        return (
-                            <TableRow key={user.id}>
-                                <TableCell>
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-9 w-9"><AvatarFallback>{name.charAt(0) || 'U'}</AvatarFallback></Avatar>
-                                        <div className="font-medium">{name}</div>
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-muted-foreground">{user.username}</TableCell>
-                                <TableCell className="text-muted-foreground">{new Date(user.created_at!).toLocaleDateString()}</TableCell>
-                            </TableRow>
-                        );
-                    })}
-                </TableBody>
-            </Table>
-        </ScrollArea>
-      </DashboardCard>
+      {/* Recent Activity Feeds */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recently Created Organizations</CardTitle>
+            <CardDescription>
+              The 5 most recently created organizations.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.organizations.map((org) => (
+                <div key={org.organization_id} className="flex items-center">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div className="ml-4 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {org.long_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{org.email}</p>
+                  </div>
+                  <div className="ml-auto text-xs text-muted-foreground">
+                    {format(new Date(org.created_at!), "PP")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recently Joined Users</CardTitle>
+            <CardDescription>
+              The 5 most recently registered users.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.users.map((user) => (
+                <div key={user.id} className="flex items-center">
+                  <UserPlus className="h-5 w-5 text-muted-foreground" />
+                  <div className="ml-4 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.first_name} {user.last_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.username}
+                    </p>
+                  </div>
+                  <div className="ml-auto text-xs text-muted-foreground">
+                    {format(new Date(user.created_at!), "PP")}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

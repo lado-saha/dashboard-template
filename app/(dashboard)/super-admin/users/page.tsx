@@ -1,14 +1,13 @@
 import { Metadata } from "next";
-import { UsersClientPage } from "./users-client";
 import { authRepository } from "@/lib/data-repo/auth";
+import { UsersClient } from "./users-client";
 
 export const metadata: Metadata = {
   title: "User Management",
-  description: "Administer all user accounts on the platform.",
+  description: "View, manage, and moderate all user accounts on the platform.",
 };
 
 export default async function SuperAdminUsersPage() {
-  // Fetch initial data on the server
-  const initialData = await authRepository.getAllUsers().catch(() => []);
-  return <UsersClientPage initialData={initialData} />;
+  const users = await authRepository.getAllUsers();
+  return <UsersClient initialUsers={users} />;
 }
