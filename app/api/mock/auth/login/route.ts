@@ -1,4 +1,3 @@
-// app/api/mock/auth/login/route.ts
 import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AuthRequest, LoginResponse, UserInfo } from '@/types/auth';
@@ -25,6 +24,8 @@ export async function POST(_request: Request) {
       return NextResponse.json({ message: "Invalid username or password." }, { status: 401 });
     }
 
+    const businessActor = dbManager.getItemById('businessActors', user.id!);
+
     const userInfo: UserInfo = {
       id: user.id,
       username: user.username,
@@ -36,11 +37,12 @@ export async function POST(_request: Request) {
       phone_number_verified: user.phone_number_verified,
     };
 
-    const loginResponse: LoginResponse = {
+    const loginResponse: LoginResponse & { businessActorId?: string | null } = {
       access_token: { token: `local-mock-jwt-for-${user.username}-${Date.now()}`, type: "Bearer", expire_in: 3600000 },
       user: userInfo,
       roles: user.username === "admin" || user.username === "superadmin" ? ["SUPER_ADMIN_ROLE", "BUSINESS_ACTOR_ROLE"] : ["BUSINESS_ACTOR_ROLE", "GENERAL_USER_ROLE"],
       permissions: user.username === "admin" || user.username === "superadmin" ? ["*:*:*"] : ["org:read", "org:create"],
+      businessActorId: businessActor ? businessActor.business_actor_id : null,
     };
 
     return NextResponse.json(loginResponse, { status: 200 });

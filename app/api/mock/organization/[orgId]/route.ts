@@ -1,54 +1,45 @@
 import { NextResponse } from 'next/server';
 import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
-import { UpdateOrganizationRequest, OrganizationDto } from '@/types/organization';
+import { UpdateOrganizationRequest } from '@/types/organization';
 
 export async function PUT(_request: Request, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
     const body = await _request.json() as UpdateOrganizationRequest;
-
-    // THE FIX: Ensure we merge with existing data, not just overwrite.
-    const existingOrg = dbManager.getItemById('organizationsDetails', orgId);
-    if (!existingOrg) {
-      return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
-    }
-
-    // Merge updates onto the existing full object
-    const updatedData = { ...existingOrg, ...body };
-
-    const updatedOrg = dbManager.updateItem('organizationsDetails', orgId, updatedData);
-
-    return NextResponse.json(updatedOrg, { status: 202 }); // Spec says 202 Accepted for update
+    const updatedOrg = dbManager.updateItem('organizationsDetails', orgId, body);
+    if (!updatedOrg) return NextResponse.json({ message: `Organization ${orgId} not found.` }, { status: 404 });
+    return NextResponse.json(updatedOrg, { status: 202 });
   } catch (error) {
     return NextResponse.json({ message: "Failed to update organization", error: error.message }, { status: 500 });
   }
 }
 
-
 export async function DELETE(_request: Request, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    const deletedDetails = dbManager.deleteItem('organizationsDetails', orgId);
+    const deleted = dbManager.deleteItem('organizationsDetails', orgId);
+    if (!deleted) return NextResponse.json({ message: `Organization ${orgId} not found.` }, { status: 404 });
 
-    if (!deletedDetails) { // If neither was found
-      return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
-    }
-    // TODO: Cascade delete related entities (agencies, contacts, addresses, etc.)
-    return NextResponse.json({ message: "Organization deleted successfully." }, { status: 202 }); // Spec says 202 Accepted
+    // Cascade delete related entities
+    const allAgencies = dbManager.getCollection('agencies');
+    const remainingAgencies = allAgencies.filter(a => a.organization_id !== orgId);
+    dbManager.saveCollection('agencies', remainingAgencies);
+    
+    const allEmployees = dbManager.getCollection('employees');
+    const remainingEmployees = allEmployees.filter(e => e.organization_id !== orgId);
+    dbManager.saveCollection('employees', remainingEmployees);
+
+    return NextResponse.json({ message: "Organization deleted successfully." }, { status: 202 });
   } catch (error) {
     return NextResponse.json({ message: "Failed to delete organization", error: error.message }, { status: 500 });
   }
 }
 
-
 export async function GET(_request: Request, { params }: { params: { orgId: string } }) {
   try {
     const { orgId } = await params;
-    // For details, we use the 'organizationsDetails' collection
     const org = dbManager.getItemById('organizationsDetails', orgId);
-    if (!org) {
-      return NextResponse.json({ message: `Organization with ID ${orgId} not found.` }, { status: 404 });
-    }
+    if (!org) return NextResponse.json({ message: `Organization ${orgId} not found.` }, { status: 404 });
     return NextResponse.json(org);
   } catch (error) {
     return NextResponse.json({ message: "Failed to get organization details", error: error.message }, { status: 500 });

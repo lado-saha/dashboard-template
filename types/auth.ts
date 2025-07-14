@@ -113,6 +113,13 @@ export interface AccessToken {
   expire_in?: number; // int64 (milliseconds or seconds)
 }
 
+export interface OAuth2TokenResponse {
+  access_token: string;
+  // type: string;
+  expires_in: number;
+  // scope?: string;
+}
+
 export interface UserInfo { // Response for /api/user and user part of LoginResponse
   id?: string; // format: uuid
   first_name?: string;

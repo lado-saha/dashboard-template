@@ -22,6 +22,6 @@ export default withAuth(
 // Configure which paths are protected by this middleware
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|login|auth|signup|data|forgot-password|$).*)", // Protects everything else including dashboard routes
+    "/((?!api|_next/static|_next/image|favicon.ico|.svg|login|auth|signup|data|forgot-password|$).*)", 
   ],
 };

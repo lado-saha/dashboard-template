@@ -5,7 +5,9 @@ export const metadata: Metadata = {
   title: "Edit Agency Employee",
 };
 
-type Props = { params: { employeeId: string } };
-export default function EditAgencyEmployeePage({ params }: Props) {
-  return <EditAgencyEmployeeClientPage employeeId={params.employeeId} />;
+type Props = { params: Promise<{ employeeId: string }> };
+
+export default async function EditAgencyEmployeePage({ params }: Props) {
+  const { employeeId } = await params;
+  return <EditAgencyEmployeeClientPage employeeId={employeeId} />;
 }

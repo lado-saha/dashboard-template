@@ -4,14 +4,14 @@ import { dbManager } from '@/lib/data-repo/local-store/json-db-manager';
 import { AddressableType } from '@/types/organization';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     entityType: AddressableType;
     entityId: string;
     addressId: string;
-  };
+  }>;
 }
 
-export async function PUT(_request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { entityId, entityType, addressId } = await params;
     const allAddresses = dbManager.getCollection('addresses');

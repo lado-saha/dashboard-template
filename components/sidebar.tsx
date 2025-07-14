@@ -1,11 +1,3 @@
-#!/bin/bash
-# Description: Refactors the main sidebar to be context-aware based on the URL path, not just the user's role.
-
-echo "🧠 Refining the Sidebar to be context-aware..."
-
-# --- 1. Update the Main Sidebar with Path-Based Logic ---
-code "components/sidebar.tsx"
-cat > "components/sidebar.tsx" << 'EOF'
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
@@ -194,7 +186,3 @@ export function Sidebar() {
     </TooltipProvider>
   );
 }
-EOF
-
-echo "✅ Sidebar logic has been successfully updated to be path-aware."
-echo "✅ Users will now see the correct navigation based on their current workspace context."

@@ -11,10 +11,10 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function EditAgencyPage({
+export default async function EditAgencyPage({
   params,
 }: {
-  params: { agencyId: string };
+  params: Promise<{ agencyId: string }>;
 }) {
   const { activeOrganizationId, fetchAgenciesForCurrentOrg } =
     useActiveOrganization();
@@ -22,12 +22,13 @@ export default function EditAgencyPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { agencyId } = await params;
 
   useEffect(() => {
-    if (activeOrganizationId && params.agencyId) {
+    if (activeOrganizationId && agencyId) {
       setIsLoading(true);
       organizationRepository
-        .getAgencyById(activeOrganizationId, params.agencyId)
+        .getAgencyById(activeOrganizationId, agencyId)
         .then((data) => {
           if (data) setAgencyData(data);
           else setError("Agency not found.");
@@ -35,7 +36,7 @@ export default function EditAgencyPage({
         .catch(() => setError("Failed to fetch agency details."))
         .finally(() => setIsLoading(false));
     }
-  }, [activeOrganizationId, params.agencyId]);
+  }, [activeOrganizationId, agencyId]);
 
   const handleSuccessAction = (updatedAgency: AgencyDto) => {
     toast.success(`Agency "${updatedAgency.short_name}" updated successfully!`);
