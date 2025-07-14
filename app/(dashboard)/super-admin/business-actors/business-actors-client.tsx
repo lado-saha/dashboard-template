@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { BusinessActorDto } from "@/types/organization";
@@ -31,23 +31,32 @@ const verifiedOptions = [
   { value: "false", label: "Not Verified" },
 ];
 
-interface BusinessActorsClientProps {
-  initialActors: BusinessActorDto[];
-}
-
-export function BusinessActorsClient({
-  initialActors,
-}: BusinessActorsClientProps) {
-  const [actors, setActors] = useState<BusinessActorDto[]>(initialActors);
+export function BusinessActorsClient() {
+  const [actors, setActors] = useState<BusinessActorDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingActor, setEditingActor] = useState<
     BusinessActorDto | undefined
   >();
 
   const refreshData = useCallback(async () => {
-    const updatedActors = await organizationRepository.getAllBusinessActors();
-    setActors(updatedActors);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updatedActors = await organizationRepository.getAllBusinessActors();
+      setActors(updatedActors);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch business actors.");
+      toast.error(err.message || "Failed to fetch business actors.");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   const handleOpenDialog = (actor?: BusinessActorDto) => {
     setEditingActor(actor);
@@ -80,8 +89,8 @@ export function BusinessActorsClient({
       <ResourceDataTable
         data={actors}
         columns={columns}
-        isLoading={false}
-        error={null}
+        isLoading={isLoading}
+        error={error}
         onRefreshAction={refreshData}
         searchPlaceholder="Search by name, email..."
         onDeleteItemsAction={handleDelete}

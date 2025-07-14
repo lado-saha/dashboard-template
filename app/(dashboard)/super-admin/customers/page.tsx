@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { organizationRepository } from "@/lib/data-repo/organization";
 import { CustomersClient } from "./customers-client";
 
 export const metadata: Metadata = {
@@ -7,25 +6,6 @@ export const metadata: Metadata = {
   description: "View and filter all customers across all organizations.",
 };
 
-export default async function SuperAdminCustomersPage() {
-  const [customers, organizations] = await Promise.all([
-    organizationRepository
-      .getAllOrganizations()
-      .then((orgs) =>
-        Promise.all(
-          orgs.map((org) =>
-            organizationRepository.getOrgCustomers(org.organization_id!)
-          )
-        )
-      )
-      .then((arrays) => arrays.flat()),
-    organizationRepository.getAllOrganizations(),
-  ]);
-
-  return (
-    <CustomersClient
-      allCustomers={customers}
-      allOrganizations={organizations}
-    />
-  );
+export default function SuperAdminCustomersPage() {
+  return <CustomersClient />;
 }

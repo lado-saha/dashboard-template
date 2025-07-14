@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -9,6 +9,9 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { Loader2 } from "lucide-react";
+import { authRepository } from "@/lib/data-repo/auth";
+import { organizationRepository } from "@/lib/data-repo/organization";
 import {
   Bar,
   BarChart,
@@ -22,7 +25,7 @@ import {
   Cell,
 } from "recharts";
 import { Users, Building, Briefcase, FileText, UserPlus } from "lucide-react";
-import { OrganizationDto, BusinessActorDto } from "@/types/organization";
+import { OrganizationDto } from "@/types/organization";
 import { UserDto } from "@/types/auth";
 import { format } from "date-fns";
 
@@ -42,10 +45,6 @@ export interface DashboardData {
   };
 }
 
-interface SuperAdminDashboardClientProps {
-  initialData: DashboardData;
-}
-
 const COLORS = [
   "#0088FE",
   "#00C49F",
@@ -55,11 +54,73 @@ const COLORS = [
   "#82ca9d",
 ];
 
-export function SuperAdminDashboardClient({
-  initialData,
-}: SuperAdminDashboardClientProps) {
-  const { stats, charts, recentActivity } = initialData;
+export function SuperAdminDashboardClient() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  const fetchDashboardData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [users, organizations, businessActors] = await Promise.all([
+        authRepository.getAllUsers(),
+        organizationRepository.getAllOrganizations(),
+        organizationRepository.getAllBusinessActors(),
+      ]);
+
+      const orgStatusCounts = organizations.reduce((acc, org) => {
+        const status = org.status || "UNKNOWN";
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const baTypeCounts = businessActors.reduce((acc, ba) => {
+        const type = ba.type || "UNKNOWN";
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      setData({
+        stats: {
+          totalUsers: users.length,
+          totalOrgs: organizations.length,
+          totalBAs: businessActors.length,
+        },
+        charts: { orgStatusCounts, baTypeCounts },
+        recentActivity: {
+          users: users.slice(0, 5),
+          organizations: organizations.slice(0, 5),
+        },
+      });
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch dashboard data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[80vh]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-destructive">Error: {error || "Could not load platform statistics."}</p>
+      </div>
+    );
+  }
+
+  const { stats, charts, recentActivity } = data;
   const orgStatusData = Object.entries(charts.orgStatusCounts).map(
     ([name, value]) => ({ name, value })
   );
@@ -220,7 +281,7 @@ export function SuperAdminDashboardClient({
                       {user.first_name} {user.last_name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {user.username}
+                      @{user.username}
                     </p>
                   </div>
                   <div className="ml-auto text-xs text-muted-foreground">

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { AgencyDto, OrganizationDto } from "@/types/organization";
+import { organizationRepository } from "@/lib/data-repo/organization";
 import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { getSuperAdminAgencyColumns } from "./columns";
@@ -10,22 +11,43 @@ import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filte
 import { FeedbackCard } from "@/components/ui/feedback-card";
 import { Building, Search } from "lucide-react";
 
-interface AgenciesClientProps {
-  allAgencies: AgencyDto[];
-  allOrganizations: OrganizationDto[];
-}
+export function AgenciesClient() {
+  const [agencies, setAgencies] = useState<AgencyDto[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function AgenciesClient({
-  allAgencies,
-  allOrganizations,
-}: AgenciesClientProps) {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const orgs = await organizationRepository.getAllOrganizations();
+      setOrganizations(orgs);
+      
+      const agencyArrays = await Promise.all(
+        orgs.map((org) =>
+          organizationRepository.getAgencies(org.organization_id!)
+        )
+      );
+      setAgencies(agencyArrays.flat());
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const orgOptions = useMemo(
     () =>
-      allOrganizations.map((org) => ({
+      organizations.map((org) => ({
         label: org.long_name || org.organization_id!,
         value: org.organization_id!,
       })),
-    [allOrganizations]
+    [organizations]
   );
 
   const columns = useMemo<ColumnDef<AgencyDto>[]>(
@@ -35,11 +57,11 @@ export function AgenciesClient({
 
   return (
     <ResourceDataTable
-      data={allAgencies}
+      data={agencies}
       columns={columns}
-      isLoading={false}
-      error={null}
-      onRefreshAction={() => window.location.reload()}
+      isLoading={isLoading}
+      error={error}
+      onRefreshAction={fetchData}
       searchPlaceholder="Search by agency name or location..."
       onDeleteItemsAction={() => {}}
       viewModeStorageKey="sa-agencies-view-mode"
@@ -59,7 +81,7 @@ export function AgenciesClient({
       )}
       renderGridItemAction={(agency) => (
         <div className="p-4 border rounded-md">{agency.long_name}</div>
-      )} // Placeholder card
+      )}
       emptyState={
         <FeedbackCard
           icon={Building}

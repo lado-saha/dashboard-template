@@ -131,7 +131,6 @@ async function yowyobApiRequest<T = any>(
     }
   }
 
-
   const config: RequestInit = {
     ...fetchOptions, // Spread the base options first
     body: body,     // Add the body from options
@@ -139,69 +138,63 @@ async function yowyobApiRequest<T = any>(
     cache: 'no-store',
   };
 
-
-
   try {
     const response = await fetch(proxyUrl, config);
-    console.debug(`Request to ${targetUrl} completed with status: ${response.status} (${response.statusText}) - Method: ${config.method || 'GET'} - Body: ${body ? JSON.stringify(body) : 'N/A'}`);
 
-    // Check if the response is not successful (status >= 400)
     if (!response.ok) {
       let errorData: ApiErrorResponse = { message: `Request failed with status ${response.status}` };
 
-      // Try parsing the response body as JSON
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        // If parsing fails, we don't need to do anything additional.
+      // --- ROBUST ERROR PARSING ---
+      // The key fix is here: Check Content-Type before assuming JSON.
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          console.error("Failed to parse JSON error response:", jsonError);
+          errorData.message = `API returned status ${response.status}, but the error response body was not valid JSON.`;
+        }
+      } else {
+        // If not JSON, read as text to avoid parsing errors
+        const textError = await response.text();
+        errorData.message = textError || `Request failed with status ${response.status}`;
       }
 
-      // Prepare the error message, checking if there are field-specific errors
       const errorMessage = errorData.message || (errorData.errors ? Object.values(errorData.errors).join(', ') : 'An unknown API error occurred.');
+      console.error(`API Error: ${errorMessage}`, { targetUrl: targetUrl, status: response.status, responseData: errorData });
 
-      // Log the error with detailed information
-      console.error(`API Error: ${errorMessage}`, { targetUrl: proxyUrl, status: response.status, responseData: errorData });
-
-      // Create and throw an error with additional information
       const error = new Error(errorMessage) as Error & { status?: number; data?: any };
       error.status = response.status;
       error.data = errorData;
       throw error;
     }
 
-    // If status is 204 (No Content) or the response body is empty, return null
-    if (response.status === 204 || response.headers.get("content-length") === "0") return null;
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
+      return null as T;
+    }
 
-    // Parse the response body as JSON
+    // Since we know the response is ok (2xx), it's safer to expect JSON.
     const data = await response.json();
 
-    // If the response has a "status" of "FAILED", handle the specific error case
+    // Your custom "FAILED" status check remains useful for business logic errors
     if (data.status === "FAILED") {
       let errorMessage = data.message || "An unknown API error occurred.";
-
       if (data.errors && typeof data.errors === "object") {
-        const errorDetails = Object.entries(data.errors)
-          .map(([field, message]) => `${field}: ${message}`)
-          .join(", ");
+        const errorDetails = Object.entries(data.errors).map(([field, message]) => `${field}: ${message}`).join(", ");
         errorMessage += ` - ${errorDetails}`;
       }
-
-      // Create and throw the error with specific details
       const error = new Error(errorMessage) as Error & { status?: number; data?: any };
-      error.status = 400; // Assuming 400 for bad request errors
+      error.status = 400;
       error.data = data;
       throw error;
     }
 
-    // If there is no error and the body is successfully parsed, return the data
     return data as T;
 
   } catch (error) {
-    // Handle unexpected errors or network issues
     if (!(error instanceof Error && 'status' in error)) {
       console.error("A network or unexpected error occurred:", error);
     }
-    // Rethrow the error to be handled further up the call stack
     throw error;
   }
 

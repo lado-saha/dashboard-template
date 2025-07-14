@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { CustomerDto, OrganizationDto } from "@/types/organization";
+import { organizationRepository } from "@/lib/data-repo/organization";
 import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { getSuperAdminCustomerColumns } from "./columns";
@@ -10,22 +11,43 @@ import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filte
 import { FeedbackCard } from "@/components/ui/feedback-card";
 import { Users, Search } from "lucide-react";
 
-interface CustomersClientProps {
-  allCustomers: CustomerDto[];
-  allOrganizations: OrganizationDto[];
-}
+export function CustomersClient() {
+  const [customers, setCustomers] = useState<CustomerDto[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function CustomersClient({
-  allCustomers,
-  allOrganizations,
-}: CustomersClientProps) {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const orgs = await organizationRepository.getAllOrganizations();
+      setOrganizations(orgs);
+      
+      const customerArrays = await Promise.all(
+        orgs.map((org) =>
+          organizationRepository.getOrgCustomers(org.organization_id!)
+        )
+      );
+      setCustomers(customerArrays.flat());
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch customer data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const orgOptions = useMemo(
     () =>
-      allOrganizations.map((org) => ({
+      organizations.map((org) => ({
         label: org.long_name || org.organization_id!,
         value: org.organization_id!,
       })),
-    [allOrganizations]
+    [organizations]
   );
 
   const columns = useMemo<ColumnDef<CustomerDto>[]>(
@@ -35,11 +57,11 @@ export function CustomersClient({
 
   return (
     <ResourceDataTable
-      data={allCustomers}
+      data={customers}
       columns={columns}
-      isLoading={false}
-      error={null}
-      onRefreshAction={() => window.location.reload()}
+      isLoading={isLoading}
+      error={error}
+      onRefreshAction={fetchData}
       searchPlaceholder="Search by customer name..."
       onDeleteItemsAction={() => {}}
       viewModeStorageKey="sa-customers-view-mode"

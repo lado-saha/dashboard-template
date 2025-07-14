@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ProviderDto, OrganizationDto } from "@/types/organization";
+import { organizationRepository } from "@/lib/data-repo/organization";
 import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { getSuperAdminSupplierColumns } from "./columns";
@@ -10,22 +11,41 @@ import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filte
 import { FeedbackCard } from "@/components/ui/feedback-card";
 import { Truck, Search } from "lucide-react";
 
-interface SuppliersClientProps {
-  allSuppliers: ProviderDto[];
-  allOrganizations: OrganizationDto[];
-}
+export function SuppliersClient() {
+  const [suppliers, setSuppliers] = useState<ProviderDto[]>([]);
+  const [organizations, setOrganizations] = useState<OrganizationDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function SuppliersClient({
-  allSuppliers,
-  allOrganizations,
-}: SuppliersClientProps) {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const orgs = await organizationRepository.getAllOrganizations();
+      setOrganizations(orgs);
+      
+      const supplierArrays = await Promise.all(
+        orgs.map(org => organizationRepository.getOrgSuppliers(org.organization_id!))
+      );
+      setSuppliers(supplierArrays.flat());
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch supplier data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const orgOptions = useMemo(
     () =>
-      allOrganizations.map((org) => ({
+      organizations.map((org) => ({
         label: org.long_name || org.organization_id!,
         value: org.organization_id!,
       })),
-    [allOrganizations]
+    [organizations]
   );
 
   const columns = useMemo<ColumnDef<ProviderDto>[]>(
@@ -35,11 +55,11 @@ export function SuppliersClient({
 
   return (
     <ResourceDataTable
-      data={allSuppliers}
+      data={suppliers}
       columns={columns}
-      isLoading={false}
-      error={null}
-      onRefreshAction={() => window.location.reload()}
+      isLoading={isLoading}
+      error={error}
+      onRefreshAction={fetchData}
       searchPlaceholder="Search by supplier name..."
       onDeleteItemsAction={() => {}}
       viewModeStorageKey="sa-suppliers-view-mode"

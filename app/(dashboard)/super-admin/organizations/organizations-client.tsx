@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -33,16 +33,11 @@ const statusOptions = OrganizationStatusValues.map((s) => ({
   label: s.replace(/_/g, " "),
 }));
 
-interface OrganizationsClientProps {
-  initialOrganizations: OrganizationDto[];
-}
-
-export function OrganizationsClient({
-  initialOrganizations,
-}: OrganizationsClientProps) {
+export function OrganizationsClient() {
   const [organizations, setOrganizations] =
-    useState<OrganizationDto[]>(initialOrganizations);
-  const [isLoading, setIsLoading] = useState(false);
+    useState<OrganizationDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [dialogState, setDialogState] = useState<{
     open: boolean;
     items: OrganizationDto[];
@@ -52,15 +47,22 @@ export function OrganizationsClient({
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const data = await organizationRepository.getAllOrganizations();
       setOrganizations(data);
-    } catch (error) {
-      toast.error("Failed to refresh organization data.");
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to refresh organization data.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   const handleStatusChangeConfirmation = (
     org: OrganizationDto,
@@ -117,7 +119,7 @@ export function OrganizationsClient({
         data={organizations}
         columns={columns}
         isLoading={isLoading}
-        error={null}
+        error={error}
         onRefreshAction={refreshData}
         searchPlaceholder="Search by name, email..."
         onDeleteItemsAction={handleDeleteConfirmation}
