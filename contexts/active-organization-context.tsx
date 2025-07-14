@@ -191,7 +191,7 @@ export const ActiveOrganizationProvider = ({
         }
       }
     } catch (error) {
-      toast.error("Could not load your organizations.");
+      // toast.error("Could not load your organizations.");
       setUserOrganizations([]);
       clearActiveOrganization();
     } finally {

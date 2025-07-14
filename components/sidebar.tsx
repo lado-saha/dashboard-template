@@ -9,6 +9,7 @@ import {
   Award,
   Briefcase,
   Building,
+  Combine,
   FileText,
   FolderHeart,
   HandCoins,
@@ -29,15 +30,13 @@ import {
   Users,
   Users2,
   UsersRound,
+  Wallet,
   Webhook,
   ArrowLeft,
   UserCog,
   Power,
   Shield,
   Info,
-  Handshake,
-  UserPlus,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -54,16 +53,13 @@ import { AgencySwitcher } from "./organization/agencies/agency-switcher";
 import { toast } from "sonner";
 
 // --- Navigation Definitions ---
-// --- Navigation Definitions ---
 
-// For a standard user (not a Business Actor)
 const userNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "My Bonus", href: "/bonus", icon: HandCoins },
   { name: "Favorites", href: "/favorites", icon: FolderHeart },
 ];
 
-// For a Business Actor when an Organization is active
 const baOrgNavigation = [
   {
     name: "Org. Dashboard",
@@ -90,30 +86,6 @@ const baOrgNavigation = [
     isOrgSpecific: true,
   },
   {
-    name: "Customers",
-    href: "/business-actor/org/customers",
-    icon: UsersRound,
-    isOrgSpecific: true,
-  },
-  {
-    name: "Suppliers",
-    href: "/business-actor/org/suppliers",
-    icon: Truck,
-    isOrgSpecific: true,
-  },
-  {
-    name: "Sales People",
-    href: "/business-actor/org/sales-people",
-    icon: UserCheck,
-    isOrgSpecific: true,
-  },
-  {
-    name: "Prospects",
-    href: "/business-actor/org/prospects",
-    icon: Lightbulb,
-    isOrgSpecific: true,
-  },
-  {
     name: "Certifications",
     href: "/business-actor/org/certifications",
     icon: Award,
@@ -127,7 +99,6 @@ const baOrgNavigation = [
   },
 ];
 
-// For a Business Actor when an Agency is active
 const agencyNavigation = [
   {
     name: "Agency Dashboard",
@@ -149,24 +120,8 @@ const agencyNavigation = [
     href: "/business-actor/agency/customers",
     icon: UsersRound,
   },
-  {
-    name: "Agency Suppliers",
-    href: "/business-actor/agency/suppliers",
-    icon: Truck,
-  },
-  {
-    name: "Agency Sales People",
-    href: "/business-actor/agency/sales-people",
-    icon: UserCheck,
-  },
-  {
-    name: "Agency Prospects",
-    href: "/business-actor/agency/prospects",
-    icon: Lightbulb,
-  },
 ];
 
-// Global links for a Business Actor (always visible in BA mode)
 const baGlobalNavigation = [
   {
     name: "Organizations Hub",
@@ -177,7 +132,6 @@ const baGlobalNavigation = [
   { name: "API & Webhooks", href: "/business-actor/webhooks", icon: Webhook },
 ];
 
-// For the Super Admin
 const superAdminNavigation = [
   { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
   { name: "User Management", href: "/super-admin/users", icon: Users },
@@ -206,7 +160,6 @@ const superAdminNavigation = [
   },
 ];
 
-// Common links for all roles, displayed at the bottom
 const bottomNavigation = [
   { name: "Help & Support", href: "/help", icon: HelpCircle },
   { name: "Settings", href: "/settings", icon: Settings },
@@ -225,50 +178,106 @@ export function Sidebar() {
     clearActiveOrganization,
   } = useActiveOrganization();
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsCollapsed(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const { isBusinessActor, isSuperAdmin } = useMemo(
     () => ({
       isBusinessActor: !!session?.user.businessActorId,
-      isSuperAdmin: session?.user.roles?.includes("SUPER_ADMIN_ROLE"),
+      isSuperAdmin: true,
     }),
     [session]
   );
 
-  let mainNav: any[], globalNav: any[], sidebarTitle: string, homeLink: string;
+  const isAgencyContext = pathname.startsWith("/business-actor/agency");
+
+  let mainNav: any[] = userNavigation;
+  let globalNav: any[] = [];
+  let sidebarTitle = "My Account";
+  let homeLink = "/dashboard";
   let ContextSwitcher = null;
 
-  const isAgencyContext =
-    isBusinessActor && pathname.startsWith("/business-actor/agency");
-  const isOrgContext =
-    isBusinessActor &&
-    pathname.startsWith("/business-actor/") &&
-    !isAgencyContext;
-  const isAdminContext = isSuperAdmin && pathname.startsWith("/super-admin");
-
-  if (isAgencyContext) {
-    mainNav = agencyNavigation;
-    sidebarTitle = activeAgencyDetails?.short_name || "Agency";
-    homeLink = "/business-actor/agency/dashboard";
-    ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
-    globalNav = [];
-  } else if (isOrgContext) {
-    mainNav = baOrgNavigation;
-    globalNav = baGlobalNavigation;
-    sidebarTitle = "BA Workspace";
-    homeLink = "/business-actor/organizations";
-    ContextSwitcher = () => <OrganizationSwitcher isCollapsed={isCollapsed} />;
-  } else if (isAdminContext) {
+  if (isSuperAdmin && pathname.startsWith("/super-admin/") ) {
     mainNav = superAdminNavigation;
     sidebarTitle = "Platform Admin";
     homeLink = "/super-admin/dashboard";
-    globalNav = [];
-  } else {
-    // Default view for ALL users, regardless of role, when not in a specific workspace.
-    mainNav = userNavigation;
-    sidebarTitle = "My Account";
-    homeLink = "/dashboard";
-    globalNav = [];
+  } else if (isBusinessActor) {
+    if (isAgencyContext) {
+      mainNav = agencyNavigation;
+      sidebarTitle = activeAgencyDetails?.short_name || "Agency";
+      homeLink = "/business-actor/agency/dashboard";
+      ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
+    } else {
+      mainNav = baOrgNavigation;
+      globalNav = baGlobalNavigation;
+      sidebarTitle = "BA Workspace";
+      homeLink = "/business-actor/organizations";
+      ContextSwitcher = () => (
+        <OrganizationSwitcher isCollapsed={isCollapsed} />
+      );
+    }
   }
-  // --- End of path-driven logic ---
+
+  const ExitButton = () => {
+    if (isAgencyContext) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => {
+                clearActiveAgency();
+                router.push("/business-actor/dashboard");
+              }}
+              variant="ghost"
+              className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <ArrowLeft
+                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
+              />
+              {!isCollapsed && "Exit Agency"}
+            </Button>
+          </TooltipTrigger>
+          {isCollapsed && (
+            <TooltipContent side="right">Exit Agency</TooltipContent>
+          )}
+        </Tooltip>
+      );
+    }
+    if (isBusinessActor) {
+      return (
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => {
+                clearActiveOrganization();
+                router.push("/dashboard");
+                toast.info("Exited Business Workspace.");
+              }}
+              variant="ghost"
+              className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-amber-500/10 hover:text-amber-600"
+            >
+              <Power
+                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
+              />
+              {!isCollapsed && "Exit Workspace"}
+            </Button>
+          </TooltipTrigger>
+          {isCollapsed && (
+            <TooltipContent side="right">Exit Workspace</TooltipContent>
+          )}
+        </Tooltip>
+      );
+    }
+    return null;
+  };
 
   const NavItem = ({
     item,
@@ -282,6 +291,7 @@ export function Sidebar() {
   }) => {
     const isDisabled = item.isOrgSpecific && !activeOrganizationId;
     const isActive = !isDisabled && pathname.startsWith(item.href);
+
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
@@ -314,59 +324,6 @@ export function Sidebar() {
         )}
       </Tooltip>
     );
-  };
-
-  const ExitButton = () => {
-    if (isAgencyContext) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => {
-                clearActiveAgency();
-                router.push("/business-actor/dashboard");
-              }}
-              variant="ghost"
-              className="w-full justify-start h-9 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <ArrowLeft
-                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
-              />
-              {!isCollapsed && "Exit Agency"}
-            </Button>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">Exit Agency</TooltipContent>
-          )}
-        </Tooltip>
-      );
-    }
-    if (isBusinessActor && pathname.startsWith("/business-actor")) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => {
-                clearActiveOrganization();
-                router.push("/dashboard");
-                toast.info("Exited Business Workspace.");
-              }}
-              variant="ghost"
-              className="flex items-center w-full justify-start h-9 px-3 text-sidebar-foreground hover:bg-amber-500/10 hover:text-amber-600"
-            >
-              <Power
-                className={cn("h-[18px] w-[18px]", !isCollapsed && "mr-3")}
-              />
-              {!isCollapsed && "Exit Workspace"}
-            </Button>
-          </TooltipTrigger>
-          {isCollapsed && (
-            <TooltipContent side="right">Exit Workspace</TooltipContent>
-          )}
-        </Tooltip>
-      );
-    }
-    return null;
   };
 
   return (
@@ -442,17 +399,17 @@ export function Sidebar() {
               isCollapsed ? "px-2" : "px-4"
             )}
           >
-            {mainNav.map((item) => (
-              <NavItem key={item.name} item={item} />
-            ))}
             {globalNav.length > 0 && (
               <>
-                <Separator className="my-3" />
                 {globalNav.map((item) => (
                   <NavItem key={item.name} item={item} />
                 ))}
+                <Separator className="my-3" />
               </>
             )}
+            {mainNav.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
           </nav>
           <div
             className={cn("mt-auto border-t", isCollapsed ? "px-2" : "px-4")}
