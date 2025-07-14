@@ -122,7 +122,7 @@ export function OrganizationForm({
         short_name: initialData?.short_name || "",
         email: initialData?.email || "",
         description: initialData?.description || "",
-        business_domains: initialData?.business_domains || [],
+        business_domains: initialData?.business_domains || ['60dc16a0-5fd3-11f0-89d8-0f177e297cbd'],
         legal_form: initialData?.legal_form || "",
         business_registration_number:
           initialData?.business_registration_number || "",

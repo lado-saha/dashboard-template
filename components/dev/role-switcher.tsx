@@ -27,9 +27,9 @@ export function DevRoleSwitcher({ className }: DevRoleSwitcherProps) {
   };
 
   // This component will only render in the development environment
-  if (process.env.NODE_ENV !== 'development') {
-    return null;
-  }
+  // if (process.env.NODE_ENV !== 'development') {
+  //   return null;
+  // }
 
   return (
     <div className={cn("flex items-center gap-2", className)}>

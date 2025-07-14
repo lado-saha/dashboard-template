@@ -7,11 +7,7 @@ import {
   RolePermissionDto, RbacResource, ApiResponseBoolean
 } from "@/types/auth";
 import {
-  CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest,
-  AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest,
-  AffectEmployeeRequest,
-  AgencyDto,
-  ApplicationDto,
+  CreateOrganizationRequest, UpdateOrganizationRequest, UpdateOrganizationStatusRequest, AddressDto, ContactDto, CreateAddressRequest, UpdateAddressRequest, ContactableType, AddressableType, CreateContactRequest, UpdateContactRequest, BusinessDomainDto, GetBusinessDomainRequest, AffectEmployeeRequest, AgencyDto, ApplicationDto,
   ApplicationKeyDto,
   BusinessActorDto,
   BusinessActorType,
@@ -60,7 +56,6 @@ import {
   OrganizationDto
 } from "@/types/organization";
 import { MediaDto, MediaType, ServiceType, UploadMediaResponse, UploadRequest } from "@/types/media";
-import crypto from "crypto";
 import { systemTokenManager } from "@/lib/auth/system-token-manager";
 
 interface ApiErrorResponse {
@@ -73,10 +68,6 @@ const YOWYOB_MEDIA_API_BASE_URL = process.env.NEXT_PUBLIC_YOWYOB_MEDIA_SERVICE_B
 const PROXY_PATH = "/api/proxy"; // All requests go through here
 const NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY = process.env.NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY;
 
-interface YowyobRequestOptions extends RequestInit {
-  isFormData?: boolean;
-  useClientBasicAuth?: boolean;
-}
 
 type AuthType = 'user' | 'system' | 'none';
 
@@ -110,32 +101,49 @@ async function yowyobApiRequest<T = any>(
     headers.set('Authorization', `Bearer ${systemToken}`);
   }
 
-  // Layer 2: Add the Application Public Key for the Organization service
-  if (serviceBaseUrl === YOWYOB_ORGANIZATION_API_BASE_URL) {
-    if (!NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY) {
-      console.warn(`YOWYOB_APP_PUBLIC_KEY is not set. Requests to ${serviceBaseUrl} may fail.`);
-    } else {
-      headers.set('Public-Key', NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY);
-    }
-  }
-
   // Set Content-Type for non-FormData requests
   if (body && !(body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const config: RequestInit = {
-    ...fetchOptions,
-    headers,
-    body: body,
-    cache: 'no-store'
+  const proxyUrl = `${process.env.NEXT_PUBLIC_URL}${PROXY_PATH}/request`;
+  // Safely convert the Headers object into a plain JavaScript object for merging.
+  const dynamicHeaders = Object.fromEntries(headers.entries());
+
+  // Build the final headers object
+  const finalHeaders = {
+    'X-Target-URL': targetUrl,
+    'Accept': '*/*',
+    ...dynamicHeaders // Now we are spreading a plain object
   };
 
-  const proxyUrl = `${process.env.NEXT_PUBLIC_URL}${PROXY_PATH}/request`;
-  headers.set('X-Target-URL', targetUrl);
+  // Requires user authentication for Yowyob Organization API
+  if (serviceBaseUrl === YOWYOB_ORGANIZATION_API_BASE_URL) {
+    const session = await getSession();
+    if (!session?.user?.accessToken) {
+      throw new Error("User is not authenticated for this request.");
+    }
+    finalHeaders['Authorization'] = `Bearer ${session.user.accessToken}`;
+    if (!NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY) {
+      console.warn(`YOWYOB_APP_PUBLIC_KEY is not set. Requests to ${serviceBaseUrl} may fail.`);
+    } else {
+      finalHeaders['Public-Key'] = NEXT_PUBLIC_YOWYOB_APP_PUBLIC_KEY;
+    }
+  }
+
+
+  const config: RequestInit = {
+    ...fetchOptions, // Spread the base options first
+    body: body,     // Add the body from options
+    headers: finalHeaders,
+    cache: 'no-store',
+  };
+
+
 
   try {
     const response = await fetch(proxyUrl, config);
+    console.debug(`Request to ${targetUrl} completed with status: ${response.status} (${response.statusText}) - Method: ${config.method || 'GET'} - Body: ${body ? JSON.stringify(body) : 'N/A'}`);
 
     // Check if the response is not successful (status >= 400)
     if (!response.ok) {
@@ -200,6 +208,30 @@ async function yowyobApiRequest<T = any>(
 }
 
 
+export const yowyobAuthApi = {
+  register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'system' }),
+  getAllUsers: () => yowyobApiRequest<UserDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/users", { method: "GET" }),
+  getUserByUsername: (username: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/username/${username}`, { method: "GET" }),
+  getUserByPhoneNumber: (phoneNumber: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/phone-number/${phoneNumber}`, { method: "GET" }),
+  getUserByEmail: (email: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/email/${email}`, { method: "GET" }),
+  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'system' }),
+  getCurrentUser: () => yowyobApiRequest<UserInfo>(YOWYOB_AUTH_API_BASE_URL, "/api/user", { method: "GET" }),
+  getRoles: () => yowyobApiRequest<RoleDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "GET" }),
+  createRole: (data: CreateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updateRole: (roleId: string, data: UpdateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  deleteRole: (roleId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "DELETE" }),
+  getAllPermissions: () => yowyobApiRequest<PermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "GET" }),
+  getPermissionById: (permissionId: string) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "GET" }),
+  createPermission: (data: CreatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updatePermission: (permissionId: string, data: UpdatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  deletePermission: (permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "DELETE" }),
+  assignPermissionsToRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<RolePermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "POST", body: JSON.stringify(permissionIds), headers: { "Content-Type": "application/json" } }),
+  removePermissionsFromRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "DELETE", body: JSON.stringify(permissionIds), headers: { "Content-Type": "application/json" } }),
+  assignPermissionToRole: (roleId: string, permissionId: string) => yowyobApiRequest<RolePermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "POST" }),
+  removePermissionFromRole: (roleId: string, permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "DELETE" }),
+  createRbacResource: (data: RbacResource) => yowyobApiRequest<ApiResponseBoolean>(YOWYOB_AUTH_API_BASE_URL, "/api/resources/save", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  getRolesHierarchy: () => yowyobApiRequest<string>(YOWYOB_AUTH_API_BASE_URL, "/api/roles/hierarchy", { method: "GET" }),
+};
 // NEW: Media Service API object
 export const yowyobMediaApi = {
   uploadFile: (
@@ -272,156 +304,170 @@ export const yowyobMediaApi = {
 };
 
 
-export const yowyobAuthApi = {
-  register: (data: CreateUserRequest) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, "/api/register", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, useClientBasicAuth: true, authType: 'system' }),
-  getAllUsers: () => yowyobApiRequest<UserDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/users", { method: "GET" }),
-  getUserByUsername: (username: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/username/${username}`, { method: "GET" }),
-  getUserByPhoneNumber: (phoneNumber: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/phone-number/${phoneNumber}`, { method: "GET" }),
-  getUserByEmail: (email: string) => yowyobApiRequest<UserDto>(YOWYOB_AUTH_API_BASE_URL, `/api/user/email/${email}`, { method: "GET" }),
-  login: (data: AuthRequest) => yowyobApiRequest<LoginResponse>(YOWYOB_AUTH_API_BASE_URL, "/api/login", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, useClientBasicAuth: false, authType: 'system' }),
-  getCurrentUser: () => yowyobApiRequest<UserInfo>(YOWYOB_AUTH_API_BASE_URL, "/api/user", { method: "GET" }),
-  getRoles: () => yowyobApiRequest<RoleDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "GET" }),
-  createRole: (data: CreateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, "/api/roles", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updateRole: (roleId: string, data: UpdateRoleRequest) => yowyobApiRequest<RoleDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteRole: (roleId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}`, { method: "DELETE" }),
-  getAllPermissions: () => yowyobApiRequest<PermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "GET" }),
-  getPermissionById: (permissionId: string) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "GET" }),
-  createPermission: (data: CreatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, "/api/permissions", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updatePermission: (permissionId: string, data: UpdatePermissionRequest) => yowyobApiRequest<PermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deletePermission: (permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/permissions/${permissionId}`, { method: "DELETE" }),
-  assignPermissionsToRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<RolePermissionDto[]>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "POST", body: JSON.stringify(permissionIds), headers: { "Content-Type": "application/json" } }),
-  removePermissionsFromRole: (roleId: string, permissionIds: string[]) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions`, { method: "DELETE", body: JSON.stringify(permissionIds), headers: { "Content-Type": "application/json" } }),
-  assignPermissionToRole: (roleId: string, permissionId: string) => yowyobApiRequest<RolePermissionDto>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "POST" }),
-  removePermissionFromRole: (roleId: string, permissionId: string) => yowyobApiRequest<void>(YOWYOB_AUTH_API_BASE_URL, `/api/roles/${roleId}/permissions/${permissionId}`, { method: "DELETE" }),
-  createRbacResource: (data: RbacResource) => yowyobApiRequest<ApiResponseBoolean>(YOWYOB_AUTH_API_BASE_URL, "/api/resources/save", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  getRolesHierarchy: () => yowyobApiRequest<string>(YOWYOB_AUTH_API_BASE_URL, "/api/roles/hierarchy", { method: "GET" }),
-};
 
 export const yowyobOrganizationApi = {
-  getMyOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user"),
-  getAllOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations"),
-  getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`),
+  getMyOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations/user", { method: "GET", authType: 'user' }),
+  getAllOrganizations: () => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "GET", authType: 'none' }),
+  getOrganizationsByDomain: (domainId: string) => yowyobApiRequest<OrganizationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/domains/${domainId}`, { method: "GET", authType: 'none' }),
   getOrganizationById: (orgId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`),
-  createOrganization: (data: CreateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrganization: (orgId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "DELETE" }),
-  updateOrganizationStatus: (orgId: string, data: UpdateOrganizationStatusRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  addBusinessDomainToOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "PUT" }),
-  removeBusinessDomainFromOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "DELETE" }),
+  createOrganization: (data: CreateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/organizations", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  updateOrganization: (orgId: string, data: UpdateOrganizationRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrganization: (orgId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}`, { method: "DELETE", authType: 'none' }),
+  updateOrganizationStatus: (orgId: string, data: UpdateOrganizationStatusRequest) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  addBusinessDomainToOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "PUT", authType: 'none' }),
+  removeBusinessDomainFromOrg: (orgId: string, businessDomainId: string) => yowyobApiRequest<OrganizationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/domains/${businessDomainId}`, { method: "DELETE", authType: 'none' }),
   getContacts: (contactableType: ContactableType, contactableId: string) => yowyobApiRequest<ContactDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`),
   getContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`),
-  createContact: (contactableType: ContactableType, contactableId: string, data: CreateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updateContact: (contactableType: ContactableType, contactableId: string, contactId: string, data: UpdateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "DELETE" }),
-  markContactAsFavorite: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}/favorite`, { method: "GET" }),
+
+  createContact: (contactableType: ContactableType, contactableId: string, data: CreateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  updateContact: (contactableType: ContactableType, contactableId: string, contactId: string, data: UpdateContactRequest) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deleteContactById: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}`, { method: "DELETE", authType: 'none' }),
+
+  markContactAsFavorite: (contactableType: ContactableType, contactableId: string, contactId: string) => yowyobApiRequest<ContactDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${contactableType}/${contactableId}/contacts/${contactId}/favorite`, { method: "GET", authType: 'none' }),
+
   getAddresses: (addressableType: AddressableType, addressableId: string) => yowyobApiRequest<AddressDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`),
   getAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`),
-  createAddress: (addressableType: AddressableType, addressableId: string, data: CreateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updateAddress: (addressableType: AddressableType, addressableId: string, addressId: string, data: UpdateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "DELETE" }),
-  markAddressAsFavorite: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}/favorite`, { method: "GET" }),
+
+  createAddress: (addressableType: AddressableType, addressableId: string, data: CreateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  updateAddress: (addressableType: AddressableType, addressableId: string, addressId: string, data: UpdateAddressRequest) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deleteAddressById: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}`, { method: "DELETE", authType: 'none' }),
+
+  markAddressAsFavorite: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}/favorite`, { method: "GET", authType: 'none' }),
+
   getPracticalInformation: (orgId: string, params?: { organizationId: string }) => yowyobApiRequest<PracticalInformationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos${params ? '?' + new URLSearchParams(params).toString() : ''}`),
-  createPracticalInformation: (orgId: string, data: CreatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+
+  createPracticalInformation: (orgId: string, data: CreatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getPracticalInformationById: (orgId: string, infoId: string) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`),
-  updatePracticalInformation: (orgId: string, infoId: string, data: UpdatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deletePracticalInformation: (orgId: string, infoId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "DELETE" }),
+
+  updatePracticalInformation: (orgId: string, infoId: string, data: UpdatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deletePracticalInformation: (orgId: string, infoId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "DELETE", authType: 'none' }),
+
   getCertifications: (orgId: string) => yowyobApiRequest<CertificationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`),
-  createCertification: (orgId: string, data: CreateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+
+  createCertification: (orgId: string, data: CreateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getCertificationById: (orgId: string, certId: string) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`),
-  updateCertification: (orgId: string, certId: string, data: UpdateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteCertification: (orgId: string, certId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "DELETE" }),
+
+  updateCertification: (orgId: string, certId: string, data: UpdateCertificationRequest) => yowyobApiRequest<CertificationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deleteCertification: (orgId: string, certId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications/${certId}`, { method: "DELETE", authType: 'none' }),
+
   getAllBusinessDomains: (params?: GetBusinessDomainRequest) => {
     const queryParams = params ? `?${new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString()}` : "";
     return yowyobApiRequest<BusinessDomainDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains${queryParams}`);
   },
   getBusinessDomainById: (domainId: string) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`),
-  createBusinessDomain: (data: CreateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  updateBusinessDomain: (domainId: string, data: UpdateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteBusinessDomain: (domainId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "DELETE" }),
+
+  createBusinessDomain: (data: CreateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  updateBusinessDomain: (domainId: string, data: UpdateBusinessDomainRequest) => yowyobApiRequest<BusinessDomainDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deleteBusinessDomain: (domainId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-domains/${domainId}`, { method: "DELETE", authType: 'none' }),
+
   getAgencies: (orgId: string, active?: boolean) => {
     let endpoint = `/organizations/${orgId}/agencies`;
     if (active !== undefined) endpoint += `?active=${active}`;
     return yowyobApiRequest<AgencyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, endpoint);
   },
-  createAgency: (orgId: string, data: CreateAgencyRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+
+  createAgency: (orgId: string, data: CreateAgencyRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencyById: (orgId: string, agencyId: string) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`),
-  updateAgency: (orgId: string, agencyId: string, data: UpdateAgencyRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgency: (orgId: string, agencyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "DELETE" }),
-  updateAgencyStatus: (orgId: string, agencyId: string, data: UpdateAgencyStatusRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+
+  updateAgency: (orgId: string, agencyId: string, data: UpdateAgencyRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+  deleteAgency: (orgId: string, agencyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}`, { method: "DELETE", authType: 'none' }),
+
+  updateAgencyStatus: (orgId: string, agencyId: string, data: UpdateAgencyStatusRequest) => yowyobApiRequest<AgencyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
+
+
   getOrgEmployees: (orgId: string) => yowyobApiRequest<EmployeeDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees`),
-  createOrgEmployee: (orgId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createOrgEmployee: (orgId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getOrgEmployeeById: (orgId: string, employeeId: string) => yowyobApiRequest<EmployeeDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`),
-  updateOrgEmployee: (orgId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrgEmployee: (orgId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "DELETE" }),
+  updateOrgEmployee: (orgId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrgEmployee: (orgId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/employees/${employeeId}`, { method: "DELETE", authType: 'none' }),
   getAgencyEmployees: (orgId: string, agencyId: string) => yowyobApiRequest<EmployeeDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees`),
-  createAgencyEmployee: (orgId: string, agencyId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createAgencyEmployee: (orgId: string, agencyId: string, data: CreateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencyEmployeeById: (orgId: string, agencyId: string, employeeId: string) => yowyobApiRequest<EmployeeDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`),
-  updateAgencyEmployee: (orgId: string, agencyId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgencyEmployee: (orgId: string, agencyId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "DELETE" }),
-  affectEmployeeToAgency: (orgId: string, agencyId: string, data: AffectEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updateAgencyEmployee: (orgId: string, agencyId: string, employeeId: string, data: UpdateEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteAgencyEmployee: (orgId: string, agencyId: string, employeeId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/${employeeId}`, { method: "DELETE", authType: 'none' }),
+  affectEmployeeToAgency: (orgId: string, agencyId: string, data: AffectEmployeeRequest) => yowyobApiRequest<EmployeeResponse>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/employees/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
   getOrgSalesPersons: (orgId: string) => yowyobApiRequest<SalesPersonDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people`),
-  createOrgSalesPerson: (orgId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createOrgSalesPerson: (orgId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getOrgSalesPersonById: (orgId: string, salesPersonId: string) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`),
-  updateOrgSalesPerson: (orgId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrgSalesPerson: (orgId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "DELETE" }),
+  updateOrgSalesPerson: (orgId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrgSalesPerson: (orgId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/sales-people/${salesPersonId}`, { method: "DELETE", authType: 'none' }),
   getAgencySalesPersons: (orgId: string, agencyId: string) => yowyobApiRequest<SalesPersonDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people`),
-  createAgencySalesPerson: (orgId: string, agencyId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createAgencySalesPerson: (orgId: string, agencyId: string, data: CreateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencySalesPersonById: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`),
-  updateAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "DELETE" }),
+  updateAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string, data: UpdateSalesPersonRequest) => yowyobApiRequest<SalesPersonDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteAgencySalesPerson: (orgId: string, agencyId: string, salesPersonId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/sales-people/${salesPersonId}`, { method: "DELETE", authType: 'none' }),
+
   getOrgCustomers: (orgId: string) => yowyobApiRequest<CustomerDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`),
-  createOrgCustomer: (orgId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createOrgCustomer: (orgId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getOrgCustomerById: (orgId: string, customerId: string) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`),
-  updateOrgCustomer: (orgId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrgCustomer: (orgId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "DELETE" }),
+  updateOrgCustomer: (orgId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrgCustomer: (orgId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/customers/${customerId}`, { method: "DELETE", authType: 'none' }),
   getAgencyCustomers: (orgId: string, agencyId: string) => yowyobApiRequest<CustomerDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`),
-  createAgencyCustomer: (orgId: string, agencyId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createAgencyCustomer: (orgId: string, agencyId: string, data: CreateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencyCustomerById: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`),
-  updateAgencyCustomer: (orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgencyCustomer: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "DELETE" }),
-  affectCustomerToAgency: (orgId: string, agencyId: string, data: AffectCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updateAgencyCustomer: (orgId: string, agencyId: string, customerId: string, data: UpdateCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteAgencyCustomer: (orgId: string, agencyId: string, customerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/${customerId}`, { method: "DELETE", authType: 'none' }),
+  affectCustomerToAgency: (orgId: string, agencyId: string, data: AffectCustomerRequest) => yowyobApiRequest<CustomerDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/customers/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
   getOrgSuppliers: (orgId: string) => yowyobApiRequest<ProviderDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`),
-  createOrgSupplier: (orgId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createOrgSupplier: (orgId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getOrgSupplierById: (orgId: string, providerId: string) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`),
-  updateOrgSupplier: (orgId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrgSupplier: (orgId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "DELETE" }),
+  updateOrgSupplier: (orgId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrgSupplier: (orgId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/suppliers/${providerId}`, { method: "DELETE", authType: 'none' }),
   getAgencySuppliers: (orgId: string, agencyId: string) => yowyobApiRequest<ProviderDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers`),
-  createAgencySupplier: (orgId: string, agencyId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createAgencySupplier: (orgId: string, agencyId: string, data: CreateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencySupplierById: (orgId: string, agencyId: string, providerId: string) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`),
-  updateAgencySupplier: (orgId: string, agencyId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgencySupplier: (orgId: string, agencyId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "DELETE" }),
-  affectSupplierToAgency: (orgId: string, agencyId: string, data: AffectProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updateAgencySupplier: (orgId: string, agencyId: string, providerId: string, data: UpdateProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteAgencySupplier: (orgId: string, agencyId: string, providerId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/${providerId}`, { method: "DELETE", authType: 'none' }),
+  affectSupplierToAgency: (orgId: string, agencyId: string, data: AffectProviderRequest) => yowyobApiRequest<ProviderDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/suppliers/add`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
   getOrgProspects: (orgId: string) => yowyobApiRequest<ProspectDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects`),
-  createOrgProspect: (orgId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createOrgProspect: (orgId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getOrgProspectById: (orgId: string, prospectId: string) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`),
-  updateOrgProspect: (orgId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteOrgProspect: (orgId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "DELETE" }),
+  updateOrgProspect: (orgId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteOrgProspect: (orgId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/prospects/${prospectId}`, { method: "DELETE", authType: 'none' }),
   getAgencyProspects: (orgId: string, agencyId: string) => yowyobApiRequest<ProspectDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects`),
-  createAgencyProspect: (orgId: string, agencyId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createAgencyProspect: (orgId: string, agencyId: string, data: CreateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getAgencyProspectById: (orgId: string, agencyId: string, prospectId: string) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`),
-  updateAgencyProspect: (orgId: string, agencyId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteAgencyProspect: (orgId: string, agencyId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "DELETE" }),
+  updateAgencyProspect: (orgId: string, agencyId: string, prospectId: string, data: UpdateProspectRequest) => yowyobApiRequest<ProspectDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteAgencyProspect: (orgId: string, agencyId: string, prospectId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/agencies/${agencyId}/prospects/${prospectId}`, { method: "DELETE", authType: 'none' }),
+
   getAllBusinessActors: () => yowyobApiRequest<BusinessActorDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/business-actors"),
-  createBusinessActor: (data: CreateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/business-actors", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createBusinessActor: (data: CreateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/business-actors", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getBusinessActorById: (baId: string) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`),
-  updateBusinessActor: (baId: string, data: UpdateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteBusinessActor: (baId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "DELETE" }),
+  updateBusinessActor: (baId: string, data: UpdateBusinessActorRequest) => yowyobApiRequest<BusinessActorDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteBusinessActor: (baId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/${baId}`, { method: "DELETE", authType: 'none' }),
   getBusinessActorsByType: (type: BusinessActorType) => yowyobApiRequest<BusinessActorDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/business-actors/types/${type}`),
-  uploadOrganizationImages: (orgId: string, formData: FormData) => yowyobApiRequest<ImageDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${orgId}/add`, { method: "PUT", body: formData, isFormData: true }),
+
+  uploadOrganizationImages: (orgId: string, formData: FormData) => yowyobApiRequest<ImageDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${orgId}/add`, { method: "PUT", body: formData, isFormData: true, authType: 'none' }),
   getOrganizationImageInfo: (imageId: string) => yowyobApiRequest<ImageDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/images/${imageId}`),
+
   getThirdParties: (orgId: string, params: GetThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties?${new URLSearchParams(params as Record<string, string>).toString()}`),
-  createThirdParty: (orgId: string, type: ThirdPartyType, data: CreateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${type}`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createThirdParty: (orgId: string, type: ThirdPartyType, data: CreateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${type}`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getThirdPartyById: (orgId: string, thirdPartyId: string) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`),
-  updateThirdParty: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteThirdParty: (orgId: string, thirdPartyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "DELETE" }),
-  updateThirdPartyStatus: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyStatusRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  updateThirdParty: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteThirdParty: (orgId: string, thirdPartyId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}`, { method: "DELETE", authType: 'none' }),
+  updateThirdPartyStatus: (orgId: string, thirdPartyId: string, data: UpdateThirdPartyStatusRequest) => yowyobApiRequest<ThirdPartyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/third-parties/${thirdPartyId}/status`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+
   getProposedActivities: (orgId: string, params: { organizationId: string }) => yowyobApiRequest<ProposedActivityDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities?${new URLSearchParams(params).toString()}`),
-  createProposedActivity: (orgId: string, data: CreateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createProposedActivity: (orgId: string, data: CreateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities`, { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getProposedActivityById: (orgId: string, activityId: string) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`),
-  updateProposedActivity: (orgId: string, activityId: string, data: UpdateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
-  deleteProposedActivity: (orgId: string, activityId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "DELETE" }),
+  updateProposedActivity: (orgId: string, activityId: string, data: UpdateProposedActivityRequest) => yowyobApiRequest<ProposedActivityDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "PUT", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
+  deleteProposedActivity: (orgId: string, activityId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/proposed-activities/${activityId}`, { method: "DELETE", authType: 'none' }),
+
   getAllApplications: () => yowyobApiRequest<ApplicationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, "/applications"),
-  createApplication: (data: CreateApplicationRequest) => yowyobApiRequest<ApplicationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/applications", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }),
+  createApplication: (data: CreateApplicationRequest) => yowyobApiRequest<ApplicationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, "/applications", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" }, authType: 'none' }),
   getApplicationKeys: (applicationId: string) => yowyobApiRequest<ApplicationKeyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/applications/${applicationId}/keys`),
-  createApiKey: (applicationId: string) => yowyobApiRequest<ApplicationKeyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/applications/${applicationId}/keys/create`, { method: "POST" }),
+  createApiKey: (applicationId: string) => yowyobApiRequest<ApplicationKeyDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/applications/${applicationId}/keys/create`, { method: "POST", authType: 'none' }),
 };

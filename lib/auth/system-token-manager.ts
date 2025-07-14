@@ -46,7 +46,7 @@ class SystemTokenManager {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error("SystemTokenManager: Failed to fetch system token via proxy.", { status: response.status, body: errorBody });
+      // console.error("SystemTokenManager: Failed to fetch system token via proxy.", { status: response.status, body: errorBody });
       throw new Error(`Could not authenticate system client. Status: ${response.status}`);
     }
 
@@ -58,7 +58,7 @@ class SystemTokenManager {
     };
 
     this.token = newToken;
-    console.log("SystemTokenManager: New system token fetched successfully.");
+    // console.log("SystemTokenManager: New system token fetched successfully.");
     return newToken;
   }
 
