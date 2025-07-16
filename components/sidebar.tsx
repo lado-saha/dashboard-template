@@ -37,6 +37,11 @@ import {
   Power,
   Shield,
   Info,
+  Building2,
+  ClipboardList,
+  HeartHandshake,
+  Target,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -60,45 +65,89 @@ const userNavigation = [
   { name: "Favorites", href: "/favorites", icon: FolderHeart },
 ];
 
-const baOrgNavigation = [
+// New "BA Global" navigation section with all specified routes
+const baGlobalNavigation = [
   {
-    name: "Org. Dashboard",
-    href: "/business-actor/dashboard",
-    icon: LayoutGrid,
-    isOrgSpecific: true,
+    name: "Organizations Hub",
+    href: "/business-actor/organizations",
+    icon: Building,
   },
   {
-    name: "Org. Profile",
+    name: "Profile",
     href: "/business-actor/org/profile",
     icon: Landmark,
-    isOrgSpecific: true,
   },
   {
     name: "Agencies",
     href: "/business-actor/org/agencies",
     icon: Users2,
-    isOrgSpecific: true,
   },
   {
-    name: "Employees",
-    href: "/business-actor/org/employees",
-    icon: Users,
-    isOrgSpecific: true,
+    name: "Business Domains",
+    href: "/business-actor/org/business-domains",
+    icon: Briefcase,
   },
   {
     name: "Certifications",
     href: "/business-actor/org/certifications",
     icon: Award,
-    isOrgSpecific: true,
+  },
+  {
+    name: "Customers",
+    href: "/business-actor/org/customers",
+    icon: HeartHandshake,
+  },
+  {
+    name: "Employees",
+    href: "/business-actor/org/employees",
+    icon: Users,
+  },
+  {
+    name: "Images",
+    href: "/business-actor/org/images",
+    icon: Image,
   },
   {
     name: "Practical Info",
     href: "/business-actor/org/practical-info",
     icon: Info,
-    isOrgSpecific: true,
+  },
+  {
+    name: "Products",
+    href: "/business-actor/org/products",
+    icon: Package,
+  },
+  {
+    name: "Proposed Activities",
+    href: "/business-actor/org/proposed-activities",
+    icon: ClipboardList,
+  },
+  {
+    name: "Prospects",
+    href: "/business-actor/org/prospects",
+    icon: Target,
+  },
+  {
+    name: "Sales People",
+    href: "/business-actor/org/sales-people",
+    icon: UserCog,
+  },
+  {
+    name: "Services",
+    href: "/business-actor/org/services",
+    icon: Wrench,
+  },
+  {
+    name: "Suppliers",
+    href: "/business-actor/org/suppliers",
+    icon: Truck,
+  },
+  {
+    name: "Third Parties",
+    href: "/business-actor/org/third-parties",
+    icon: Building2,
   },
 ];
-
 const agencyNavigation = [
   {
     name: "Agency Dashboard",
@@ -120,16 +169,6 @@ const agencyNavigation = [
     href: "/business-actor/agency/customers",
     icon: UsersRound,
   },
-];
-
-const baGlobalNavigation = [
-  {
-    name: "Organizations Hub",
-    href: "/business-actor/organizations",
-    icon: Building,
-  },
-  { name: "My BA Profile", href: "/business-actor/profile", icon: UserCog },
-  { name: "API & Webhooks", href: "/business-actor/webhooks", icon: Webhook },
 ];
 
 const superAdminNavigation = [
@@ -200,12 +239,11 @@ export function Sidebar() {
   const isAgencyContext = pathname.startsWith("/business-actor/agency");
 
   let mainNav: any[] = userNavigation;
-  let globalNav: any[] = [];
   let sidebarTitle = "My Account";
   let homeLink = "/dashboard";
   let ContextSwitcher = null;
 
-  if (isSuperAdmin && pathname.startsWith("/super-admin/") ) {
+  if (isSuperAdmin && pathname.startsWith("/super-admin/")) {
     mainNav = superAdminNavigation;
     sidebarTitle = "Platform Admin";
     homeLink = "/super-admin/dashboard";
@@ -216,8 +254,8 @@ export function Sidebar() {
       homeLink = "/business-actor/agency/dashboard";
       ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
     } else {
-      mainNav = baOrgNavigation;
-      globalNav = baGlobalNavigation;
+      mainNav = baGlobalNavigation;
+
       sidebarTitle = "BA Workspace";
       homeLink = "/business-actor/organizations";
       ContextSwitcher = () => (
@@ -399,14 +437,6 @@ export function Sidebar() {
               isCollapsed ? "px-2" : "px-4"
             )}
           >
-            {globalNav.length > 0 && (
-              <>
-                {globalNav.map((item) => (
-                  <NavItem key={item.name} item={item} />
-                ))}
-                <Separator className="my-3" />
-              </>
-            )}
             {mainNav.map((item) => (
               <NavItem key={item.name} item={item} />
             ))}
