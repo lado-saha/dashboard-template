@@ -21,9 +21,6 @@ export function CreateOrgSupplierClientPage() {
     }
     try {
       const createdSupplier = await organizationRepository.createOrgSupplier(activeOrganizationId, data);
-      if (data.agency_id && createdSupplier.provider_id) {
-         await organizationRepository.affectSupplierToAgency(activeOrganizationId, data.agency_id, { provider_id: createdSupplier.provider_id });
-      }
       toast.success("Supplier created successfully!");
       router.push("/business-actor/org/suppliers");
       router.refresh();

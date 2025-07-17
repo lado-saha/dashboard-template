@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
-import { ThirdPartyDto, ThirdPartyTypeValues } from "@/types/organization";
+import { ThirdPartyDto, ThirdPartyTypeValues, GetThirdPartyRequest } from "@/types/organization"; // Added GetThirdPartyRequest
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -37,11 +38,17 @@ export function OrgThirdPartiesClientPage() {
   const [editingItem, setEditingItem] = useState<ThirdPartyDto | undefined>(undefined);
 
   const refreshData = useCallback(async () => {
-    if (!activeOrganizationId) { setIsLoading(false); setThirdParties([]); return; }
+    if (!activeOrganizationId) {
+      setIsLoading(false);
+      setThirdParties([]);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      const data = await organizationRepository.getThirdParties(activeOrganizationId, {});
+      // REASON: The API requires pagination. Added default params to the request.
+      const params: GetThirdPartyRequest = { page: 1, size: 100 };
+      const data = await organizationRepository.getThirdParties(activeOrganizationId, params);
       setThirdParties(data || []);
     } catch (err: any) {
       setError(err.message || "Could not load third-party data.");

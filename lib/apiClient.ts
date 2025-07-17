@@ -337,11 +337,11 @@ export const yowyobOrganizationApi = {
   markAddressAsFavorite: (addressableType: AddressableType, addressableId: string, addressId: string) => yowyobApiRequest<AddressDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/${addressableType}/${addressableId}/addresses/${addressId}/favorite`, { method: "PUT", authType: 'user' }),
 
   // --- Practical Information Endpoints ---
-  getPracticalInformation: (orgId: string, params?: { organizationId: string }) => yowyobApiRequest<PracticalInformationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos`, { method: "GET", authType: 'user' }),
-  createPracticalInformation: (orgId: string, data: CreatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos`, { method: "POST", body: JSON.stringify(data), authType: 'user' }),
-  getPracticalInformationById: (orgId: string, infoId: string) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "GET", authType: 'user' }),
-  updatePracticalInformation: (orgId: string, infoId: string, data: UpdatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "PUT", body: JSON.stringify(data), authType: 'user' }),
-  deletePracticalInformation: (orgId: string, infoId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/practical-infos/${infoId}`, { method: "DELETE", authType: 'user' }),
+  getPracticalInformation: (orgId: string, params?: { organizationId: string }) => yowyobApiRequest<PracticalInformationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations${orgId}/practical-infos`, { method: "GET", authType: 'user' }),
+  createPracticalInformation: (orgId: string, data: CreatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations${orgId}/practical-infos`, { method: "POST", body: JSON.stringify(data), authType: 'user' }),
+  getPracticalInformationById: (orgId: string, infoId: string) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations${orgId}/practical-infos/${infoId}`, { method: "GET", authType: 'user' }),
+  updatePracticalInformation: (orgId: string, infoId: string, data: UpdatePracticalInformationRequest) => yowyobApiRequest<PracticalInformationDto>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations${orgId}/practical-infos/${infoId}`, { method: "PUT", body: JSON.stringify(data), authType: 'user' }),
+  deletePracticalInformation: (orgId: string, infoId: string) => yowyobApiRequest<void>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations${orgId}/practical-infos/${infoId}`, { method: "DELETE", authType: 'user' }),
 
   // --- Certification Endpoints ---
   getCertifications: (orgId: string) => yowyobApiRequest<CertificationDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, `/organizations/${orgId}/certifications`, { method: "GET", authType: 'user' }),

@@ -20,6 +20,7 @@ import { /* Import ALL DTOs and Request types used in the interface */
   ApplicationDto, CreateApplicationRequest, ApplicationKeyDto,
 } from '@/types/organization';
 import { yowyobOrganizationApi } from '@/lib/apiClient';
+import { randomUUID } from 'crypto';
 
 export class OrganizationRemoteRepository implements IOrganizationRepository {
   // Organizations
@@ -80,7 +81,14 @@ export class OrganizationRemoteRepository implements IOrganizationRepository {
   async deleteBusinessDomain(domainId: string): Promise<void> { return yowyobOrganizationApi.deleteBusinessDomain(domainId); }
 
   // Agencies
-  async getAgencies(orgId: string, active?: boolean): Promise<AgencyDto[]> { return yowyobOrganizationApi.getAgencies(orgId, active); }
+  // async getAgencies(orgId: string, active?: boolean): Promise<AgencyDto[]> { return yowyobOrganizationApi.getAgencies(orgId, active); }
+  async getAgencies(orgId: string, active?: boolean): Promise<AgencyDto[]> {
+    const allAgencies = await yowyobOrganizationApi.getAgencies(orgId);
+    if (active === undefined) {
+      return allAgencies;
+    }
+    return allAgencies.filter(agency => agency.is_active === active);
+  }
   async createAgency(orgId: string, data: CreateAgencyRequest): Promise<AgencyDto> { return yowyobOrganizationApi.createAgency(orgId, data); }
   async getAgencyById(orgId: string, agencyId: string): Promise<AgencyDto | null> { return yowyobOrganizationApi.getAgencyById(orgId, agencyId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
   async updateAgency(orgId: string, agencyId: string, data: UpdateAgencyRequest): Promise<AgencyDto> { return yowyobOrganizationApi.updateAgency(orgId, agencyId, data); }
@@ -142,7 +150,15 @@ export class OrganizationRemoteRepository implements IOrganizationRepository {
 
   // Prospects - Placeholder
   async getOrgProspects(orgId: string): Promise<ProspectDto[]> { const p = await yowyobOrganizationApi.getOrgProspects(orgId); return p || []; }
-  async createOrgProspect(orgId: string, data: CreateProspectRequest): Promise<ProspectDto> { return yowyobOrganizationApi.createOrgProspect(orgId, data); }
+
+  // REASON: Fixed to generate a prospect_id on the client, as the backend expects it.
+  async createOrgProspect(orgId: string, data: CreateProspectRequest): Promise<ProspectDto> {
+    const payloadWithId = { ...data, prospect_id: randomUUID() };
+    return yowyobOrganizationApi.createOrgProspect(orgId, payloadWithId);
+  }
+
+  // async getOrgProspects(orgId: string): Promise<ProspectDto[]> { const p = await yowyobOrganizationApi.getOrgProspects(orgId); return p || []; }
+  // async createOrgProspect(orgId: string, data: CreateProspectRequest): Promise<ProspectDto> { return yowyobOrganizationApi.createOrgProspect(orgId, data); }
   async getOrgProspectById(orgId: string, prospectId: string): Promise<ProspectDto | null> { return yowyobOrganizationApi.getOrgProspectById(orgId, prospectId).catch(e => (e.status === 404 ? null : Promise.reject(e))); }
   async updateOrgProspect(orgId: string, prospectId: string, data: UpdateProspectRequest): Promise<ProspectDto> { return yowyobOrganizationApi.updateOrgProspect(orgId, prospectId, data); }
   async deleteOrgProspect(orgId: string, prospectId: string): Promise<void> { return yowyobOrganizationApi.deleteOrgProspect(orgId, prospectId); }

@@ -23,7 +23,7 @@ export function CreateOrgSalesPersonClientPage() {
       await organizationRepository.createOrgSalesPerson(activeOrganizationId, data);
       toast.success("Sales Person created successfully!");
       router.push("/business-actor/org/sales-people");
-      router.refresh();
+      router.refresh(); // Invalidate cache for the list page
       return true;
     } catch (error: any) {
       toast.error(error.message || "Failed to create sales person.");
