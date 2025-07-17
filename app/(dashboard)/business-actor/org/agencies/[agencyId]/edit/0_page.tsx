@@ -11,18 +11,19 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default async function EditAgencyPage({
+export default function EditAgencyPage({
   params,
 }: {
-  params: Promise<{ agencyId: string }>;
-}) {
+  params: { agencyId: string }
+  }
+) {
   const { activeOrganizationId, fetchAgenciesForCurrentOrg } =
     useActiveOrganization();
   const [agencyData, setAgencyData] = useState<AgencyDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { agencyId } = await params;
+  const { agencyId } =  params;
 
   useEffect(() => {
     if (activeOrganizationId && agencyId) {

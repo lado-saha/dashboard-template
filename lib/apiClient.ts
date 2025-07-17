@@ -363,7 +363,7 @@ export const yowyobOrganizationApi = {
   // --- Agency Endpoints ---
   getAgencies: (orgId: string, active?: boolean) => {
     // TODO: Illegal pattern
-    let endpoint = `/organizations/${orgId}/agencies`;
+    const endpoint = `/organizations/${orgId}/agencies`;
     // if (active !== undefined) endpoint += `?active=${active}`;
     return yowyobApiRequest<AgencyDto[]>(YOWYOB_ORGANIZATION_API_BASE_URL, endpoint, { method: "GET", authType: 'user' });
   },

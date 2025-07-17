@@ -22,9 +22,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ message: "Sales person name is required." }, { status: 400 });
     }
 
-    const newSpData: Omit<SalesPersonDto, 'sales_person_id' | 'created_at' | 'updated_at' | 'partner_details'> = {
+    const newSpData: Omit<SalesPersonDto, 'created_at' | 'updated_at'> = {
       ...body,
       organization_id: orgId,
+      sales_person_id: '',
       partner_type: "SALE",
     };
     const createdSp = dbManager.addItem('salesPersons', newSpData);
