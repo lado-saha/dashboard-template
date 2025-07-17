@@ -1,23 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ProviderDto, AgencyDto } from "@/types/organization";
 import { FormWrapper } from "@/components/ui/form-wrapper";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageUploader } from "@/components/ui/image-uploader";
 
+// REASON: This schema is now corrected to match the ProviderDto,
+// using first_name, last_name, and product_service_type as required.
 const supplierFormSchema = z.object({
   first_name: z.string().min(2, "First name is required."),
   last_name: z.string().min(2, "Last name is required."),
+  product_service_type: z.string().min(3, "Service/Product type is required."),
   short_description: z.string().optional(),
   long_description: z.string().optional(),
-  product_service_type: z.string().min(3, "Service type is required."),
   agency_id: z.string().nullable().optional(),
+  logo: z.string().url("Invalid URL").optional().or(z.literal("")),
+  logoFile: z.any().optional(),
 });
 
 export type SupplierFormData = z.infer<typeof supplierFormSchema>;
@@ -27,50 +45,162 @@ interface SupplierFormProps {
   mode: "create" | "edit";
   onSubmitAction: (data: SupplierFormData) => Promise<boolean>;
   agencies: AgencyDto[];
-  hideAgencySelector?: boolean;
+  scopedAgencyId?: string | null;
+  isLoading: boolean;
 }
 
-export function SupplierForm({ initialData, mode, onSubmitAction, agencies, hideAgencySelector = false }: SupplierFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
+// REASON: This is a pure UI component. It is stateless and receives all logic
+// via props, making it reusable for create, edit, org, and agency contexts.
+export function SupplierForm({
+  initialData,
+  mode,
+  onSubmitAction,
+  agencies,
+  scopedAgencyId,
+  isLoading,
+}: SupplierFormProps) {
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierFormSchema),
     defaultValues: {
       first_name: initialData?.first_name || "",
       last_name: initialData?.last_name || "",
+      product_service_type: initialData?.product_service_type || "",
       short_description: initialData?.short_description || "",
       long_description: initialData?.long_description || "",
-      product_service_type: initialData?.product_service_type || "",
-      agency_id: initialData?.agency_id || null,
+      agency_id:
+        scopedAgencyId !== undefined
+          ? scopedAgencyId
+          : initialData?.agency_id || null,
+      logo: initialData?.logo || "",
     },
   });
 
-  const handleSubmit = async (data: SupplierFormData) => {
-    setIsLoading(true);
-    const success = await onSubmitAction(data);
-    if (!success) setIsLoading(false);
-  };
+  const title = mode === "create" ? "Add New Supplier" : "Edit Supplier";
+  const description =
+    mode === "create"
+      ? "Provide details for the new supplier."
+      : `Update details for ${initialData?.first_name || ""} ${
+          initialData?.last_name || ""
+        }`.trim();
 
   return (
     <FormWrapper
       form={form}
-      onFormSubmit={handleSubmit}
+      onFormSubmit={onSubmitAction}
       isLoading={isLoading}
-      title={mode === 'create' ? "Add New Supplier" : "Edit Supplier"}
-      description="Manage supplier information and their assignments."
-      submitButtonText={mode === 'create' ? "Add Supplier" : "Save Changes"}
+      title={title}
+      description={description}
+      submitButtonText={mode === "create" ? "Create Supplier" : "Save Changes"}
     >
       {() => (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="first_name" render={({ field }) => (<FormItem><FormLabel>First Name *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="last_name" render={({ field }) => (<FormItem><FormLabel>Last Name *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+        <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="logoFile"
+            render={({ field }) => (
+              <FormItem>
+                {" "}
+                <FormLabel>Supplier Logo / Photo</FormLabel>{" "}
+                <FormControl>
+                  {" "}
+                  <ImageUploader
+                    currentImageUrl={form.getValues("logo")}
+                    onImageSelectedAction={(file, url) => {
+                      field.onChange(file);
+                      form.setValue("logo", url || "");
+                    }}
+                    label=""
+                    fallbackName={`${form.getValues(
+                      "first_name"
+                    )} ${form.getValues("last_name")}`}
+                  />{" "}
+                </FormControl>{" "}
+                <FormMessage />{" "}
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="John" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Smith" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <FormField control={form.control} name="product_service_type" render={({ field }) => (<FormItem><FormLabel>Primary Service/Product Type *</FormLabel><FormControl><Input placeholder="e.g., Raw Materials, Logistics" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          {!hideAgencySelector && (
-            <FormField control={form.control} name="agency_id" render={({ field }) => (<FormItem><FormLabel>Agency Assignment</FormLabel><Select onValueChange={(value) => field.onChange(value === "headquarters" ? null : value)} defaultValue={field.value || "headquarters"}><FormControl><SelectTrigger><SelectValue placeholder="Assign to an agency..." /></SelectTrigger></FormControl><SelectContent><SelectItem value="headquarters">Headquarters (No Agency)</SelectItem>{agencies.map((agency) => (<SelectItem key={agency.agency_id} value={agency.agency_id!}>{agency.long_name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+          <FormField
+            control={form.control}
+            name="product_service_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Primary Service/Product Type *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Raw Materials, Logistics"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {scopedAgencyId === undefined && (
+            <FormField
+              control={form.control}
+              name="agency_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Agency Assignment</FormLabel>
+                  <Select
+                    onValueChange={(value) =>
+                      field.onChange(value === "headquarters" ? null : value)
+                    }
+                    defaultValue={field.value || "headquarters"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Assign to an agency..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="headquarters">
+                        Headquarters (No Agency)
+                      </SelectItem>
+                      {agencies.map((agency) => (
+                        <SelectItem
+                          key={agency.agency_id}
+                          value={agency.agency_id!}
+                        >
+                          {agency.long_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-          <FormField control={form.control} name="long_description" render={({ field }) => (<FormItem><FormLabel>Notes</FormLabel><FormControl><Textarea placeholder="Add any relevant notes about this supplier..." {...field} /></FormControl><FormMessage /></FormItem>)} />
         </div>
       )}
     </FormWrapper>

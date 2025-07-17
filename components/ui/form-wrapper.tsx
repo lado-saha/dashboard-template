@@ -29,6 +29,7 @@ interface FormWrapperProps<T extends FieldValues> {
   isLoading: boolean;
   title: string;
   description: string;
+  
   steps?: Step[];
   children: (currentStep: number) => React.ReactNode;
   submitButtonText?: string;

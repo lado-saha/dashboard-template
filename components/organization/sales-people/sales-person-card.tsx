@@ -15,7 +15,7 @@ interface SalesPersonCardProps {
   onDeleteAction: (salesPerson: SalesPersonDto) => void;
 }
 
-export function SalesPersonCard({ salesPerson, agencies, onEditAction, onDeleteAction }: SalesPersonCardProps) {
+export function   SalesPersonCard({ salesPerson, agencies, onEditAction, onDeleteAction }: SalesPersonCardProps) {
   const name = salesPerson.name || `${salesPerson.first_name || ""} ${salesPerson.last_name || ""}`.trim();
   const fallback = name ? name.charAt(0).toUpperCase() : "S";
   const agency = agencies.find(a => a.agency_id === salesPerson.agency_id);

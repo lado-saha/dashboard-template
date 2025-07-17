@@ -9,39 +9,33 @@ import {
   Award,
   Briefcase,
   Building,
-  Combine,
   FileText,
   FolderHeart,
   HandCoins,
   HelpCircle,
   LayoutGrid,
-  Lightbulb,
   LogOut,
-  Landmark,
   Menu,
-  MessagesSquare,
   Package,
   Server,
   Settings,
-  Share2,
   SidebarClose,
   Truck,
   UserCheck,
   Users,
-  Users2,
   UsersRound,
-  Wallet,
-  Webhook,
   ArrowLeft,
-  UserCog,
   Power,
-  Shield,
   Info,
   Building2,
   ClipboardList,
   HeartHandshake,
-  Target,
-  Wrench,
+  UserSearch,
+  ClipboardSignature,
+  ConciergeBell,
+  Network,
+  ShieldCheck,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -53,7 +47,6 @@ import {
 } from "@/components/ui/tooltip";
 import { OrganizationSwitcher } from "@/components/organization/organization-switcher";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
-import { Separator } from "./ui/separator";
 import { AgencySwitcher } from "./organization/agencies/agency-switcher";
 import { toast } from "sonner";
 
@@ -66,136 +59,175 @@ const userNavigation = [
 ];
 
 // New "BA Global" navigation section with all specified routes
+// Note: Import these icons from a library like 'lucide-react'
+// e.g., import { Building, ClipboardSignature, Store, ... } from 'lucide-react';
+
 const baGlobalNavigation = [
   {
     name: "Organizations Hub",
     href: "/business-actor/organizations",
-    icon: Building,
+    icon: Building, // Kept: 'Building' is perfect for a hub of organizations.
   },
   {
     name: "Profile",
     href: "/business-actor/org/profile",
-    icon: Landmark,
+    icon: ClipboardSignature, // Changed: More descriptive than 'Landmark'. Represents the official identity and details of the organization.
   },
   {
     name: "Agencies",
     href: "/business-actor/org/agencies",
-    icon: Users2,
+    icon: Store, // Changed: 'Store' is a better metaphor for branches or agencies than 'Users2'.
   },
   {
     name: "Business Domains",
     href: "/business-actor/org/business-domains",
-    icon: Briefcase,
+    icon: Briefcase, // Kept: Excellent choice for professional fields or industries.
   },
   {
     name: "Certifications",
     href: "/business-actor/org/certifications",
-    icon: Award,
+    icon: Award, // Kept: The perfect icon for achievements and certifications.
   },
   {
     name: "Customers",
     href: "/business-actor/org/customers",
-    icon: HeartHandshake,
+    icon: HeartHandshake, // Kept: A modern and friendly icon for customer relationships.
   },
   {
     name: "Employees",
     href: "/business-actor/org/employees",
-    icon: Users,
+    icon: Users, // Kept: The classic and universally understood icon for employees.
   },
   {
     name: "Images",
     href: "/business-actor/org/images",
-    icon: Image,
+    icon: Image, // Kept: Direct and clear.
   },
   {
     name: "Practical Info",
     href: "/business-actor/org/practical-info",
-    icon: Info,
+    icon: Info, // Kept: Simple and effective for informational sections.
   },
   {
     name: "Products",
     href: "/business-actor/org/products",
-    icon: Package,
+    icon: Package, // Kept: Great for tangible goods and products.
   },
   {
     name: "Proposed Activities",
     href: "/business-actor/org/proposed-activities",
-    icon: ClipboardList,
+    icon: ClipboardList, // Kept: Fits perfectly for lists of proposals or tasks.
   },
   {
     name: "Prospects",
     href: "/business-actor/org/prospects",
-    icon: Target,
+    icon: UserSearch, // Kept: Clearly communicates the act of finding potential leads.
   },
   {
     name: "Sales People",
     href: "/business-actor/org/sales-people",
-    icon: UserCog,
+    icon: UserCheck, // Changed: 'UserCheck' is more fitting than 'UserCog', suggesting qualified or assigned sales staff.
   },
   {
     name: "Services",
     href: "/business-actor/org/services",
-    icon: Wrench,
+    icon: ConciergeBell, // Changed: A more elegant and universal icon for services than 'Wrench'.
   },
   {
     name: "Suppliers",
     href: "/business-actor/org/suppliers",
-    icon: Truck,
+    icon: Truck, // Kept: An excellent visual for logistics and supply chain partners.
   },
   {
     name: "Third Parties",
     href: "/business-actor/org/third-parties",
-    icon: Building2,
+    icon: Building2, // Kept: Differentiates well from the main organization, suggesting external partners.
   },
 ];
+// Note: Icon components like LayoutGrid, Landmark, etc. would need to be imported.
+// For example: import { LayoutGrid, Landmark, Users, UsersRound, Truck, UserCheck, UserSearch } from 'lucide-react';
 const agencyNavigation = [
   {
     name: "Agency Dashboard",
     href: "/business-actor/agency/dashboard",
-    icon: LayoutGrid,
+    icon: LayoutGrid, // Kept: The standard and best choice for a dashboard.
   },
   {
     name: "Agency Profile",
     href: "/business-actor/agency/profile",
-    icon: Landmark,
+    icon: FileText, // Changed: 'FileText' better represents the specific file or details of the agency, more so than 'Landmark'.
   },
   {
     name: "Agency Employees",
     href: "/business-actor/agency/employees",
-    icon: Users,
+    icon: Users, // Kept: Clear and consistent for the team.
   },
   {
     name: "Agency Customers",
     href: "/business-actor/agency/customers",
-    icon: UsersRound,
+    icon: UsersRound, // Kept: A great visual for the customer base, distinct from internal employees.
+  },
+  {
+    name: "Agency Suppliers",
+    href: "/business-actor/agency/suppliers",
+    icon: Truck, // Kept: Consistent and clear.
+  },
+  {
+    name: "Agency Sales People",
+    href: "/business-actor/agency/sales-people",
+    icon: UserCheck, // Kept: Excellent and consistent with the global navigation.
+  },
+  {
+    name: "Agency Prospects",
+    href: "/business-actor/agency/prospects",
+    icon: UserSearch, // Kept: Perfect for the agency's lead generation activities.
   },
 ];
-
 const superAdminNavigation = [
-  { name: "Dashboard", href: "/super-admin/dashboard", icon: LayoutGrid },
-  { name: "User Management", href: "/super-admin/users", icon: Users },
-  { name: "Roles & Permissions", href: "/super-admin/roles", icon: Shield },
+  {
+    name: "Dashboard",
+    href: "/super-admin/dashboard",
+    icon: LayoutGrid, // Kept: The quintessential dashboard icon.
+  },
+  {
+    name: "User Management",
+    href: "/super-admin/users",
+    icon: Users, // Kept: The go-to for managing all users in the system.
+  },
+  {
+    name: "Roles & Permissions",
+    href: "/super-admin/roles",
+    icon: ShieldCheck, // Changed: 'ShieldCheck' is a slight improvement on 'Shield', implying verification and security.
+  },
   {
     name: "Organization Mgmt",
     href: "/super-admin/organizations",
-    icon: Building,
+    icon: Building, // Kept: Consistent for managing all organizations.
   },
-  { name: "Global Agencies", href: "/super-admin/agencies", icon: Users2 },
+  {
+    name: "Global Agencies",
+    href: "/super-admin/agencies",
+    icon: Network, // Changed: 'Network' is a superior icon for a global collection of agencies, representing a connected system.
+  },
   {
     name: "Global Customers",
     href: "/super-admin/customers",
-    icon: UsersRound,
+    icon: UsersRound, // Kept: Consistent and clear.
   },
-  { name: "Global Suppliers", href: "/super-admin/suppliers", icon: Truck },
+  {
+    name: "Global Suppliers",
+    href: "/super-admin/suppliers",
+    icon: Truck, // Kept: Consistent and clear.
+  },
   {
     name: "Global Certifications",
     href: "/super-admin/certifications",
-    icon: Award,
+    icon: Award, // Kept: Consistent and clear.
   },
   {
     name: "Business Domains",
     href: "/super-admin/business-domains",
-    icon: Server,
+    icon: Server, // Kept: 'Server' is excellent here, as it implies managing the core data/taxonomy of domains from an admin perspective.
   },
 ];
 
@@ -243,24 +275,29 @@ export function Sidebar() {
   let homeLink = "/dashboard";
   let ContextSwitcher = null;
 
-  if (isSuperAdmin && pathname.startsWith("/super-admin/")) {
-    mainNav = superAdminNavigation;
-    sidebarTitle = "Platform Admin";
-    homeLink = "/super-admin/dashboard";
-  } else if (isBusinessActor) {
-    if (isAgencyContext) {
-      mainNav = agencyNavigation;
-      sidebarTitle = activeAgencyDetails?.short_name || "Agency";
-      homeLink = "/business-actor/agency/dashboard";
-      ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
-    } else {
-      mainNav = baGlobalNavigation;
+  if (
+    pathname.startsWith("/business-actor/") ||
+    pathname.startsWith("/super-admin/")
+  ) {
+    if (isSuperAdmin && pathname.startsWith("/super-admin/")) {
+      mainNav = superAdminNavigation;
+      sidebarTitle = "Platform Admin";
+      homeLink = "/super-admin/dashboard";
+    } else if (isBusinessActor) {
+      if (isAgencyContext) {
+        mainNav = agencyNavigation;
+        sidebarTitle = activeAgencyDetails?.short_name || "Agency";
+        homeLink = "/business-actor/agency/dashboard";
+        ContextSwitcher = () => <AgencySwitcher isCollapsed={isCollapsed} />;
+      } else {
+        mainNav = baGlobalNavigation;
 
-      sidebarTitle = "BA Workspace";
-      homeLink = "/business-actor/organizations";
-      ContextSwitcher = () => (
-        <OrganizationSwitcher isCollapsed={isCollapsed} />
-      );
+        sidebarTitle = "BA Workspace";
+        homeLink = "/business-actor/organizations";
+        ContextSwitcher = () => (
+          <OrganizationSwitcher isCollapsed={isCollapsed} />
+        );
+      }
     }
   }
 

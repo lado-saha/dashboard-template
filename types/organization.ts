@@ -553,10 +553,10 @@ export interface SalesPersonDto extends Auditable {
   short_description?: string;
   long_description?: string;
   location_id?: string; // format: uuid
-  partner_type?: "CUSTOMER" | "SUPPLIER" | "SALE" | "PROSPECT";
+partner_type?: "CUSTOMER" | "SUPPLIER" | "SALE" | "PROSPECT";
   partner_details?: string;
   logo?: string;
-  sales_person_id?: string; // format: uuid
+  sales_person_id: string; // format: uuid
   name?: string;
   commission_rate?: number; // format: float
   credit?: number; // format: float

@@ -1,14 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useActiveOrganization } from "@/contexts/active-organization-context";
 import { organizationRepository } from "@/lib/data-repo/organization";
-import {
-  SalesPersonDto,
-  CreateSalesPersonRequest,
-  UpdateSalesPersonRequest,
-  AgencyDto,
-} from "@/types/organization";
+import { SalesPersonDto, AgencyDto } from "@/types/organization";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import {
@@ -33,15 +29,11 @@ import { SalesPersonCard } from "@/components/organization/sales-people/sales-pe
 import { ResourceDataTable } from "@/components/resource-management/resource-data-table";
 import { FeedbackCard } from "@/components/ui/feedback-card";
 import { PageHeader } from "@/components/ui/page-header";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import {
-  SalesPersonForm,
-  SalesPersonFormData,
-} from "@/components/organization/sales-people/sales-person-form";
 import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter";
 import { DataTableFilterOption } from "@/types/table";
 
 export function OrgSalesPeopleClientPage() {
+  const router = useRouter();
   const { activeOrganizationId, activeOrganizationDetails } =
     useActiveOrganization();
   const [salesPeople, setSalesPeople] = useState<SalesPersonDto[]>([]);
@@ -50,47 +42,44 @@ export function OrgSalesPeopleClientPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState<SalesPersonDto[]>([]);
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingSalesPerson, setEditingSalesPerson] = useState<
-    SalesPersonDto | undefined
-  >(undefined);
+  const [dataVersion, setDataVersion] = useState(0);
 
-  const refreshData = useCallback(async () => {
-    if (!activeOrganizationId) {
-      setIsLoading(false);
-      setSalesPeople([]);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [agenciesData, hqData] = await Promise.all([
-        organizationRepository.getAgencies(activeOrganizationId),
-        organizationRepository.getOrgSalesPersons(activeOrganizationId),
-      ]);
-      setAgencies(agenciesData || []);
-      const agencyPromises = (agenciesData || []).map((agency) =>
-        organizationRepository.getAgencySalesPersons(
-          activeOrganizationId,
-          agency.agency_id!
-        )
-      );
-      const agencyResults = await Promise.all(agencyPromises);
-      setSalesPeople([...(hqData || []), ...agencyResults.flat()]);
-    } catch (err: any) {
-      setError(err.message || "Could not load sales people.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeOrganizationId]);
+  const refreshData = useCallback(() => setDataVersion((v) => v + 1), []);
 
   useEffect(() => {
-    refreshData();
-  }, [refreshData]);
+    async function fetchData() {
+      if (!activeOrganizationId) {
+        setIsLoading(false);
+        setSalesPeople([]);
+        return;
+      }
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [agenciesData, hqData] = await Promise.all([
+          organizationRepository.getAgencies(activeOrganizationId),
+          organizationRepository.getOrgSalesPersons(activeOrganizationId),
+        ]);
+        setAgencies(agenciesData || []);
+        const agencyPromises = (agenciesData || []).map((agency) =>
+          organizationRepository.getAgencySalesPersons(
+            activeOrganizationId,
+            agency.agency_id!
+          )
+        );
+        const agencyResults = await Promise.all(agencyPromises);
+        setSalesPeople([...(hqData || []), ...agencyResults.flat()]);
+      } catch (err: any) {
+        setError(err.message || "Could not load sales people.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, [activeOrganizationId, dataVersion]);
 
-  const handleOpenFormModal = (salesPerson?: SalesPersonDto) => {
-    setEditingSalesPerson(salesPerson);
-    setIsFormModalOpen(true);
+  const handleEditAction = (salesPersonId: string) => {
+    router.push(`/business-actor/org/sales-people/${salesPersonId}`);
   };
 
   const handleDeleteConfirmation = (items: SalesPersonDto[]) => {
@@ -101,13 +90,6 @@ export function OrgSalesPeopleClientPage() {
 
   const executeDelete = async () => {
     if (!activeOrganizationId || itemsToDelete.length === 0) return;
-    const originalItems = [...salesPeople];
-    const idsToDelete = itemsToDelete.map((item) => item.sales_person_id!);
-    setSalesPeople((prev) =>
-      prev.filter((item) => !idsToDelete.includes(item.sales_person_id!))
-    );
-    setIsDeleteDialogOpen(false);
-
     const promise = Promise.all(
       itemsToDelete.map((item) =>
         item.agency_id
@@ -129,71 +111,23 @@ export function OrgSalesPeopleClientPage() {
         setItemsToDelete([]);
         return "Sales person(s) deleted.";
       },
-      error: (err) => {
-        setSalesPeople(originalItems);
-        setItemsToDelete([]);
-        return `Failed to delete: ${err.message}`;
-      },
+      error: (err) => `Failed to delete: ${err.message}`,
     });
-  };
-
-  const handleFormSubmit = async (
-    data: SalesPersonFormData
-  ): Promise<boolean> => {
-    if (!activeOrganizationId) {
-      toast.error("No active organization.");
-      return false;
-    }
-    const payload: CreateSalesPersonRequest | UpdateSalesPersonRequest = {
-      ...data,
-    };
-    try {
-      let response: SalesPersonDto;
-      if (editingSalesPerson?.sales_person_id) {
-        response = await toast.promise(
-          organizationRepository.updateOrgSalesPerson(
-            activeOrganizationId,
-            editingSalesPerson.sales_person_id,
-            payload as UpdateSalesPersonRequest
-          ),
-          {
-            loading: "Updating...",
-            success: "Saved!",
-            error: (err) => err.message,
-          }
-        ).unwrap();
-      } else {
-        response = await toast.promise(
-          organizationRepository.createOrgSalesPerson(
-            activeOrganizationId,
-            payload as CreateSalesPersonRequest
-          ),
-          {
-            loading: "Creating...",
-            success: "Created!",
-            error: (err) => err.message,
-          }
-        ).unwrap();
-      }
-      refreshData();
-      setIsFormModalOpen(false);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    setIsDeleteDialogOpen(false);
   };
 
   const columns = useMemo<ColumnDef<SalesPersonDto>[]>(
     () =>
       getSalesPersonColumns(
         {
-          onEditAction: handleOpenFormModal,
-          onDeleteAction: (item) => handleDeleteConfirmation([item]),
+          onEditAction: (sp) => handleEditAction(sp.sales_person_id!),
+          onDeleteAction: (sp) => handleDeleteConfirmation([sp]),
         },
         agencies
       ),
     [agencies]
   );
+
   const agencyFilterOptions: DataTableFilterOption[] = useMemo(
     () => [
       { value: "headquarters", label: "Headquarters" },
@@ -229,7 +163,11 @@ export function OrgSalesPeopleClientPage() {
             title="Sales People"
             description={`Manage all sales people for ${activeOrganizationDetails?.long_name}`}
             action={
-              <Button onClick={() => handleOpenFormModal()}>
+              <Button
+                onClick={() =>
+                  router.push("/business-actor/org/sales-people/create")
+                }
+              >
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Sales Person
               </Button>
             }
@@ -246,8 +184,10 @@ export function OrgSalesPeopleClientPage() {
           <SalesPersonCard
             salesPerson={item}
             agencies={agencies}
-            onEditAction={handleOpenFormModal}
-            onDeleteAction={(item) => handleDeleteConfirmation([item])}
+            onEditAction={(sp) => handleEditAction(sp.sales_person_id!)}
+            onDeleteAction={(dto) => {
+              handleDeleteConfirmation([dto]);
+            }}
           />
         )}
         emptyState={
@@ -256,7 +196,11 @@ export function OrgSalesPeopleClientPage() {
             title="No Sales People Yet"
             description="Add your first sales person to build your sales team."
             actionButton={
-              <Button onClick={() => handleOpenFormModal()}>
+              <Button
+                onClick={() =>
+                  router.push("/business-actor/org/sales-people/create")
+                }
+              >
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Sales Person
               </Button>
             }
@@ -270,19 +214,6 @@ export function OrgSalesPeopleClientPage() {
           />
         }
       />
-      <Dialog open={isFormModalOpen} onOpenChange={setIsFormModalOpen}>
-        <DialogContent>
-          <DialogTitle className="sr-only">
-            {editingSalesPerson ? "Edit Sales Person" : "Add New Sales Person"}
-          </DialogTitle>
-          <SalesPersonForm
-            mode={editingSalesPerson ? "edit" : "create"}
-            initialData={editingSalesPerson}
-            onSubmitAction={handleFormSubmit}
-            agencies={agencies}
-          />
-        </DialogContent>
-      </Dialog>
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

@@ -241,7 +241,9 @@ export function AgencySuppliersClientPage() {
             initialData={editingSupplier}
             onSubmitAction={handleFormSubmit}
             agencies={[]}
-            hideAgencySelector={true}
+            isLoading={isLoading}
+            // hideAgencySelector={true}
+            scopedAgencyId={activeAgencyId}
           />
         </DialogContent>
       </Dialog>
