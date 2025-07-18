@@ -33,11 +33,6 @@ export default function CreateOrganizationPage() {
 
   return (
     <div className="">
-      <PageHeader
-        title="Create Your First Organization"
-        description="This is the first step to unlocking your business workspace. Fill out the details below."
-        className="text-center mb-8"
-      />
       <OrganizationForm onSuccessAction={handleCreateSuccess} mode={"create"} />
     </div>
   );

@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <ActiveOrganizationProvider>
-      <CommandPalette isOpen={isOpen} setIsOpen={setIsOpen} />
+      <CommandPalette isOpen={isOpen} setIsOpen={setIsOpen}/>
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-x-hidden">
