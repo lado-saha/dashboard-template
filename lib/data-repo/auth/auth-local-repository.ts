@@ -12,6 +12,9 @@ const APP_URL = typeof window !== 'undefined' ? window.location.origin : (proces
 const MOCK_API_AUTH_BASE = `${APP_URL}/api/mock/auth`;
 
 export class AuthLocalRepository implements IAuthRepository {
+  getPermissionsForRole(roleId: string): Promise<PermissionDto[]> {
+      throw new Error('Method not implemented.');
+  }
   private async fetchMockApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(`${MOCK_API_AUTH_BASE}${endpoint}`, {
       ...options,

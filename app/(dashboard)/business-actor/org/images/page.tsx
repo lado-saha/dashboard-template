@@ -1,9 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-export default function ImagesPage() {
-  return (
-    <Card>
-      <CardHeader><CardTitle>Image Management</CardTitle></CardHeader>
-      <CardContent><p>This page will be used to manage the organization image gallery. Coming soon.</p></CardContent>
-    </Card>
-  );
+import { Metadata } from "next";
+import { MediaLibraryClientPage } from "./images-client";
+
+export const metadata: Metadata = {
+  title: "Media Library",
+  description: "Manage your organization's uploaded images and media files.",
+};
+
+export default async function MediaLibraryPage() {
+  return <MediaLibraryClientPage />;
 }
