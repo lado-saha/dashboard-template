@@ -98,11 +98,11 @@ const baGlobalNavigation = [
     href: "/business-actor/org/employees",
     icon: Users, // Kept: The classic and universally understood icon for employees.
   },
-  {
-    name: "Images",
-    href: "/business-actor/org/images",
-    icon: Image, // Kept: Direct and clear.
-  },
+  // {
+  //   name: "Images",
+  //   href: "/business-actor/org/images",
+  //   icon: Image, // Kept: Direct and clear.
+  // },
   {
     name: "Practical Info",
     href: "/business-actor/org/practical-info",

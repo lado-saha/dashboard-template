@@ -32,6 +32,7 @@ const LoginSchema = z.object({
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
 export const LoginForm = () => {
+
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const [error, setError] = useState<string | null>(null);
