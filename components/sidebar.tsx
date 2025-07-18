@@ -36,6 +36,8 @@ import {
   Network,
   ShieldCheck,
   Store,
+  MessagesSquare,
+  Share2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,6 +58,12 @@ const userNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "My Bonus", href: "/bonus", icon: HandCoins },
   { name: "Favorites", href: "/favorites", icon: FolderHeart },
+  { name: "Services", href: "/services", icon: Briefcase },
+  { name: "Invoices", href: "/invoices", icon: FileText },
+  { name: "My Bonus", href: "/bonus", icon: HandCoins },
+  { name: "Favorites", href: "/favorites", icon: FolderHeart },
+  { name: "Invite Friends", href: "/invite", icon: Share2 },
+  { name: "Chat", href: "/chat", icon: MessagesSquare },
 ];
 
 // New "BA Global" navigation section with all specified routes
