@@ -56,14 +56,13 @@ import { toast } from "sonner";
 
 const userNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
-  { name: "My Bonus", href: "/bonus", icon: HandCoins },
-  { name: "Favorites", href: "/favorites", icon: FolderHeart },
-  { name: "Services", href: "/services", icon: Briefcase },
-  { name: "Invoices", href: "/invoices", icon: FileText },
-  { name: "My Bonus", href: "/bonus", icon: HandCoins },
-  { name: "Favorites", href: "/favorites", icon: FolderHeart },
-  { name: "Invite Friends", href: "/invite", icon: Share2 },
-  { name: "Chat", href: "/chat", icon: MessagesSquare },
+  { name: "My Bonus", href: "#", icon: HandCoins },
+  { name: "Favorites", href:"#", icon: FolderHeart },
+  { name: "Services", href: "#", icon: Briefcase },
+  { name: "Invoices", href: "#", icon: FileText },
+  { name: "My Bonus", href: "/bonus#", icon: HandCoins },
+  { name: "Invite Friends", href: "#", icon: Share2 },
+  { name: "Chat", href: "#", icon: MessagesSquare },
 ];
 
 // New "BA Global" navigation section with all specified routes
