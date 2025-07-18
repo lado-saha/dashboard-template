@@ -68,7 +68,12 @@ export function AgencyEmployeesClientPage() {
   }, [refreshData]);
 
   const handleEditAction = (employeeId: string) =>
-    router.push(`/business-actor/agency/employees/${employeeId}`);
+    router.push(
+      `/business-actor/agency/employees/${employeeId}/edit`
+    );
+  const handleCreateAction = () =>
+    router.push("/business-actor/agency/employees/create");
+
   const handleDeleteConfirmation = (items: EmployeeDto[]) => {
     if (items.length > 0) {
       setItemsToDelete(items);
@@ -79,13 +84,6 @@ export function AgencyEmployeesClientPage() {
   const executeDelete = async () => {
     if (!activeOrganizationId || !activeAgencyId || itemsToDelete.length === 0)
       return;
-    const originalItems = [...employees];
-    const idsToDelete = itemsToDelete.map((item) => item.employee_id!);
-    setEmployees((prev) =>
-      prev.filter((item) => !idsToDelete.includes(item.employee_id!))
-    );
-    setIsDeleteDialogOpen(false);
-
     const promise = Promise.all(
       itemsToDelete.map((item) =>
         organizationRepository.deleteAgencyEmployee(
@@ -102,15 +100,11 @@ export function AgencyEmployeesClientPage() {
         setItemsToDelete([]);
         return "Employee(s) deleted.";
       },
-      error: (err) => {
-        setEmployees(originalItems);
-        setItemsToDelete([]);
-        return `Failed to delete: ${err.message}`;
-      },
+      error: (err) => `Failed to delete: ${err.message}`,
     });
+    setIsDeleteDialogOpen(false);
   };
 
-  // [ADD] Filter options for the agency view
   const roleOptions: DataTableFilterOption[] = useMemo(
     () =>
       EmployeeRoleValues.map((role) => ({
@@ -138,7 +132,7 @@ export function AgencyEmployeesClientPage() {
         },
         activeAgencyDetails ? [activeAgencyDetails] : []
       ),
-    [activeAgencyDetails]
+    [activeAgencyDetails, router]
   );
 
   if (!activeAgencyId && !isLoading) {
@@ -168,17 +162,12 @@ export function AgencyEmployeesClientPage() {
             title="Agency Employees"
             description={`Manage the team for ${activeAgencyDetails?.long_name}`}
             action={
-              <Button
-                onClick={() =>
-                  router.push("/business-actor/agency/employees/create")
-                }
-              >
+              <Button onClick={handleCreateAction}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Employee
               </Button>
             }
           />
         }
-        // [ADD] Pass the relevant filters to the toolbar
         filterControls={(table) => (
           <>
             <DataTableFacetedFilter
@@ -197,7 +186,7 @@ export function AgencyEmployeesClientPage() {
           <EmployeeCard
             employee={employee}
             agency={activeAgencyDetails}
-            onEditAction={handleEditAction}
+            onEditAction={(e) => handleEditAction(e)}
             onDeleteAction={(item) => handleDeleteConfirmation([item])}
           />
         )}
@@ -207,11 +196,7 @@ export function AgencyEmployeesClientPage() {
             title="No Employees in this Agency"
             description="Assign an existing employee or create a new one for this agency."
             actionButton={
-              <Button
-                onClick={() =>
-                  router.push("/business-actor/agency/employees/create")
-                }
-              >
+              <Button onClick={handleCreateAction}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Employee
               </Button>
             }

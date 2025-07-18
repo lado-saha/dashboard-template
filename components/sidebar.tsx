@@ -108,11 +108,7 @@ const baGlobalNavigation = [
     href: "/business-actor/org/practical-info",
     icon: Info, // Kept: Simple and effective for informational sections.
   },
-  {
-    name: "Products",
-    href: "/business-actor/org/products",
-    icon: Package, // Kept: Great for tangible goods and products.
-  },
+
   {
     name: "Proposed Activities",
     href: "/business-actor/org/proposed-activities",
@@ -129,9 +125,9 @@ const baGlobalNavigation = [
     icon: UserCheck, // Changed: 'UserCheck' is more fitting than 'UserCog', suggesting qualified or assigned sales staff.
   },
   {
-    name: "Services",
+    name: "Product & Services",
     href: "/business-actor/org/services",
-    icon: ConciergeBell, // Changed: A more elegant and universal icon for services than 'Wrench'.
+    icon: Package, // Changed: A more elegant and universal icon for services than 'Wrench'.
   },
   {
     name: "Suppliers",
@@ -345,7 +341,7 @@ export function Sidebar() {
               {!isCollapsed && "Exit Workspace"}
             </Button>
           </TooltipTrigger>
-          {isCollapsed && (
+          {isCollapsed && pathname.startsWith("/business-actor") && (
             <TooltipContent side="right">Exit Workspace</TooltipContent>
           )}
         </Tooltip>

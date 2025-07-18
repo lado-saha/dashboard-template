@@ -46,6 +46,7 @@ export function CreateCustomerClientPage() {
         onSubmitAction={handleCreateAction}
         agencies={agenciesForCurrentOrg}
         isLoading={isLoading}
+        scopedAgencyId={""}
       />
     </div>
   );

@@ -38,9 +38,10 @@ interface CustomerFormProps {
   onSubmitAction: (data: CustomerFormData) => Promise<boolean>;
   agencies: AgencyDto[];
   isLoading: boolean;
+  scopedAgencyId: string;
 }
 
-export function CustomerForm({ initialData, mode, onSubmitAction, agencies, isLoading }: CustomerFormProps) {
+export function CustomerForm({ initialData, mode, onSubmitAction, agencies, isLoading, scopedAgencyId }: CustomerFormProps) {
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
