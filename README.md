@@ -91,7 +91,7 @@ Understanding these five core concepts is essential to working effectively with 
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-repo/dashboard-template.git
+git clone https://github.com/lado-saha/dashboard-template.git
 cd dashboard-template
 pnpm install
 ```
