@@ -159,5 +159,3 @@ Let's walk through adding a new management page for **"Warehouses"** to an organ
 -   **Mock API Limitations:** The local mock API (`NEXT_PUBLIC_DATA_SOURCE=local`) is excellent for UI development but is **not a perfect replica of the backend**. It does not enforce all database constraints or complex business logic. Always test against a staging `remote` environment before merging major features.
 -   **API Inconsistencies:** You may encounter minor inconsistencies between the different microservice APIs (e.g., naming conventions, response structures). The repository layer is the correct place to normalize this data before it reaches the UI.
 -   **Future Improvements:** A potential next step is to integrate a dedicated data-fetching library like **TanStack Query (React Query)**. This would centralize caching and state management (`isLoading`, `error`), further reducing boilerplate in the `*-client.tsx` files.
-
-This document should provide a comprehensive foundation for any developer to understand, maintain, and extend the YowYob Dashboard application.
